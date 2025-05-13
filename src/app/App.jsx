@@ -1,7 +1,7 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Mainlayout from '../layouts/Mainlayout'
-import Request from '../layouts/Requestlayout/Request'
+import Request from '../pages/Requestlayout/Request'
 
 const App = () => {
   return (
