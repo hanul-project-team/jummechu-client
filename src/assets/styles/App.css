@@ -1,0 +1,41 @@
+.app-container {
+    display: flex;
+    height: 100%;
+    font-family: sans-serif;
+  }
+  
+  .sidebar {
+    width: 300px;
+    background-color: #2bd9f5; /* 파란색 */
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .sidebar-header {
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .sidebar-menu a {
+    color: white;
+    text-decoration: none;
+    margin-bottom: 1rem;
+    display: block;
+    padding: 8px 12px;
+    border-radius: 6px;
+  }
+  
+  Link:hover,
+  .sidebar-menu a:hover {
+    background-color: #ffffff;
+    color: #000000; /* hover 효과 */
+  }
+  
+  .main-content {
+    flex: 1;
+    background-color: #f9f9f9;
+  }
+  
