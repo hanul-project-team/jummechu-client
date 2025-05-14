@@ -1,5 +1,5 @@
 import React from 'react'
-import LoginForm from '../../features/login/components/LoginForm'
+import LoginForm from '../../features/auth/components/login/LoginForm'
 import style from './loginPage.module.css'
 
 
