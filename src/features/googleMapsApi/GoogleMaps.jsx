@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import axios from 'axios'
 import '../../assets/styles/global.css'
 import usePlaceStore from '../../store/usePlaceStore.js'
@@ -22,23 +22,10 @@ const GoogleMaps = () => {
   const pickerRef = useRef(null)
   const isRoot = location.pathname === '/'
 
-  if (
-    mapRef.current &&
-    center?.lat &&
-    center?.lng &&
-    (mapRef.current.center?.lat !== center.lat || mapRef.current.center?.lng !== center.lng)
-  ) {
-    mapRef.current.center = center
-  }
+  const MAX_RETRY = 3
+  const RETRY_DELAY = 1000
 
   useEffect(() => {
-    const checkAndInit = async () => {
-      if (window.google && window.google.maps) {
-        await init()
-      } else {
-        setTimeout(checkAndInit, 300)
-      }
-    }
     const loadScript = () => {
       const script = document.createElement('script')
       script.type = 'module'
@@ -50,7 +37,16 @@ const GoogleMaps = () => {
       }
       document.head.appendChild(script)
     }
+
     loadScript()
+
+    const checkAndInit = async () => {
+      if (window.google && window.google.maps) {
+        await init()
+      } else {
+        setTimeout(checkAndInit, 300)
+      }
+    }
 
     const init = async () => {
       await window.customElements.whenDefined('gmp-map')
@@ -64,55 +60,78 @@ const GoogleMaps = () => {
 
       map.innerMap.setOptions({ mapTypeControl: false })
 
+      if (
+        mapRef.current &&
+        center?.lat &&
+        center?.lng &&
+        (mapRef.current.center?.lat !== center.lat || mapRef.current.center?.lng !== center.lng)
+      ) {
+        mapRef.current.center = center
+      }
+
       if ('geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition(
           async function (position) {
             let latitude = position.coords.latitude
             let longitude = position.coords.longitude
+
+            // console.log('현재 위치: 위도=' + latitude + ', 경도=' + longitude)
+            const nowLocation = new window.google.maps.LatLng(latitude, longitude)
             setCenter({
-              lat: latitude,
               lng: longitude,
+              lat: latitude,
             })
+
+            if (isRoot === true) {
+              await axios
+                .get('http://localhost:3000', {
+                  withCredentials: true,
+                  headers: {
+                    location: nowLocation,
+                  },
+                })
+                .then(res => {
+                  // console.log(res)
+                  setNearPlaces(res.data)
+                })
+                .catch(err => {
+                  console.log(err)
+                })
+            }
 
             if (pickerRef.current) {
               const shadow = pickerRef.current.shadowRoot
               const input = shadow?.querySelector('input')
               if (input) {
                 input.style.borderRadius = '1.2rem'
-                input.addEventListener('keydown', e => {
+                const handleKeyDown = e => {
+                  // console.log('초기 검색어:', e.target.value)
                   if (e.key === 'Enter') {
                     e.preventDefault()
-                    // console.log('초기 검색어:', e.target.value)
-                    kakaoPatch(e.target.value)
-                  } /* else {
-                    // console.log('현재 입력 값:', e.target.value)
-                  } */
-                })
+                    // if (e.target.value && mapRef?.current?.center) {
+                    if (e.target.value && nowLocation) {
+                      attemptKakaoPatch(
+                        e.target.value,
+                        {
+                          lat: nowLocation.lat,
+                          lng: nowLocation.lng,
+                        },
+                        // {
+                        //   lat: mapRef.current.center.lat,
+                        //   lng: mapRef.current.center.lng,
+                        // },
+                        0,
+                      )
+                    } else {
+                      console.log('검색어와 위치정보를 기다리는 중입니다.')
+                    }
+                  }
+                }
+                input.addEventListener('keydown', handleKeyDown)
+                return () => {
+                  input.removeEventListener('keydown', handleKeyDown)
+                }
               }
-            }
-
-            console.log('현재 위치: 위도=' + latitude + ', 경도=' + longitude)
-            const location = new window.google.maps.LatLng(latitude, longitude)
-
-            try {
-              if (isRoot === true) {
-                await axios
-                  .get('http://localhost:3000', {
-                    withCredentials: true,
-                    headers: {
-                      location: location,
-                    },
-                  })
-                  .then(res => {
-                    // console.log(res)
-                    setNearPlaces(res.data)
-                  })
-                  .catch(err => {
-                    console.log(err)
-                  })
-              }
-            } catch (err) {
-              console.log(err)
             }
           },
           function (error) {
@@ -140,7 +159,7 @@ const GoogleMaps = () => {
         }
 
         if (place.id) {
-          placesService.getDetails(
+          const getDetailsInfo = placesService.getDetails(
             {
               placeId: place.id,
               fields: [
@@ -222,34 +241,52 @@ const GoogleMaps = () => {
     }
   }, [])
 
-  const kakaoPatch = search => {
-    // console.log('넘겨받은 검색어 값:', search)
-    try {
-      if (search) {
+  const kakaoPatch = (search, location) => {
+    return new Promise((resolve, reject) => {
+      if (search && location) {
         axios
-        .post(
-          'http://localhost:3000/api/search',
-          { place: search },
-          {
-            withCredentials: true,
-          },
-        )
-        .then(res => {
-          const data = res
-          console.log(data)
-          setKakaoPlace(data)
-        })
-        .catch(res => {
-          console.log(res)
-        })
+          .post(
+            'http://localhost:3000/api/search',
+            { place: search, location: location },
+            {
+              withCredentials: true,
+            },
+          )
+          .then(res => {
+            const data = res.data
+            // console.log(data)
+            setKakaoPlace(data)
+            resolve(res)
+          })
+          .catch(err => {
+            console.error('kakaoPatch 에러', err)
+            reject(err)
+          })
       } else {
-        return console.log('검색어가 제대로 입력되지 않음')
+        console.log('장소 또는 위치 정보가 누락되어있습니다.')
+        reject('장소 또는 위치 정보가 누락되었습니다.')
       }
-    } catch (err) {
-      console.log(err)
-    }
+    })
   }
 
+  const attemptKakaoPatch = (search, location, retryCount) => {
+    kakaoPatch(search, location)
+      .then(res => {
+        console.log(res.data)
+        console.log('요청 성공')
+      })
+      .catch(err => {
+        if (retryCount < MAX_RETRY) {
+          console.log(`재시도 (${retryCount + 1}/${MAX_RETRY}) 검색:`, search, '위치:', location)
+          setTimeout(() => {
+            attemptKakaoPatch(search, location, retryCount + 1)
+          }, RETRY_DELAY)
+        } else {
+          console.log('최대 재시도 횟수 초과.')
+        }
+      })
+  }
+  // console.log(placeDetails)
   return (
     <div className="text-center py-3">
       {isRoot === true ? (
