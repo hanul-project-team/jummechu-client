@@ -3,7 +3,7 @@
 }
 .loginFormField input {
     text-indent: 0.25rem;
-    padding: 1rem 0.25rem ;
+    padding: 1rem 0.5rem ;
     background-color: #d9d9d9;
     outline: none;
     border-radius: 0.25rem;
@@ -11,7 +11,7 @@
 .loginFormField label {
     position: absolute;
     top: 1rem;
-    left: 0.5rem;
+    left: 0.75rem;
     transition: all 0.5 ease-out;
     pointer-events: none;
     opacity: 0.5;
@@ -21,16 +21,21 @@
 .loginFormField input:not(:placeholder-shown) +label {
     position: absolute;
     top: 0.125rem;
-    left: 0.50rem;
+    left: 0.75rem;
     font-size: 0.75rem;
 }
-.errorSpan {
-    color: red;
-    font-size: 0.75rem;
+.loginForm button[type=button] {
+    position: absolute;
+    top: 1.25rem;
+    right: 0.75rem;
 }
-.loginForm button {
+.loginForm button[type=submit] {
     padding: 0.75rem 0.25rem;
     background-color: black;
     color: white;
     border-radius: 0.25rem;
+}
+.errorSpan {
+    color: red;
+    font-size: 0.75rem;
 }
