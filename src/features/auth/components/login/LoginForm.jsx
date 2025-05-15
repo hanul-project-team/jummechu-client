@@ -1,21 +1,19 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Field, Label } from '@headlessui/react'
-import { loginSchema } from '../../authSchema'
+import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
+import axios from 'axios'
+import { Field, Label } from '@headlessui/react'
+import { loginSchema } from '../../schema/loginSchema'
 import { login } from '../../authSlice'
 import CustomCheckBox from '../../../../shared/CustomCheckBox'
-import axios from 'axios'
 import style from './loginForm.module.css'
 
 const LoginForm = () => {
-  const [serverError, setServerError] = useState()
   const [visible, setVisible] = useState(false)
   const [isPassword, setIsPassword] = useState(false)
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
+  const [serverError, setServerError] = useState()
   const {
     register,
     handleSubmit,
@@ -28,14 +26,19 @@ const LoginForm = () => {
   } = useForm({
     defaultValues: { rememberMe: false },
     resolver: zodResolver(loginSchema),
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
   })
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
+  const passwordValue = watch('password')
   useEffect(() => {
-    if (errors.email) {
-      setFocus('email')
-    } else if (errors.password) {
-      setFocus('password')
+    if (passwordValue) {
+      setIsPassword(true)
+    } else {
+      setIsPassword(false)
     }
-  }, [errors, setFocus])
+  }, [passwordValue])
   const onSubmit = async data => {
     try {
       const response = await axios.post('http://localhost:3000/auth/login', data, {
@@ -55,6 +58,14 @@ const LoginForm = () => {
       setFocus('password')
     }
   }
+  const onIsvalid = errors => {
+    if (errors.email) {
+      setFocus('email')
+    } else if (errors.password) {
+      setFocus('password')
+    }
+    resetField('password')
+  }
   const changeVisible = () => {
     if (visible === true) {
       setVisible(false)
@@ -62,16 +73,12 @@ const LoginForm = () => {
       setVisible(true)
     }
   }
-  const passwordValue = watch('password')
-  useEffect(() => {
-   if(passwordValue) {
-    setIsPassword(true)
-   } else {
-    setIsPassword(false)
-   }
-  },[passwordValue])
   return (
-    <form className={style.loginForm} autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className={style.loginForm}
+      autoComplete="off"
+      onSubmit={handleSubmit(onSubmit, onIsvalid)}
+    >
       <fieldset className="flex flex-col gap-3">
         <legend className="hidden">로그인 폼</legend>
         <div className={`${style.loginFormField} flex flex-col`}>
@@ -88,11 +95,7 @@ const LoginForm = () => {
             {...register('password')}
           />
           <label htmlFor="password">비밀번호</label>
-          <button
-            type="button"
-            onClick={changeVisible}
-            className={isPassword ? 'flex' : 'hidden'}
-          >
+          <button type="button" onClick={changeVisible} className={isPassword ? 'flex' : 'hidden'}>
             {visible ? (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -130,7 +133,6 @@ const LoginForm = () => {
               </svg>
             )}
           </button>
-          {errors.password && <span className={style.errorSpan}>{errors.password.message}</span>}
         </div>
         <Controller
           name="rememberMe"
@@ -142,7 +144,11 @@ const LoginForm = () => {
             </Field>
           )}
         />
-        {serverError && <span className={style.errorSpan}>{serverError}</span>}
+        {errors.password && !serverError && (
+          <span className={style.errorSpan}>{errors.password.message}</span>
+        )}
+        {!errors.password && serverError && <span className={style.errorSpan}>{serverError}</span>}
+        {errors.password && serverError && <span className={style.errorSpan}>{serverError}</span>}
         <button type="submit">로그인</button>
       </fieldset>
     </form>
