@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react'
 import '../../assets/styles/global.css'
-import usePlaceStore from '../../store/usePlaceStore.js'
+import HomeRecommand from './components/HomeRecommand.jsx'
 
 const HomeSearch = () => {
 
   return (
     <>
       <div className='w-full pb-5'>
-        <p>Open</p>
+        <div className='max-w-5xl mx-auto'>
+          <HomeRecommand />
+        </div>
       </div>
     </>
   )
