@@ -15,7 +15,7 @@ const Reviews = ({ reviews }) => {
   };
   return (
     <>
-      <div className="container max-w-2xl grid grid-cols-1 gap-2">
+      <div className="container mx-auto max-w-2xl grid grid-cols-1 gap-2">
         {reviews !== null && reviews !== '' && reviews.map((rv, i) => (
           <div
             key={i}
