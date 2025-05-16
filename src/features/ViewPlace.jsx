@@ -1,6 +1,6 @@
 import React from 'react'
 import usePlaceStore from '../store/usePlaceStore'
-import GoogleReviews from './googleMapsApi/components/GoogleReviews.jsx'
+// import GoogleReviews from './googleMapsApi/components/GoogleReviews.jsx'
 import KakaoPlace from '../features/googleMapsApi/components/KakaoPlace.jsx'
 
 const ViewPlace = () => {
@@ -35,7 +35,7 @@ const ViewPlace = () => {
             <p>평점 : {placeDetails.rating}☆</p>
             <div className='flex'>
               <div className='min-w-2/3'>
-                <GoogleReviews reviews={placeDetails?.reviews} />
+                {/* <GoogleReviews reviews={placeDetails?.reviews} /> */}
               </div>
               <div className='min-w-1/3'>
                 <KakaoPlace />
