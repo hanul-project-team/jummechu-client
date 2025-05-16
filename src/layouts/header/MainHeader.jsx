@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import Logo from '../../assets/images/logo.png'
 import LogoSm from '../../assets/images/logo-small.png'
-import GoogleMaps from '../../features/googleMapsApi/GoogleMaps'
+// import GoogleMaps from '../../features/googleMapsApi/GoogleMaps'
 import usePlaceStore from '../../store/usePlaceStore'
 
 const MainHeader = () => {
@@ -50,7 +50,7 @@ const MainHeader = () => {
               </div>
             </div>
             <h1 className="text-center text-5xl font-sans font-bold">어디로 가시나요?</h1>
-            <GoogleMaps />
+            {/* <GoogleMaps /> */}
           </div>
         ) : (
           <div className="max-w-7xl mx-auto">
@@ -75,7 +75,7 @@ const MainHeader = () => {
                 </button>
               </div>
             </div>
-            <GoogleMaps />
+            {/* <GoogleMaps /> */}
           </div>
         )}
       </div>
