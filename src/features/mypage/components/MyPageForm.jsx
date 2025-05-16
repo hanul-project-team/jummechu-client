@@ -1,16 +1,117 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import '../MyPage.css' // 경로 기준: 현재 컴포넌트 파일 위치 기준
+
+
 
 const MyPageForm = () => {
   const [active, setActive] = useState('최근기록')
   const [bookmarked, setBookmarked] = useState([])
   const tabs = ['최근기록', '찜', '공유', '음식점 추천']
   const [isopen, setIsOpen] = useState(false)
+const [openai, setOpenAi] = useState([])
 
+const example = [
+  {
+    id: 1,
+    title: '맛있다 초밥집',
+    image: 'https://picsum.photos/250/250?random=1',
+    rating: '4.0',
+    description: '맛있다. 이 집 괜찮다.',
+    keyword: '초밥, 일식, 스시',
+  },
+  {
+    id: 2,
+    title: '매운 떡볶이 전문점',
+    image: 'https://picsum.photos/250/250?random=2',
+    rating: '4.5',
+    description: '맵고 맛있다. 이 집 나쁘지않다.',
+    keyword: '떡볶이, 분식, 매운맛',
+  },
+  {
+    id: 3,
+    title: '감성 카페',
+    image: 'https://picsum.photos/250/250?random=3',
+    rating: '4.2',
+    description: '좋은 커피와 달달한 디저트 이 집 감성있다. 이 집 괜찮다',
+    keyword: '카페, 디저트, 분위기',
+  },
+  {
+    id: 4,
+    title: '전통 한식당',
+    image: 'https://picsum.photos/250/250?random=4',
+    rating: '4.8',
+    description: '엄마 손맛이 나는 집밥 느낌 그야말로 맘스터치 이 집 괜찮다.',
+    keyword: '한식, 전통, 백반',
+  },
+  {
+    id: 5,
+    title: '라멘 맛도 모르면서',
+    image: 'https://picsum.photos/250/250?random=5',
+    rating: '5',
+    description: '맛있다 이 집 좋다. 내일 또 와야겠다.',
+    keyword: '일식, 라멘',
+  },
+  {
+    id: 6,
+    title: '이것은 덮밥',
+    image: 'https://picsum.photos/250/250?random=6',
+    rating: '5',
+    description: '존맛',
+    keyword: '일식, 덮밥, 가츠동'
+  }
+]
+
+  const callOpenAi = async (keywords) => {
+    const prompt = `
+      다음은 사용자가 최근 본 음식점의 키워드 목록입니다:
+      ${keywords.join(', ')}
   
+      다음은 사용자가 최근에 방문한 음식점들의 키워드 목록입니다.  
+이 키워드와 2개 이상 겹치는 음식점만 골라 추천해 주세요.
+
+결과는 아래 JSON 형식의 배열로만 출력하세요.  
+각 추천 음식점은 다음 필드를 포함해야 합니다:  
+- title: 음식점 이름  
+- rating: 평점 (0.0 ~ 5.0)  
+- description: 음식점 설명 (간단하고 매력적인 한 줄)  
+- keyword: 이 음식점의 키워드 배열
+
+JSON 외에는 아무 것도 출력하지 마세요.
+
+[예시 키워드 목록]: #한식, #떡볶이, #매운맛, #분식, #치즈, #일식
+    `
+  
+    const response = await fetch('http://localhost:3000/api/openai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    })
+  
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('OpenAI 응답 오류:', errorText)
+      return []
+    }
+  
+    const data = await response.json()
+    return data
+  }
+  
+
+  useEffect(() => {
+    if (active === '음식점 추천') {
+      const allkeywords = example.flatMap(item => 
+        item.keyword.split(',').map(k => k.trim())
+      )
+      callOpenAi(allkeywords).then(setOpenAi)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active])
+  
+
   const Modal = ({ isOpen, onClose }) => {
     if (!isOpen) return null
-  
+
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white p-6 rounded-lg shadow-xl relative z-10 w-[300px]">
@@ -19,95 +120,49 @@ const MyPageForm = () => {
           <div className="py-3 flex justify-between">
             <p>프로필 사진</p>
             <div
-            className="w-[100px] h-[100px] bg-cover mask-radial-fade"
-            style={{ backgroundImage: "url('https://picsum.photos/200')", 
-            }}
-                    />
+              className="w-[100px] h-[100px] bg-cover mask-radial-fade"
+              style={{ backgroundImage: "url('https://picsum.photos/200')" }}
+            />
           </div>
-          <hr className="py-3"/>
+          <hr className="py-3" />
           <div className="py-3 flex justify-between">
             <p>이름</p>
             <p> 사용자 이름 </p>
           </div>
-          <hr className="py-3"/>
+          <hr className="py-3" />
           <div className="py-3 flex justify-between">
             <p>이메일 관리</p>
-            <p>  사용자 이메일 </p>
+            <p> 사용자 이메일 </p>
           </div>
-          <hr className="py-3"/>
+          <hr className="py-3" />
           <div className="py-3 flex justify-between">
             <p>비밀번호</p>
-            <p>  사용자 비밀번호 </p>
+            <p> 사용자 비밀번호 </p>
           </div>
-          <hr className="py-3"/>
+          <hr className="py-3" />
 
-
-
-
-          
-          
-          <button
-            onClick={onClose}
-            className="mt-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
-          >
-            닫기
-          </button>
+          <div className="flex gap-2">
+            <button
+              className='mt-4 px-4 py-2 text-black bg-red-600 hover:bg-gray-500 rounded'>
+                  계정 삭제
+              </button>
+            <button
+              onClick={onClose}
+              className="mt-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
+            >
+              닫기
+            </button>
+          </div>
         </div>
       </div>
     )
   }
-  
 
-
-
-  
   const handleClick = (e, tab) => {
     e.preventDefault()
     setActive(tab)
   }
 
-  const example = [
-    {
-      id: 1,
-      title: '맛있다 초밥집',
-      image: 'https://picsum.photos/250/250?random=1',
-      rating: '4.0',
-      description: '맛있다. 이 집 괜찮다.',
-      keyword: '초밥, 일식, 스시',
-    },
-    {
-      id: 2,
-      title: '매운 떡볶이 전문점',
-      image: 'https://picsum.photos/250/250?random=2',
-      rating: '4.5',
-      description: '맵고 맛있다. 이 집 나쁘지않다.',
-      keyword: '떡볶이, 분식, 매운맛',
-    },
-    {
-      id: 3,
-      title: '감성 카페',
-      image: 'https://picsum.photos/250/250?random=3',
-      rating: '4.2',
-      description: '좋은 커피와 달달한 디저트 이 집 감성있다. 이 집 괜찮다',
-      keyword: '카페, 디저트, 분위기',
-    },
-    {
-      id: 4,
-      title: '전통 한식당',
-      image: 'https://picsum.photos/250/250?random=4',
-      rating: '4.8',
-      description: '엄마 손맛이 나는 집밥 느낌 그야말로 맘스터치 이 집 괜찮다.',
-      keyword: '한식, 전통, 백반',
-    },
-    {
-      id: 5,
-      title: '라멘 맛도 모르면서',
-      image: 'https://picsum.photos/250/250?random=5',
-      rating: '5',
-      description: '맛있다 이 집 좋다. 내일 또 와야겠다.',
-      keyword: '일식, 라멘',
-    },
-  ]
 
   const isBookmarked = item => bookmarked.some(b => b.id === item.id)
 
@@ -120,7 +175,6 @@ const MyPageForm = () => {
   }
 
   const renderContent = () => {
-    
     switch (active) {
       case '최근기록':
         return (
@@ -161,7 +215,7 @@ const MyPageForm = () => {
                   </button>
                 </div>
                 <div className="py-3">
-                  <h2 className="text-lg font-semibold">{item.title}</h2>
+                  <h2 className="text-lg font-SinchonRhapsody">{item.title}</h2>
                   <p>{item.rating} ⭐</p>
                   <p>{item.description}</p>
                   <p className="text-sm text-gray-500">{item.keyword}</p>
@@ -193,8 +247,30 @@ const MyPageForm = () => {
       case '공유':
         return <p>친구에게 공유한 음식점 기록을 여기에 보여줍니다.</p>
 
-      case '음식점 추천':
-        return <p>ㅎㅎ</p>
+        case '음식점 추천':
+          return openai.length > 2 ? (
+            <ul className="flex flex-col gap-9 py-5">
+              {openai.map(item => (
+                <li key={item.id} className="flex gap-4">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-[150px] h-[150px] object-cover rounded"
+                  />
+                  <div>
+                    <h2 className="text-lg font-semibold">{item.title}</h2>
+                    <p>{item.rating} ⭐</p>
+                    <p>{item.description}</p>
+                    <p className="text-sm text-gray-500">{item.keyword}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>추천 가게를 불러오는 중...</p>
+          )
+
+
 
       default:
         return null
@@ -211,12 +287,11 @@ const MyPageForm = () => {
           />
           <div className="flex gap-3 ">
             <p>프로필설정</p>
-            <button onClick={() => setIsOpen(true)} className="text-xl cursor-pointer"
-              >
+            <button onClick={() => setIsOpen(true)} className="text-xl cursor-pointer">
               ⚙
             </button>
           </div>
-      </div>
+        </div>
       </div>
       <Modal isOpen={isopen} onClose={() => setIsOpen(false)} />
 
