@@ -1,7 +1,7 @@
 import React from 'react'
 import LoginForm from '../../features/auth/components/login/LoginForm'
+import LoginAction from '../../features/auth/components/login/LoginAction'
 import style from './loginPage.module.css'
-
 
 const LoginPage = () => {
   return (
@@ -10,6 +10,7 @@ const LoginPage = () => {
         <div className={`flex justify-center pb-3`}>로그인</div>
         <div className={`flex flex-col gap-6`}>
           <LoginForm />
+          <LoginAction />
         </div>
       </section>
     </main>
