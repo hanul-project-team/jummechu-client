@@ -64,7 +64,7 @@ const LoginForm = () => {
     } else if (errors.password) {
       setFocus('password')
     }
-    resetField('password')
+    resetField('password', { keepError: true })
   }
   const changeVisible = () => {
     if (visible === true) {
@@ -144,11 +144,11 @@ const LoginForm = () => {
             </Field>
           )}
         />
-        {errors.password && !serverError && (
-          <span className={style.errorSpan}>{errors.password.message}</span>
+        {(errors.password || serverError) && (
+          <span className={style.errorSpan}>
+            {errors.password?.message || serverError}
+          </span>
         )}
-        {!errors.password && serverError && <span className={style.errorSpan}>{serverError}</span>}
-        {errors.password && serverError && <span className={style.errorSpan}>{serverError}</span>}
         <button type="submit">로그인</button>
       </fieldset>
     </form>
