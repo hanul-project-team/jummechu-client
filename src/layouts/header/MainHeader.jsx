@@ -16,12 +16,16 @@ const MainHeader = () => {
   const isRoot = location.pathname === '/'
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated)
   const user = useSelector(state => state.auth.user)
-  console.log(isAuthenticated)
-  console.log(user)
+  // console.log(isAuthenticated)
+  // console.log(user)
+
   const setLogout = async () => {
     try {
-      axios.get('http://localhost:3000/auth/logout', { withCredentials: true })
-      dispatch(logout())
+      if (confirm('로그아웃 하시겠습니까?')) {
+        axios.get('http://localhost:3000/auth/logout', { withCredentials: true })
+        dispatch(logout())
+        navigate('/')
+      }
     } catch {
       alert('다시 시도해주세요')
     }
@@ -29,15 +33,14 @@ const MainHeader = () => {
   // const isList = location.pathname.startsWith('/list')
   const setKakaoPlace = usePlaceStore(state => state.setKakaoPlace)
   const navigateLogin = () => {
-    // navigate('/login')
+    navigate('/login')
     console.log('로그인 이동')
   }
   const navigateSignup = () => {
-    // navigate('/signup')
+    navigate('/signup')
     console.log('회원가입 이동')
   }
   const navigateHome = () => {
-    setKakaoPlace(null)
     navigate('/')
   }
   return (
@@ -51,7 +54,7 @@ const MainHeader = () => {
               </div>
               {isAuthenticated ? (
                 <div>
-                  <button className="border" onClick={setLogout}>
+                  <button className="border p-2 rounded-xl" onClick={setLogout}>
                     로그아웃
                   </button>
                 </div>
@@ -76,30 +79,38 @@ const MainHeader = () => {
             </div>
             <h1 className="text-center text-5xl font-sans font-bold">어디로 가시나요?</h1>
             {/* <GoogleMaps /> */}
-            {<KakaoMaps />}
+            <KakaoMaps />
           </div>
         ) : (
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto md:relative">
             <div className="flex justify-between items-center">
               <div onClick={navigateHome}>
                 <img src={LogoSm} alt="logo" className="mouse_pointer" />
               </div>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  className="border bg-teal-400 text-white border-black rounded-3xl p-2 font-sans mouse_pointer"
-                  onClick={navigateLogin}
-                >
-                  로그인
-                </button>
-                <button
-                  type="button"
-                  className="border bg-white text-teal-400 border-black rounded-3xl p-2 font-sans mouse_pointer"
-                  onClick={navigateSignup}
-                >
-                  회원가입
-                </button>
-              </div>
+              {isAuthenticated ? (
+                <div>
+                  <button className="border p-2 rounded-xl" onClick={setLogout}>
+                    로그아웃
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    className="border bg-teal-400 text-white border-black rounded-3xl p-2 font-sans mouse_pointer"
+                    onClick={navigateLogin}
+                  >
+                    로그인
+                  </button>
+                  <button
+                    type="button"
+                    className="border bg-white text-teal-400 border-black rounded-3xl p-2 font-sans mouse_pointer"
+                    onClick={navigateSignup}
+                  >
+                    회원가입
+                  </button>
+                </div>
+              )}
             </div>
             {/* <GoogleMaps /> */}
             {<KakaoMaps />}
