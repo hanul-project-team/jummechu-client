@@ -27,11 +27,16 @@ function MyShop() {
     <div>
       <h1 className="w-100 text-center m-auto title h1-box">매장관리</h1>
 
-      <div className="m-auto w-200">
-        <h2 className="title">매장이름</h2>
-        <img src={banner} alt="banner" />
+      <div className="m-auto w-200" >
+        <div className='w-50'></div>
+        <h2 className="title">
+          <input type="text" name="shopname" id="shopname" className='w-200 m-auto text-center' placeholder='가게 이름'/>
+        </h2>
       </div>
+      <div className="m-auto w-200" >
+        <img src={banner} alt="banner" />
 
+      </div>
       <table style={{ width: 800, tableLayout: 'fixed' }}>
         <caption className="title">메뉴</caption>
         <colgroup>
@@ -138,6 +143,9 @@ function MyShop() {
           </tr>
         </tbody>
       </table>
+      <div style={{display: "flex", justifyContent: 'center'}}>
+        <button style={{color: "white", backgroundColor: "#39D2D7", borderRadius: "5px"}} className='p-2'>저장</button>
+      </div>
     </div>
   )
 }
