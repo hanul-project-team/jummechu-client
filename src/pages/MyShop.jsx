@@ -7,6 +7,14 @@ function MyShop() {
 
   const addRow = () => setRows([...rows, { name: '', price: '' }])
 
+  const removeRow = index => {
+    if (rows.length === 1) {
+      alert('메뉴는 최소 1개 이상이어야 합니다.')
+      return
+    }
+    setRows(rows.filter((_, i) => i !== index))
+  }
+
   const formatNumber = value => (value ? Number(value).toLocaleString() : '')
 
   const handleChange = (index, field, value) => {
@@ -42,6 +50,7 @@ function MyShop() {
             <tr key={idx}>
               <td>
                 <input
+                className='shop-input'
                   type="text"
                   placeholder="메뉴 이름"
                   value={row.name}
@@ -51,6 +60,7 @@ function MyShop() {
               </td>
               <td>
                 <input
+                className='shop-input'
                   type="text"
                   placeholder="메뉴 가격"
                   value={formatNumber(row.price)}
@@ -59,10 +69,10 @@ function MyShop() {
                     if (/^\d*$/.test(raw)) handleChange(idx, 'price', raw)
                   }}
                   style={{ width: '90%' }}
-                />
+                />원
               </td>
               <td>
-                <button className="delete_b">
+                <button onClick={() => removeRow(idx)} className="delete_b">
                   ×
                 </button>
               </td>
@@ -71,13 +81,14 @@ function MyShop() {
         </tbody>
       </table>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 , marginBottom: 20 }}>
         <button onClick={addRow} className="plus-b">
           +
         </button>
       </div>
       <div className='Separation'></div>
 
+     
     </div>
   )
 }
