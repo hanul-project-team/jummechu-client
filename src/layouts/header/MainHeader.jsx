@@ -4,13 +4,14 @@ import Logo from '../../assets/images/logo.png'
 import LogoSm from '../../assets/images/logo-small.png'
 // import GoogleMaps from '../../features/googleMapsApi/GoogleMaps'
 import usePlaceStore from '../../store/usePlaceStore'
+import KakaoMaps from '../../features/kakaoMapsApi/KakaoMaps.jsx'
 
 const MainHeader = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const isRoot = location.pathname === '/'
   // const isList = location.pathname.startsWith('/list')
-  const setPlaceDetails = usePlaceStore(state => state.setPlaceDetails)
+  const setKakaoPlace = usePlaceStore(state => state.setKakaoPlace)
   const navigateLogin = () => {
     // navigate('/login')
     console.log('로그인 이동')
@@ -20,7 +21,7 @@ const MainHeader = () => {
     console.log('회원가입 이동')
   }
   const navigateHome = () => {
-    setPlaceDetails(null)
+    setKakaoPlace(null)
     navigate('/')
   }
   return (
@@ -51,6 +52,7 @@ const MainHeader = () => {
             </div>
             <h1 className="text-center text-5xl font-sans font-bold">어디로 가시나요?</h1>
             {/* <GoogleMaps /> */}
+            {<KakaoMaps />}
           </div>
         ) : (
           <div className="max-w-7xl mx-auto">
@@ -76,6 +78,7 @@ const MainHeader = () => {
               </div>
             </div>
             {/* <GoogleMaps /> */}
+            {<KakaoMaps />}
           </div>
         )}
       </div>
