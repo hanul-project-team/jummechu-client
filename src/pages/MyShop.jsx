@@ -88,7 +88,56 @@ function MyShop() {
       </div>
       <div className='Separation'></div>
 
-     
+      <table
+        style={{
+          margin: '20px auto',
+        }}
+      >
+        <caption className="title m-3">영업시간</caption>
+        <thead>
+          <tr>
+            <th>요일</th>
+            <th colSpan={2}>시간</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>일</td>
+            <td><input type="time"/> ~ <input type="time"/></td>
+            <td><input type="time"/> ~ <input type="time"/></td>
+          </tr>
+          <tr>
+            <td>월</td>
+            <td><input type="time"/> ~ <input type="time"/></td>
+            <td><input type="time"/> ~ <input type="time"/></td>
+          </tr>
+          <tr>
+            <td>화</td>
+            <td><input type="time"/> ~ <input type="time"/></td>
+            <td><input type="time"/> ~ <input type="time"/></td>
+          </tr>
+          <tr>
+            <td>수</td>
+            <td><input type="time"/> ~ <input type="time"/></td>
+            <td><input type="time"/> ~ <input type="time"/></td>
+          </tr>
+          <tr>
+            <td>목</td>
+            <td><input type="time"/> ~ <input type="time"/></td>
+            <td><input type="time"/> ~ <input type="time"/></td>
+          </tr>
+          <tr>
+            <td>금</td>
+            <td><input type="time"/> ~ <input type="time"/></td>
+            <td><input type="time"/> ~ <input type="time"/></td>
+          </tr>
+          <tr>
+            <td>토</td>
+            <td><input type="time"/> ~ <input type="time"/></td>
+            <td><input type="time"/> ~ <input type="time"/></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   )
 }
