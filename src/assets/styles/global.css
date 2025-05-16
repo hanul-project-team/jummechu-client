@@ -1,0 +1,20 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+.place-picker-container {
+  padding: 20px;
+}
+.gmpx-place-picker {
+  width: 500px;
+}
+gmp-map {
+  /* height: 20rem; */
+  min-width: 60%;
+  max-width: 80%;
+}
+.mouse_pointer:hover {
+  cursor: pointer;
+}

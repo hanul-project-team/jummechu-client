@@ -202,38 +202,43 @@ const MyPageForm = () => {
   }
 
   return (
-    <div>
-      <div className="py-3 flex justify-between">
-        <div
-          className="w-[100px] h-[100px] bg-cover mask-radial-fade"
-          style={{ backgroundImage: "url('https://picsum.photos/200')" }}
-        />
-        <div className="flex items-center gap-3 ">
-          <p>프로필설정</p>
-          <button onClick={() => setIsOpen(true)} className="text-xl">
-            ⚙
-          </button>
-        </div>
+    <div className="w-full pb-5">
+      <div className="max-w-6xl mx-auto">
+        <div className="py-3 flex justify-between items-center ">
+          <div
+            className="w-[100px] h-[100px] bg-cover mask-radial-fade"
+            style={{ backgroundImage: "url('https://picsum.photos/200')" }}
+          />
+          <div className="flex gap-3 ">
+            <p>프로필설정</p>
+            <button onClick={() => setIsOpen(true)} className="text-xl cursor-pointer"
+              >
+              ⚙
+            </button>
+          </div>
+      </div>
       </div>
       <Modal isOpen={isopen} onClose={() => setIsOpen(false)} />
 
-      <ul className="py-5 flex gap-5">
-        {tabs.map(tab => (
-          <li key={tab}>
-            <button
-              type="button"
-              onClick={e => handleClick(e, tab)}
-              className={`pb-2 text-gray-600 font-medium border-b-2 transition duration-200 ${
-                active === tab
-                  ? 'border-cyan-500 text-blue-500'
-                  : 'border-transparent hover:border-gray-300 hover:text-black'
-              }`}
-            >
-              {tab}
-            </button>
-          </li>
-        ))}
-      </ul>
+      <div className="max-w-5xl mx-auto">
+        <ul className="py-5 flex gap-5">
+          {tabs.map(tab => (
+            <li key={tab}>
+              <button
+                type="button"
+                onClick={e => handleClick(e, tab)}
+                className={`pb-2 text-gray-600 font-medium border-b-2 transition duration-200 ${
+                  active === tab
+                    ? 'border-cyan-500 text-blue-500'
+                    : 'border-transparent hover:border-gray-300 hover:text-black'
+                }`}
+              >
+                {tab}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
       <hr className=" border-gray-500" />
 
       <div className="flex justify-center">{renderContent()}</div>
