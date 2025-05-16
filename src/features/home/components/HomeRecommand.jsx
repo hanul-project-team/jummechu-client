@@ -3,19 +3,20 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import Icon from '../../../assets/images/icon.png'
 import 'swiper/css'
 import { Link } from 'react-router-dom'
+import '../../../assets/styles/tailwind.css'
 
 const HomeRecommand = () => {
   return (
-    <div>
+    <div className='max-xl:m-3'>
       <Link to="/list">
-        <span className='text-xl font-bold'>전체보기</span>
+        <span className='text-xl font-bold font-(family-name:peoplefirst)'>전체보기</span>
       </Link>
-      <div className="container border rounded-xl max-w-full p-3 my-3">
+      <div className="container shadow-xl/20 max-w-full p-3 my-3 overflow-auto">
         <p className="text-lg font-sans">&#35; 카페</p>
         <Swiper
           spaceBetween={50}
           slidesPerView={3}
-          onSlideChange={() => console.log('slide change')}
+          // onSlideChange={() => console.log('slide change')}
           // onSwiper={swiper => console.log(swiper)}
         >
           <SwiperSlide>
@@ -80,12 +81,12 @@ const HomeRecommand = () => {
           </SwiperSlide>
         </Swiper>
       </div>
-      <div className="container border rounded-xl p-3 my-3 overflow-auto">
+      <div className="container shadow-xl/20 max-w-full p-3 my-3 overflow-auto">
         <p className="text-lg font-sans">&#35; 혼밥</p>
         <Swiper
           spaceBetween={50}
           slidesPerView={3}
-          onSlideChange={() => console.log('slide change')}
+          // onSlideChange={() => console.log('slide change')}
           // onSwiper={swiper => console.log(swiper)}
         >
           <SwiperSlide>
@@ -150,12 +151,12 @@ const HomeRecommand = () => {
           </SwiperSlide>
         </Swiper>
       </div>
-      <div className="container border rounded-xl p-3 my-3 overflow-auto">
+      <div className="container shadow-xl/20 max-w-full p-3 my-3 overflow-auto">
         <p className="text-lg font-sans">&#35; 바</p>
         <Swiper
           spaceBetween={50}
           slidesPerView={3}
-          onSlideChange={() => console.log('slide change')}
+          // onSlideChange={() => console.log('slide change')}
           // onSwiper={swiper => console.log(swiper)}
         >
           <SwiperSlide>
