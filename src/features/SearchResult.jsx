@@ -19,7 +19,7 @@ const SearchResult = () => {
         <p>loading...</p>
       ) : (
         <>
-          <p>{searchData.length} 개의 검색 결과</p>
+          <span>{searchData.length} 개의 검색 결과</span>
           {searchData.map((sd, i) => {
             return (
               <div key={i} className="flex gap-2 p-2 my-3 border-1 rounded-xl">
