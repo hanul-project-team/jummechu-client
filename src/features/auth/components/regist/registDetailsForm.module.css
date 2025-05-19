@@ -1,19 +1,88 @@
+.registFormField {
+    position: relative;
+}
+.registFormField input[name='password'] + button[type=button] {
+    position: absolute;
+    top: 2.75rem;
+    right: 0.75rem;
+}
+.registFormField input[name='passwordCheck'] + button[type=button] {
+    position: absolute;
+    top: 1.25rem;
+    right: 0.75rem;
+}
 .requiredSpan {
     padding-left: 0.25rem;
     color: red;
 }
-.loginFormField input {
+.registFormField input {
     text-indent: 0.25rem;
     padding: 1rem 0.5rem ;
     background-color: #d9d9d9;
     outline: none;
     border-radius: 0.25rem;
 }
-.loginFormField label {
+.registFormField label {
     color: black;
+}
+.modalWrapper {
+    position: fixed;
+    display: flex;
+    top: 10rem;
+    left: 40rem;
+}
+.modalPanel {
+    font-size: 0.75rem;
+    border: 1px solid gray;
+    background-color: white;
+    padding: 0.5rem 0.25rem;
+    border-radius: 0.25rem;
 }
 .noSpinner::-webkit-outer-spin-button,
 .noSpinner::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+.getCodeBtn {
+    padding: 1rem 0.5rem;
+    border-radius: 0.25rem;
+    color: white;
+    background-color: black;
+    min-width: 6rem;
+}
+.getCodeBtn:disabled {
+    background-color: gray;
+}
+.resendBtn {
+    padding: 1rem 0.5rem;
+    border-radius: 0.25rem;
+    color: white;
+    background-color: black;
+    min-width: 6rem;
+}
+.resendBtn:disabled {
+    background-color: gray;
+}
+.sendCodeBtn {
+    padding: 1rem 0.5rem;
+    border-radius: 0.25rem;
+    color: white;
+    background-color: black;
+    min-width: 6rem
+}
+.sendCodeBtn:disabled {
+    background-color: gray;
+}
+.registBtn {
+    padding: 1rem 0.5rem;
+    border-radius: 0.25rem;
+    color: white;
+    background-color: black;
+}
+.registBtn:disabled {
+    background-color: gray;
+}
+.errorSpan {
+    color: red;
+    font-size: 0.75rem;
 }
