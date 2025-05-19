@@ -6,27 +6,11 @@ const MyPageForm = () => {
   const [bookmarked, setBookmarked] = useState([])
   const tabs = ['최근기록', '찜', '공유', '음식점 추천']
   const [isopen, setIsOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [openai, setOpenAi] = useState([])
   const [dalleImage, setDalleImage] = useState(null)
+  const [loading, setLoading] = useState(false)
 
-  const callDalleImage = async keywordSummary => {
-    try {
-      const res = await fetch('http://localhost:3000/api/dalle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: `일러스트 스타일로 다음 키워드들을 반영한 음식점 장면을 그려주세요: ${keywordSummary}. 음식이 놓인 테이블, 가게 외관, 손님들, 분위기 등을 포함해 주세요.`,
-        }),
-      })
 
-      const result = await res.json()
-      const imageUrl = result?.result?.data?.[0]?.url // Azure는 `result` 아래에 있을 수 있음
-      setDalleImage(imageUrl)
-    } catch (err) {
-      console.error('DALL·E 호출 실패:', err)
-    }
-  }
 
   const example = [
     {
@@ -39,14 +23,6 @@ const MyPageForm = () => {
     },
     {
       id: 2,
-      title: '매운 떡볶이 전문점',
-      image: 'https://picsum.photos/250/250?random=2',
-      rating: '4.5',
-      description: '맵고 맛있다. 이 집 나쁘지않다.',
-      keyword: '떡볶이, 분식, 매운맛',
-    },
-    {
-      id: 3,
       title: '감성 카페',
       image: 'https://picsum.photos/250/250?random=3',
       rating: '4.2',
@@ -54,7 +30,7 @@ const MyPageForm = () => {
       keyword: '카페, 디저트, 분위기',
     },
     {
-      id: 4,
+      id: 3,
       title: '전통 한식당',
       image: 'https://picsum.photos/250/250?random=4',
       rating: '4.8',
@@ -62,15 +38,7 @@ const MyPageForm = () => {
       keyword: '한식, 전통, 백반',
     },
     {
-      id: 5,
-      title: '라멘 맛도 모르면서',
-      image: 'https://picsum.photos/250/250?random=5',
-      rating: '5',
-      description: '맛있다 이 집 좋다. 내일 또 와야겠다.',
-      keyword: '일식, 라멘',
-    },
-    {
-      id: 6,
+      id: 4,
       title: '이것은 덮밥',
       image: 'https://picsum.photos/250/250?random=6',
       rating: '5',
@@ -119,19 +87,53 @@ JSON 외에는 아무 것도 출력하지 마세요.
     return data;
   }
 
+
+  const callDalleImage = async (keyword) => {
+    try {
+      const res = await fetch('http://localhost:3000/api/dalle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: `일러스트 스타일로 다음 키워드들을 반영한 음식점 장면을 그려주세요: ${keyword}. 음식이 놓인 테이블, 가게 외관, 손님들, 분위기 등을 포함해 주세요.`,
+        }),
+      });
+
+      if (!res.ok) {
+        const errorResult = await res.json();
+        console.error(`DALL·E 호출 실패 (${keyword}):`, errorResult);
+        return null;
+      }
+
+      const result = await res.json();
+      return result?.imageUrl;
+    } catch (err) {
+      console.error(`DALL·E 호출 실패 (${keyword}):`, err);
+      return null;
+    }
+  }
+
+
   useEffect(() => {
+    console.log(dalleImage)
     if (active === '음식점 추천') {
-      const allkeywords = example.flatMap(item => item.keyword.split(',').map(k => k.trim()))
-      setLoading(true)
+      const allkeywords = example.flatMap(item => item.keyword.split(',').map(k => k.trim()));
+      setLoading(true);
       callOpenAi(allkeywords).then(data => {
-        setOpenAi(data)
-        const keywordSummary = Array.from(new Set(allkeywords)).slice(0, 10).join(',')
-        callDalleImage(keywordSummary)
-        setLoading(false)
-      })
+        setOpenAi(data);
+        // 대표 키워드를 추출하여 DALL-E 이미지 생성 (음식점 추천 탭 대표 이미지)
+        const keywordSummary = Array.from(new Set(allkeywords)).slice(0, 10).join(',');
+        callDalleImage(keywordSummary).then(imageUrl => {
+          setDalleImage(imageUrl);
+          setLoading(false);
+        });
+      });
+    } else {
+      setDalleImage(null); // 다른 탭에서는 DALL-E 이미지 초기화
+      setOpenAi([]); // 다른 탭에서는 OpenAI 추천 결과 초기화
+      setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active])
+  }, [active]);
 
   const Modal = ({ isOpen, onClose }) => {
     if (!isOpen) return null
@@ -283,11 +285,6 @@ JSON 외에는 아무 것도 출력하지 마세요.
               <ul className="flex flex-col gap-9 py-5">
                 {openai.map((item, index) => (
                   <li key={index} className="flex gap-4">
-                    <img
-                      src={`https://picsum.photos/150/150?random=${index + 10}`}
-                      alt={item.title}
-                      className="w-[150px] h-[150px] object-cover rounded"
-                    />
                     <div>
                       <h2 className="text-lg font-semibold">{item.title}</h2>
                       <p>{item.rating} ⭐</p>
