@@ -58,7 +58,7 @@ const KakaoMaps = () => {
   }, [center])
 
   const getKakaoData = center => {
-    console.log('재시도 횟수', retryCount)
+    // console.log('재시도 횟수', retryCount)
     axios
       .post(
         'http://localhost:3000/api/nearplace',
@@ -69,7 +69,7 @@ const KakaoMaps = () => {
       )
       .then(res => {
         const data = res.data
-        console.log(data)
+        // console.log(data)
         setKakaoPlace(data)
         setRetryCount(0)
       })
@@ -142,99 +142,104 @@ const KakaoMaps = () => {
   return (
     <>
       {isRoot === true ? (
-        <div className="container mx-auto max-w-5xl max-xl:m-3">
-          <form className="p-3 my-3" onSubmit={handleSubmit} autoComplete="off">
-            <fieldset>
-              <legend className="hidden">kakao search</legend>
-              <div className="flex items-center mx-auto md:max-w-1/2 gap-1 border-1 rounded-3xl px-3 py-1">
-                <div className="max-w-6">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="size-6 mx-auto"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                    />
-                  </svg>
-                </div>
-                <div className="flex gap-1 items-center w-full">
-                  <div className="flex-5">
-                    <input
-                      type="text"
-                      name="place"
-                      value={formData.place}
-                      onChange={handleChange}
-                      className="py-1 indent-1 w-full"
-                      placeholder="#카페 #식사 #혼밥"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <button
-                      className="button w-full rounded-3xl px-2 py-2 bg-teal-400 focus:bg-teal-700 text-yellow-300"
-                      type="submit"
+        <>
+          <div className="md:max-w-1/2 mx-auto">
+            <form className="p-3 my-3" onSubmit={handleSubmit} autoComplete="off">
+              <fieldset>
+                <legend className="hidden">kakao search</legend>
+                <div className="flex items-center mx-auto gap-1 border-1 rounded-3xl px-3 py-1">
+                  <div className="max-w-6">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="size-6 mx-auto"
                     >
-                      <span className="max-[426px]:text-sm mouse_pointer">검색</span>
-                    </button>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex gap-1 items-center w-full">
+                    <div className="flex-5">
+                      <input
+                        type="text"
+                        name="place"
+                        value={formData.place}
+                        onChange={handleChange}
+                        className="py-1 indent-1 w-full"
+                        placeholder="검색어를 입력해주세요"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <button
+                        className="button w-full rounded-3xl px-2 py-2 bg-teal-400 focus:bg-teal-700 text-yellow-300"
+                        type="submit"
+                      >
+                        <span className="max-[426px]:text-sm mouse_pointer">검색</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </fieldset>
-          </form>
-          {isRoot === true && <KakaoPlace />}
-        </div>
+              </fieldset>
+            </form>
+          </div>
+          <div className="container mx-auto max-w-5xl max-xl:m-3">
+            <KakaoPlace />
+          </div>
+        </>
       ) : (
-        <div className="container md:absolute md:top-px xl:top-px xl:left-1/8 mx-auto max-w-5xl max-xl:m-3">
-          <form className="p-3 my-3" onSubmit={handleSubmit} autoComplete="off">
-            <fieldset>
-              <legend className="hidden">kakao search</legend>
-              <div className="flex items-center mx-auto md:max-w-1/2 gap-1 border-1 rounded-3xl px-3 py-1">
-                <div className="max-w-6">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="size-6 mx-auto"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                    />
-                  </svg>
-                </div>
-                <div className="flex gap-1 items-center w-full">
-                  <div className="flex-5">
-                    <input
-                      type="text"
-                      name="place"
-                      value={formData.place}
-                      onChange={handleChange}
-                      className="py-1 indent-1 w-full"
-                      placeholder="#카페 #식사 #혼밥"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <button
-                      className="button w-full rounded-3xl px-2 py-2 bg-teal-400 focus:bg-teal-700 text-yellow-300"
-                      type="submit"
+        <>
+          <div className="container md:max-w-1/2 md:absolute md:top-px xl:top-px xl:left-2/8 md:left-2/8 mx-auto max-w-5xl max-xl:mx-3">
+            <form className="px-3 my-3" onSubmit={handleSubmit} autoComplete="off">
+              <fieldset>
+                <legend className="hidden">kakao search</legend>
+                <div className="flex items-center mx-auto gap-1 border-1 rounded-3xl px-3 py-1">
+                  <div className="max-w-6">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="size-6 mx-auto"
                     >
-                      <span className="max-[426px]:text-sm">검색</span>
-                    </button>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                      />
+                    </svg>
+                  </div>
+                  <div className="flex gap-1 items-center w-full">
+                    <div className="flex-5">
+                      <input
+                        type="text"
+                        name="place"
+                        value={formData.place}
+                        onChange={handleChange}
+                        className="py-1 indent-1 w-full"
+                        placeholder="검색어를 입력해주세요"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <button
+                        className="button mouse_pointer w-full rounded-3xl px-2 py-2 bg-teal-400 focus:bg-teal-700 text-yellow-300"
+                        type="submit"
+                      >
+                        <span className="max-[426px]:text-sm">검색</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </fieldset>
-          </form>
-          {isRoot === true && <KakaoPlace />}
-        </div>
+              </fieldset>
+            </form>
+          </div>
+        </>
       )}
     </>
   )
