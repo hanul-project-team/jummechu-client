@@ -2,7 +2,7 @@ import React from 'react'
 
 const VisibleBtn = ( {changeVisible, setter, visible, hasValue, className}) => {
   return (
-    <button type="button" onClick={() => changeVisible(setter)} className={`${hasValue ? 'flex' : 'hidden'} ${className && className} outline-0`}>
+    <button type="button" tabIndex={-1} onClick={() => changeVisible(setter)} className={`${hasValue ? 'flex' : 'hidden'} ${className && className} outline-0`}>
                 {visible ? (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
