@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { logout } from '../../features/auth/authSlice'
 import axios from 'axios'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, NavLink } from 'react-router-dom'
 import Logo from '../../assets/images/logo.png'
 import LogoSm from '../../assets/images/logo-small.png'
 // import GoogleMaps from '../../features/googleMapsApi/GoogleMaps'
@@ -53,10 +53,15 @@ const MainHeader = () => {
                 <img src={Logo} alt="logo" className="mouse_pointer" />
               </div>
               {isAuthenticated ? (
-                <div>
-                  <button className="border p-2 rounded-xl" onClick={setLogout}>
+                <div className='flex gap-2'>
+                  <button className="border p-2 rounded-xl bg-red-500 text-white hover:bg-red-700 mouse_pointer" onClick={setLogout}>
                     로그아웃
                   </button>
+                  <NavLink to='/mypage'>
+                    <button className='border p-2 rounded-xl mouse_pointer'>
+                      내정보
+                    </button>
+                  </NavLink>
                 </div>
               ) : (
                 <div className="flex gap-3">
@@ -88,10 +93,15 @@ const MainHeader = () => {
                 <img src={LogoSm} alt="logo" className="mouse_pointer" />
               </div>
               {isAuthenticated ? (
-                <div>
-                  <button className="border p-2 rounded-xl" onClick={setLogout}>
+                <div className='flex gap-2'>
+                  <button className="border p-2 rounded-xl bg-red-500 text-white hover:bg-red-700" onClick={setLogout}>
                     로그아웃
                   </button>
+                  <NavLink to='/mypage'>
+                    <button className='border p-2 rounded-xl mouse_pointer'>
+                      내정보
+                    </button>
+                  </NavLink>
                 </div>
               ) : (
                 <div className="flex gap-3">
