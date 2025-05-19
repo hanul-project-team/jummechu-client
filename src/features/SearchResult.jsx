@@ -22,7 +22,7 @@ const SearchResult = () => {
           <span>{searchData.length} 개의 검색 결과</span>
           {searchData.map((sd, i) => {
             return (
-              <div key={i} className="flex gap-2 p-2 my-3 border-1 rounded-xl">
+              <div key={i} className="flex gap-2 p-2 my-3">
                 <div className="md:min-w-[200px]">
                   <Link to={`/place/${sd.id}`}>
                     <img
@@ -63,7 +63,9 @@ const SearchResult = () => {
                         <p key={i}>{kw}</p>
                       ))} */}
                     </div>
-                    <p><strong>개요</strong>: {sd.summary.description}</p>
+                    <p>
+                      <strong>개요</strong>: {sd.summary.description}
+                    </p>
                   </div>
                 </div>
               </div>
