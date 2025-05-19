@@ -3,7 +3,7 @@ import usePlaceStore from '../../store/usePlaceStore.js'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import 'swiper/css'
 
-const KakaoPlace = () => {
+const KakaoNearPlace = () => {
   const kakaoPlace = usePlaceStore(state => state.kakaoPlace)
   // console.log(kakaoPlace)
   return (
@@ -32,4 +32,4 @@ const KakaoPlace = () => {
   )
 }
 
-export default KakaoPlace
+export default KakaoNearPlace
