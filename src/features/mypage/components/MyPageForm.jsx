@@ -1,67 +1,85 @@
 import React, { useState, useEffect } from 'react'
 import '../MyPage.css' // 경로 기준: 현재 컴포넌트 파일 위치 기준
 
-
-
 const MyPageForm = () => {
   const [active, setActive] = useState('최근기록')
   const [bookmarked, setBookmarked] = useState([])
   const tabs = ['최근기록', '찜', '공유', '음식점 추천']
   const [isopen, setIsOpen] = useState(false)
-const [openai, setOpenAi] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [openai, setOpenAi] = useState([])
+  const [dalleImage, setDalleImage] = useState(null)
 
-const example = [
-  {
-    id: 1,
-    title: '맛있다 초밥집',
-    image: 'https://picsum.photos/250/250?random=1',
-    rating: '4.0',
-    description: '맛있다. 이 집 괜찮다.',
-    keyword: '초밥, 일식, 스시',
-  },
-  {
-    id: 2,
-    title: '매운 떡볶이 전문점',
-    image: 'https://picsum.photos/250/250?random=2',
-    rating: '4.5',
-    description: '맵고 맛있다. 이 집 나쁘지않다.',
-    keyword: '떡볶이, 분식, 매운맛',
-  },
-  {
-    id: 3,
-    title: '감성 카페',
-    image: 'https://picsum.photos/250/250?random=3',
-    rating: '4.2',
-    description: '좋은 커피와 달달한 디저트 이 집 감성있다. 이 집 괜찮다',
-    keyword: '카페, 디저트, 분위기',
-  },
-  {
-    id: 4,
-    title: '전통 한식당',
-    image: 'https://picsum.photos/250/250?random=4',
-    rating: '4.8',
-    description: '엄마 손맛이 나는 집밥 느낌 그야말로 맘스터치 이 집 괜찮다.',
-    keyword: '한식, 전통, 백반',
-  },
-  {
-    id: 5,
-    title: '라멘 맛도 모르면서',
-    image: 'https://picsum.photos/250/250?random=5',
-    rating: '5',
-    description: '맛있다 이 집 좋다. 내일 또 와야겠다.',
-    keyword: '일식, 라멘',
-  },
-  {
-    id: 6,
-    title: '이것은 덮밥',
-    image: 'https://picsum.photos/250/250?random=6',
-    rating: '5',
-    description: '존맛',
-    keyword: '일식, 덮밥, 가츠동'
+  const callDalleImage = async keywordSummary => {
+    try {
+      const res = await fetch('http://localhost:3000/api/dalle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: `일러스트 스타일로 다음 키워드들을 반영한 음식점 장면을 그려주세요: ${keywordSummary}. 음식이 놓인 테이블, 가게 외관, 손님들, 분위기 등을 포함해 주세요.`,
+        }),
+      })
+
+      const result = await res.json()
+      const imageUrl = result?.result?.data?.[0]?.url // Azure는 `result` 아래에 있을 수 있음
+      setDalleImage(imageUrl)
+    } catch (err) {
+      console.error('DALL·E 호출 실패:', err)
+    }
   }
-]
 
-  const callOpenAi = async (keywords) => {
+  const example = [
+    {
+      id: 1,
+      title: '맛있다 초밥집',
+      image: 'https://picsum.photos/250/250?random=1',
+      rating: '4.0',
+      description: '맛있다. 이 집 괜찮다.',
+      keyword: '초밥, 일식, 스시',
+    },
+    {
+      id: 2,
+      title: '매운 떡볶이 전문점',
+      image: 'https://picsum.photos/250/250?random=2',
+      rating: '4.5',
+      description: '맵고 맛있다. 이 집 나쁘지않다.',
+      keyword: '떡볶이, 분식, 매운맛',
+    },
+    {
+      id: 3,
+      title: '감성 카페',
+      image: 'https://picsum.photos/250/250?random=3',
+      rating: '4.2',
+      description: '좋은 커피와 달달한 디저트 이 집 감성있다. 이 집 괜찮다',
+      keyword: '카페, 디저트, 분위기',
+    },
+    {
+      id: 4,
+      title: '전통 한식당',
+      image: 'https://picsum.photos/250/250?random=4',
+      rating: '4.8',
+      description: '엄마 손맛이 나는 집밥 느낌 그야말로 맘스터치 이 집 괜찮다.',
+      keyword: '한식, 전통, 백반',
+    },
+    {
+      id: 5,
+      title: '라멘 맛도 모르면서',
+      image: 'https://picsum.photos/250/250?random=5',
+      rating: '5',
+      description: '맛있다 이 집 좋다. 내일 또 와야겠다.',
+      keyword: '일식, 라멘',
+    },
+    {
+      id: 6,
+      title: '이것은 덮밥',
+      image: 'https://picsum.photos/250/250?random=6',
+      rating: '5',
+      description: '존맛',
+      keyword: '일식, 덮밥, 가츠동',
+    },
+  ]
+
+  const callOpenAi = async keywords => {
     const prompt = `
       다음은 사용자가 최근 본 음식점의 키워드 목록입니다:
       ${keywords.join(', ')}
@@ -80,34 +98,40 @@ JSON 외에는 아무 것도 출력하지 마세요.
 
 [예시 키워드 목록]: #한식, #떡볶이, #매운맛, #분식, #치즈, #일식
     `
-  
+
+    
+
     const response = await fetch('http://localhost:3000/api/openai', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt }),
     })
-  
+
     if (!response.ok) {
       const errorText = await response.text()
       console.error('OpenAI 응답 오류:', errorText)
       return []
     }
-  
+
     const data = await response.json()
-    return data
+    console.log('OpenAI 응답 raw:', data) // 전체 응답 데이터 로깅
+   
+    return data;
   }
-  
 
   useEffect(() => {
     if (active === '음식점 추천') {
-      const allkeywords = example.flatMap(item => 
-        item.keyword.split(',').map(k => k.trim())
-      )
-      callOpenAi(allkeywords).then(setOpenAi)
+      const allkeywords = example.flatMap(item => item.keyword.split(',').map(k => k.trim()))
+      setLoading(true)
+      callOpenAi(allkeywords).then(data => {
+        setOpenAi(data)
+        const keywordSummary = Array.from(new Set(allkeywords)).slice(0, 10).join(',')
+        callDalleImage(keywordSummary)
+        setLoading(false)
+      })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active])
-  
 
   const Modal = ({ isOpen, onClose }) => {
     if (!isOpen) return null
@@ -142,10 +166,9 @@ JSON 외에는 아무 것도 출력하지 마세요.
           <hr className="py-3" />
 
           <div className="flex gap-2">
-            <button
-              className='mt-4 px-4 py-2 text-black bg-red-600 hover:bg-gray-500 rounded'>
-                  계정 삭제
-              </button>
+            <button className="mt-4 px-4 py-2 text-black bg-red-600 hover:bg-gray-500 rounded">
+              계정 삭제
+            </button>
             <button
               onClick={onClose}
               className="mt-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
@@ -162,7 +185,6 @@ JSON 외에는 아무 것도 출력하지 마세요.
     e.preventDefault()
     setActive(tab)
   }
-
 
   const isBookmarked = item => bookmarked.some(b => b.id === item.id)
 
@@ -247,30 +269,39 @@ JSON 외에는 아무 것도 출력하지 마세요.
       case '공유':
         return <p>친구에게 공유한 음식점 기록을 여기에 보여줍니다.</p>
 
-        case '음식점 추천':
-          return openai.length > 2 ? (
-            <ul className="flex flex-col gap-9 py-5">
-              {openai.map(item => (
-                <li key={item.id} className="flex gap-4">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-[150px] h-[150px] object-cover rounded"
-                  />
-                  <div>
-                    <h2 className="text-lg font-semibold">{item.title}</h2>
-                    <p>{item.rating} ⭐</p>
-                    <p>{item.description}</p>
-                    <p className="text-sm text-gray-500">{item.keyword}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>추천 가게를 불러오는 중...</p>
-          )
-
-
+      case '음식점 추천':
+        return (
+          <div className="flex flex-col gap-5 items-center">
+            {dalleImage && (
+              <img
+                src={dalleImage}
+                alt="AI 음식점 이미지"
+                className="w-[300px] h-[300px] rounded shadow-md"
+              />
+            )}
+            {openai.length > 2 ? (
+              <ul className="flex flex-col gap-9 py-5">
+                {openai.map((item, index) => (
+                  <li key={index} className="flex gap-4">
+                    <img
+                      src={`https://picsum.photos/150/150?random=${index + 10}`}
+                      alt={item.title}
+                      className="w-[150px] h-[150px] object-cover rounded"
+                    />
+                    <div>
+                      <h2 className="text-lg font-semibold">{item.title}</h2>
+                      <p>{item.rating} ⭐</p>
+                      <p>{item.description}</p>
+                      <p className="text-sm text-gray-500">{item.keyword}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>추천 가게를 불러오는 중...</p>
+            )}
+          </div>
+        )
 
       default:
         return null
