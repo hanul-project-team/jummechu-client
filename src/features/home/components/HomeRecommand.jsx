@@ -27,13 +27,14 @@ const HomeRecommand = () => {
       setTag(setCategory)
       setIsLoading(false)
     }
-  }, [])
+  }, [kakaoPlace])
   // console.log(tag)
   // console.log(kakaoPlace)
   return (
     <div className="max-xl:m-3">
-      {isLoading === true && <p>loading...</p>}
-      {isLoading === false && (
+      {isLoading === true ? (
+        <p>loading...</p>
+      ) : (
         <>
           <Link to="/list">
             <span className="text-xl font-bold font-(family-name:peoplefirst)">전체보기</span>
