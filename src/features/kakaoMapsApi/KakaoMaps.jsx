@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import usePlaceStore from '../../store/usePlaceStore'
 import axios from 'axios'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import KakaoPlace from './KakaoPlace.jsx'
+import KakaoNearPlace from './KakaoNearPlace.jsx'
 
 const KakaoMaps = () => {
   const setCenter = usePlaceStore(state => state.setCenter)
@@ -103,7 +103,7 @@ const KakaoMaps = () => {
         .then(res => {
           const data = res
           console.log(data)
-          // setSearchData(data)
+          setSearchData(data)
         })
         .catch(err => {
           console.log(err)
@@ -124,7 +124,7 @@ const KakaoMaps = () => {
         .then(res => {
           const data = res
           console.log(data)
-          // setSearchData(data)
+          setSearchData(data)
         })
         .catch(err => {
           console.log(err)
@@ -189,7 +189,7 @@ const KakaoMaps = () => {
             </form>
           </div>
           <div className="container mx-auto max-w-5xl max-xl:m-3">
-            <KakaoPlace />
+            <KakaoNearPlace />
           </div>
         </>
       ) : (
