@@ -86,6 +86,7 @@ const KakaoMaps = () => {
   }
   const handleSubmit = e => {
     e.preventDefault()
+    setSearchData(null);
     if (formData.place.startsWith('#')) {
       const sliced = formData.place.slice(1)
       navigate(`/search/${sliced}`)
@@ -101,8 +102,8 @@ const KakaoMaps = () => {
           },
         )
         .then(res => {
-          const data = res
-          console.log(data)
+          const data = res.data
+          // console.log(data)
           setSearchData(data)
         })
         .catch(err => {
@@ -122,8 +123,8 @@ const KakaoMaps = () => {
           },
         )
         .then(res => {
-          const data = res
-          console.log(data)
+          const data = res.data
+          // console.log(data)
           setSearchData(data)
         })
         .catch(err => {
@@ -139,6 +140,7 @@ const KakaoMaps = () => {
       [e.target.name]: e.target.value,
     })
   }
+  // console.log(searchData)
   return (
     <>
       {isRoot === true ? (
