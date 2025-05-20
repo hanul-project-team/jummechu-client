@@ -21,14 +21,24 @@ const TermsForm = ({ nextStep }) => {
   })
   const [service, privacy, business] = watch(['service', 'privacy', 'business'])
   useEffect(() => {
-    if (service && privacy && business) {
-      setChecked(true)
-      setDisabled(false)
+    if (role === 'business') {
+      if (service && privacy && business) {
+        setChecked(true)
+        setDisabled(false)
+      } else {
+        setChecked(false)
+        setDisabled(true)
+      }
     } else {
-      setChecked(false)
-      setDisabled(true)
+      if (service && privacy) {
+        setChecked(true)
+        setDisabled(false)
+      } else {
+        setChecked(false)
+        setDisabled(true)
+      }
     }
-  }, [service, privacy, business])
+  }, [role, service, privacy, business])
   const handleAgreement = checked => {
     setChecked(checked)
     setValue('service', checked)
@@ -50,8 +60,8 @@ const TermsForm = ({ nextStep }) => {
             <span>전체 동의합니다</span>
           </Label>
         </Field>
-        <div className='flex'>
-            <span className={`${style.horizontalBar} grow-1`}></span>
+        <div className="flex">
+          <span className={`${style.horizontalBar} grow-1`}></span>
         </div>
         <Controller
           name="service"
