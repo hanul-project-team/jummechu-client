@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import axios from 'axios'
 import { Field, Label } from '@headlessui/react'
+import { toast } from 'react-toastify'
 import { loginSchema } from '../../schema/loginSchema'
 import { login } from '../../authSlice'
 import VisibleBtn from '../../../../shared/VisibleBtn'
@@ -13,10 +14,9 @@ import style from './loginForm.module.css'
 
 const LoginForm = () => {
   const [passwordState, setPasswordState] = useState({
-      hasValue: false,
-      visible: false,
-    })
-  const [serverError, setServerError] = useState()
+    hasValue: false,
+    visible: false,
+  })
   const {
     register,
     handleSubmit,
@@ -25,6 +25,7 @@ const LoginForm = () => {
     reset,
     resetField,
     watch,
+    setError,
     formState: { errors },
   } = useForm({
     defaultValues: { rememberMe: false },
@@ -35,29 +36,36 @@ const LoginForm = () => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const passwordValue = watch('password')
-   useEffect(() => {
-      setPasswordState(prev => ({
-        ...prev,
-        hasValue: !!passwordValue,
-      }))
-    }, [passwordValue])
+  useEffect(() => {
+    setPasswordState(prev => ({
+      ...prev,
+      hasValue: !!passwordValue,
+    }))
+  }, [passwordValue])
   const onSubmit = async data => {
     try {
       const response = await axios.post('http://localhost:3000/auth/login', data, {
         withCredentials: true,
       })
-      setServerError('')
       reset()
-      navigate('/')
       dispatch(login(response.data))
+      toast.success('로그인에 성공하셨습니다.', { autoClose: 3000 })
+      navigate('/')
     } catch (e) {
       if (e.response.status === 400) {
-        setServerError(e.response.data.message)
+        setError('password',{message:e.response.data.message})
+        resetField('password', { keepError: true })
+        setFocus('password')
       } else {
-        setServerError('다시 시도해주세요.')
+      toast.error(
+        <div>
+          서버 오류가 발생했습니다.
+          <br />
+          잠시 후 다시 시도해주세요.
+        </div>,
+        { autoClose: 3000 },
+      )
       }
-      resetField('password')
-      setFocus('password')
     }
   }
   const onIsvalid = errors => {
@@ -96,11 +104,13 @@ const LoginForm = () => {
             {...register('password')}
           />
           <label htmlFor="password">비밀번호</label>
-          <VisibleBtn changeVisible={changeVisible}
+          <VisibleBtn
+            changeVisible={changeVisible}
             setter={setPasswordState}
             visible={passwordState.visible}
             hasValue={passwordState.hasValue}
-            className="absolute top-5 right-3 "  />
+            className="absolute top-5 right-3 "
+          />
         </div>
         <Controller
           name="rememberMe"
@@ -112,11 +122,7 @@ const LoginForm = () => {
             </Field>
           )}
         />
-        {(errors.password || serverError) && (
-          <span className={style.errorSpan}>
-            {errors.password?.message || serverError}
-          </span>
-        )}
+        {errors.password && <span className={style.errorSpan}>{errors.password.message}</span>}
         <button type="submit">로그인</button>
       </fieldset>
     </form>
