@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import usePlaceStore from '../../store/usePlaceStore'
 import axios from 'axios'
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import KakaoNearPlace from './KakaoNearPlace.jsx'
 
 const KakaoMaps = () => {
@@ -11,9 +11,11 @@ const KakaoMaps = () => {
   const kakaoPlace = usePlaceStore(state => state.kakaoPlace)
   const setSearchData = usePlaceStore(state => state.setSearchData)
 
-  const [searchParams] = useSearchParams()
+  const intervalRef = useRef(null)
+  const [lat, setLat] = useState('')
+  const [lng, setLng] = useState('')
   const navigate = useNavigate()
-  const [retryCount, setRetryCount] = useState(0)
+  const retryCountRef = useRef(0);
   const [formData, setFormData] = useState({
     place: '',
   })
@@ -21,45 +23,57 @@ const KakaoMaps = () => {
   const isRoot = location.pathname === '/'
 
   useEffect(() => {
-    const getNowLocation = () => {
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          const latitude = position.coords.latitude
-          const longitude = position.coords.longitude
-          // console.log('y:'+latitude, 'x:'+longitude)
-          if (!center || center.lat !== latitude || center.lng !== longitude) {
-            setCenter({ lat: latitude, lng: longitude })
-            setRetryCount(0)
-          }
-        },
-        err => {
-          console.error('error msg:', err)
-          if (retryCount < 3) {
-            console.log(`위치정보 획득 실패, ${retryCount + 1}회 째 재시도...`)
-            setRetryCount(prevCount => prevCount + 1)
-            setTimeout(() => getNowLocation(retryCount, 1000))
-          } else {
-            console.log('위치 정보 획득 실패 및 재시도 실패')
-          }
-        },
-      )
-    }
     getNowLocation()
+
+    intervalRef.current = setInterval(() => {
+      getNowLocation()
+    }, 60000)
 
     try {
       if (isRoot) {
-        if (center !== null && !kakaoPlace) {
+        // console.log(isRoot)
+        if (!center || center.lat !== lat || center.lng !== lng || kakaoPlace?.length === 0) {
           getKakaoData(center)
         }
       }
     } catch (err) {
       console.log(err)
     }
+
+    return () => clearInterval(intervalRef.current)
   }, [center])
 
+  const getNowLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const latitude = position.coords.latitude
+        const longitude = position.coords.longitude
+        // console.log('y:'+latitude, 'x:'+longitude)
+        setLat(latitude)
+        setLng(longitude)
+        if (!center || center.lat !== latitude || center.lng !== longitude) {
+          setCenter({ lat: latitude, lng: longitude })
+        }
+        // console.log(center)
+      },
+      err => {
+        console.error('error msg:', err)
+        if (retryCountRef.current < 3) {
+          retryCountRef.current += 1
+          console.log(`위치정보 획득 실패, ${retryCountRef.current}회 째 재시도...`)
+          setTimeout(() => getNowLocation(retryCountRef, 1000))
+        } else {
+          console.log('위치 정보 획득 실패 및 재시도 실패')
+        }
+      },
+    )
+  }
+
   const getKakaoData = center => {
-    // console.log('재시도 횟수', retryCount)
-    axios
+    // console.log('재시도 횟수', retryCountRef.current)
+    if(kakaoPlace?.length === 0 || !kakaoPlace) {
+      // console.log(kakaoPlace?.length)
+      axios
       .post(
         'http://localhost:3000/api/nearplace',
         { location: center },
@@ -71,22 +85,23 @@ const KakaoMaps = () => {
         const data = res.data
         // console.log(data)
         setKakaoPlace(data)
-        setRetryCount(0)
+        retryCountRef.current == 0;
       })
       .catch(err => {
-        console.error('error msg:', err)
-        if (retryCount < 3) {
-          console.log(`데이터 로딩 실패 ${retryCount + 1}회 째 재시도...`)
-          setRetryCount(prevCount => prevCount + 1)
-          setTimeout(() => getKakaoData(center, retryCount, 1000))
+        // console.error('error msg:', err)
+        if (retryCountRef.current < 3) {
+          retryCountRef.current += 1
+          console.log(`데이터 로딩 실패 ${retryCountRef.current}회 째 재시도...`)
+          setTimeout(() => getKakaoData(center, 1000))
         } else {
-          console.log('kakao map 데이터 로딩 실패 및 재시도 실패')
+          console.log('kakao map 데이터 로딩 실패 및 재시도 실패', err)
         }
       })
+    }
   }
   const handleSubmit = e => {
     e.preventDefault()
-    setSearchData(null);
+    setSearchData(null)
     if (formData.place.startsWith('#')) {
       const sliced = formData.place.slice(1)
       navigate(`/search/${sliced}`)
