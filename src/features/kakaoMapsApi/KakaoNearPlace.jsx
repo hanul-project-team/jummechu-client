@@ -1,4 +1,3 @@
-import React from 'react'
 import usePlaceStore from '../../store/usePlaceStore.js'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import 'swiper/css'
@@ -21,7 +20,7 @@ const KakaoNearPlace = () => {
           {kakaoPlace &&
             kakaoPlace.map((kp, i) => (
               <SwiperSlide key={i} className='md:max-w-full' style={{margin: '0px'}}>
-                <img src="https://picsum.photos/200/150" alt="lorem picture" />
+                <img src={`https://picsum.photos/200/150?random=${Math.floor(Math.random() * 1000)}`} alt="lorem picture" />
                 <p className='font-bold font-sans max-[426px]:text-sm'>{kp.place_name}</p>
                 <p className='max-[426px]:text-sm'>소재지:{kp.address_name}</p>
               </SwiperSlide>
