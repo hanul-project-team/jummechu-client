@@ -97,6 +97,8 @@ const RegistDetailsForm = () => {
     try {
       await axios.post('http://localhost:3000/auth/regist', submitData)
       reset()
+      localStorage.removeItem('role')
+      localStorage.removeItem('termsAgreement')
       navigate('/login')
       toast.success('회원가입 완료!', { autoClose:3000 })
     } catch (e) {
