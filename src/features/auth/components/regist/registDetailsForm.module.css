@@ -86,3 +86,7 @@
     color: red;
     font-size: 0.75rem;
 }
+.hintSpan {
+    font-size: 0.75rem;
+    color: gray;
+}

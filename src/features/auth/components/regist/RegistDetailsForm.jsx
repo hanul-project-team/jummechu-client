@@ -4,13 +4,12 @@ import { useForm } from 'react-hook-form'
 import { registScheam } from '../../schema/registSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import axios from 'axios'
-import { Dialog, DialogPanel } from '@headlessui/react'
+import { toast } from 'react-toastify'
 import VisibleBtn from '../../../../shared/VisibleBtn'
 import Timer from '../../../../shared/Timer'
 import style from './registDetailsForm.module.css'
 
 const RegistDetailsForm = () => {
-  const [isOpen, setIsOpen] = useState(false)
   const [isPhone, setIsPhone] = useState(false)
   const [isRequested, setIsRequested] = useState(false)
   const [isCode, setIsCode] = useState(false)
@@ -32,6 +31,8 @@ const RegistDetailsForm = () => {
     trigger,
     getValues,
     resetField,
+    reset,
+    setError,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(registScheam),
@@ -39,15 +40,36 @@ const RegistDetailsForm = () => {
     reValidateMode: 'onSubmit',
   })
   const navigate = useNavigate()
-  const onExpire = () => {
-    setIsRequested(false)
-  }
+  const phoneValue = watch('phone')
+  const codeValue = watch('code')
+  const passwordValue = watch('password')
+  const passwordCheckValue = watch('passwordCheck')
+  useEffect(() => {
+    const isValid = /^01[016789][0-9]{8}$/.test(phoneValue)
+    setIsPhone(!!isValid)
+  }, [phoneValue])
+  useEffect(() => {
+    const isValid = /^\d{6}$/.test(codeValue)
+    setIsCode(!!isValid)
+  }, [codeValue])
+  useEffect(() => {
+    setPasswordState(prev => ({
+      ...prev,
+      hasValue: !!passwordValue,
+    }))
+  }, [passwordValue])
+  useEffect(() => {
+    setPasswordCheckState(prev => ({
+      ...prev,
+      hasValue: !!passwordCheckValue,
+    }))
+  }, [passwordCheckValue])
   const phoneSubmit = async () => {
     const isValid = await trigger('phone')
     if (isValid) {
       const phone = getValues('phone')
       console.log(phone)
-      // await axios.post('http://localhost:3000/auth/reqcode', phone)
+      // await axios.post('http://localhost:3000/auth/sendCode', phone)
       setIsRequested(true)
       resetField('code')
       setFocus('code')
@@ -60,7 +82,7 @@ const RegistDetailsForm = () => {
       const code = getValues('code')
       console.log(code)
       // try {
-      //   const response = await axios.post('http://localhost:3000/auth/reqauthenticate', code)
+      //   const response = await axios.post('http://localhost:3000/auth/verifyCode', code)
       //   if (response.data === true) {
       //   }
       // } catch {}
@@ -71,12 +93,28 @@ const RegistDetailsForm = () => {
     const role = JSON.parse(localStorage.getItem('role'))
     const termsAgreement = JSON.parse(localStorage.getItem('termsAgreement'))
     const { passwordCheck, code, ...rest } = data
-    const submitData = { role, termsAgreement, rest }
-    console.log(submitData)
-    navigate('/login')
-    // try {
-    //   await axios.post('http://localhost:3000/auth/regist', submitData)
-    // } catch {}
+    const submitData = { ...role, termsAgreement, ...rest }
+    try {
+      await axios.post('http://localhost:3000/auth/regist', submitData)
+      reset()
+      navigate('/login')
+      toast.success('회원가입 완료!', { autoClose:3000 })
+    } catch (e) {
+      if (e.response.status === 400) {
+        setError('email', { message: e.response.data.message })
+        resetField('email', { keepError: true })
+        setFocus('email')
+      } else {
+        toast.error(
+          <div>
+            서버 오류가 발생했습니다.
+            <br />
+            잠시 후 다시 시도해주세요.
+          </div>,
+          { autoClose: 3000 },
+        )
+      }
+    }
   }
   const onIsvalid = errors => {
     if (errors.email) {
@@ -91,36 +129,14 @@ const RegistDetailsForm = () => {
       setFocus('phone')
     }
   }
-  const phoneValue = watch('phone')
-  useEffect(() => {
-    const isValid = /^01[016789][0-9]{8}$/.test(phoneValue)
-    setIsPhone(!!isValid)
-  }, [phoneValue])
-  const codeValue = watch('code')
-  useEffect(() => {
-    const isValid = /^\d{6}$/.test(codeValue)
-    setIsCode(!!isValid)
-  }, [codeValue])
-  const passwordValue = watch('password')
-  const passwordCheckValue = watch('passwordCheck')
-  useEffect(() => {
-    setPasswordState(prev => ({
-      ...prev,
-      hasValue: !!passwordValue,
-    }))
-  }, [passwordValue])
-  useEffect(() => {
-    setPasswordCheckState(prev => ({
-      ...prev,
-      hasValue: !!passwordCheckValue,
-    }))
-  }, [passwordCheckValue])
-
   const changeVisible = setter => {
     setter(prev => ({
       ...prev,
       visible: !prev.visible,
     }))
+  }
+  const onExpire = () => {
+    setIsRequested(false)
   }
   return (
     <form
@@ -144,23 +160,14 @@ const RegistDetailsForm = () => {
           {errors.email && <span className={style.errorSpan}>{errors.email.message}</span>}
         </div>
         <div className={`${style.registFormField} flex flex-col`}>
-          <div className='flex gap-3'>
+          <div className="flex justify-between items-center">
             <label htmlFor="password">
               비밀번호<span className={style.requiredSpan}>*</span>
             </label>
-            <button onClick={() => setIsOpen(true)}>열기</button>
+            <span className={style.hintSpan}>
+              영문/숫자/특수문자(~!@#^*_=+-) 포함 8자 이상 
+            </span>
           </div>
-          <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
-            <div className={`${style.modalWrapper} fixed flex`}>
-              <DialogPanel className={`${style.modalPanel}`}>
-                <p>비밀번호는 다음 조건을 만족해야 합니다:</p>
-                <ul>
-                  <li>8자 이상, 영문, 숫자, 특수문자 포함</li>
-                  <li>~ ! @ # ^ * _ = + - </li>
-                </ul>
-              </DialogPanel>
-            </div>
-          </Dialog>
           <input
             className="grow"
             type={passwordState.visible ? 'text' : 'password'}
