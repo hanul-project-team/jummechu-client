@@ -11,7 +11,7 @@ import style from './termsForm.module.css'
 const TermsForm = ({ nextStep }) => {
   const [checked, setChecked] = useState(false)
   const [disabled, setDisabled] = useState(true)
-  const { role } = JSON.parse(localStorage.getItem('role'))
+  const { role } = JSON.parse(localStorage.getItem('role')) || {}
   const { handleSubmit, control, watch, setValue, reset } = useForm({
     defaultValues: {
       service: false,
