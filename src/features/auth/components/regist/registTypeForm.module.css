@@ -1,0 +1,19 @@
+.typeCard {
+    width: 100%;
+    max-width: 26rem;
+    border: 1px solid gray;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+}
+.typeCardTitle {
+    padding: 0.5rem;
+    border-bottom: 1px solid gray;
+}
+.typeBtn {
+    outline: none;
+    padding: 0.5rem 0.5rem;
+    border-radius: 0.25rem;
+    color: white;
+    background-color: black;
+    min-width: 10rem;
+}
