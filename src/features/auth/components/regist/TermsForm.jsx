@@ -43,7 +43,9 @@ const TermsForm = ({ nextStep }) => {
     setChecked(checked)
     setValue('service', checked)
     setValue('privacy', checked)
-    setValue('business', checked)
+    if (role === 'business') {
+      setValue('business', checked)
+    }
   }
   const onSubmit = data => {
     localStorage.setItem('termsAgreement', JSON.stringify(data))
