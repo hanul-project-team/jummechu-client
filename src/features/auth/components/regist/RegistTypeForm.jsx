@@ -21,8 +21,11 @@ const RegistTypeForm = ({ nextStep }) => {
           <input type="hidden" {...register('role', { required: true })} />
           <div className={`${style.typeCard} flex flex-col gap-5`}>
             <div className={`${style.typeCardTitle} flex flex-col gap-2`}>
-              <strong>일반 회원</strong>
-              <p className='text-sm'>맛집을 찾고, 리뷰를 남기고, 추천도 받아보세요</p>
+              <div className='flex items-center gap-2'>
+                <strong>일반 회원</strong>
+                <span className={style.badgeSpan}>추천</span>
+              </div>
+              <p className="text-sm">맛집을 찾고, 리뷰를 남기고, 추천도 받아보세요</p>
             </div>
             <ul className="flex flex-col gap-2">
               <li className="flex items-center gap-1">
@@ -30,11 +33,11 @@ const RegistTypeForm = ({ nextStep }) => {
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   stroke="currentColor"
-                  class="size-4"
+                  className="size-4"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                 </svg>
                 <span>위치 기반 검색 및 음식점 정보 열람</span>
               </li>
@@ -43,11 +46,11 @@ const RegistTypeForm = ({ nextStep }) => {
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   stroke="currentColor"
-                  class="size-4"
+                  className="size-4"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                 </svg>
                 <span>음식점 찜, 공유, 최근 본 목록 기능</span>
               </li>
@@ -56,11 +59,11 @@ const RegistTypeForm = ({ nextStep }) => {
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   stroke="currentColor"
-                  class="size-4"
+                  className="size-4"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                 </svg>
                 <span>리뷰 작성 및 개인화 추천 제공</span>
               </li>
@@ -76,7 +79,7 @@ const RegistTypeForm = ({ nextStep }) => {
           <div className={`${style.typeCard} flex flex-col gap-5`}>
             <div className={`${style.typeCardTitle} flex flex-col gap-2`}>
               <strong>사업자 회원</strong>
-              <p className='text-sm'>내 가게를 등록하고 리뷰를 직접 관리해보세요</p>
+              <p className="text-sm">내 가게를 등록하고 리뷰를 직접 관리해보세요</p>
             </div>
             <ul className="flex flex-col gap-2">
               <li className="flex items-center gap-1">
@@ -84,11 +87,11 @@ const RegistTypeForm = ({ nextStep }) => {
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   stroke="currentColor"
-                  class="size-4"
+                  className="size-4"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                 </svg>
                 <span>사업자 정보 등록 후 입점 요청 가능 </span>
               </li>
@@ -97,11 +100,11 @@ const RegistTypeForm = ({ nextStep }) => {
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   stroke="currentColor"
-                  class="size-4"
+                  className="size-4"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                 </svg>
                 <span>소개글 작성 및 리뷰·평점 관리</span>
               </li>
@@ -110,11 +113,11 @@ const RegistTypeForm = ({ nextStep }) => {
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke-width="1.5"
+                  strokeWidth="1.5"
                   stroke="currentColor"
-                  class="size-4"
+                  className="size-4"
                 >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                 </svg>
                 <span>파트너 회원의 가게는 먼저 보여집니다</span>
               </li>
