@@ -1,13 +1,22 @@
-import {create} from 'zustand';
+import { create } from 'zustand'
 
-const usePlaceStore = create((set) => ({
-    searchData: null,
-    center: null,
-    kakaoPlace: null,
+const usePlaceStore = create(set => ({
+  placeDetail: [],
+  searchData: [],
+  center: null,
+  kakaoPlace: [],
 
-    setSearchData: data => set({searchData: data}),
-    setCenter: data => set({center: data}),
-    setKakaoPlace: data => set({kakaoPlace: data}),
+  setSearchData: data => {
+    if (!data || data.length === 0) {
+      set({ searchData: [] })
+    } else {
+      set({ searchData: data })
+    }
+  },
+  setPlaceDetail: data => set({placeDetail: data}),
+  clearSearchData: () => set({ searchData: [] }),
+  setCenter: data => set({ center: data }),
+  setKakaoPlace: data => set({ kakaoPlace: data }),
 }))
 
-export default usePlaceStore;
+export default usePlaceStore
