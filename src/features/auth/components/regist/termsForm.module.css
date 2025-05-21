@@ -1,0 +1,44 @@
+.horizontalBar {
+    height: 1px;
+    background-color: gray;
+}
+.loginForm button[type=submit] {
+    padding: 0.75rem 0.25rem;
+    background-color: black;
+    color: white;
+    border-radius: 0.25rem;
+    outline: none;
+}
+.loginForm button[type=submit]:disabled {
+    padding: 0.75rem 0.25rem;
+    background-color: gray;
+    color: white;
+    border-radius: 0.25rem;
+}
+.termBox {
+    border: 1px solid gray;
+    border-radius: 0.25rem;
+    padding-top: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 0.5rem;
+}
+.termBoxInner{
+    height: 10rem;
+    overflow-y: scroll;
+    color: rgba(0, 0, 0, 0.5);
+    outline: none;
+}
+.termBoxInner::-webkit-scrollbar-track {
+    background: transparent;
+}
+.termBoxInner::-webkit-scrollbar-button {
+    display: none; 
+}
+.termBoxInner::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 0.25rem;
+    border: none;
+}
+.termBoxInner::-webkit-scrollbar {
+    width: 0.5rem;
+}

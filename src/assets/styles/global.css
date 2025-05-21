@@ -1,0 +1,5 @@
+.custom-toast-container .Toastify__toast {
+    border-radius: 0.25rem;
+    box-shadow: none;
+    width: 21.875rem;
+  }

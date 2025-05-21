@@ -17,6 +17,7 @@ export const authCheck = createAsyncThunk('auth/authCheck', async (_, { rejectWi
 const initialState = {
   isAuthenticated: false,
   user: {
+    id:'',
     name: '',
     profileImage: '',
     role: 'guest',
@@ -35,6 +36,7 @@ const authSlice = createSlice({
     },
     logout: state => {
       state.isAuthenticated = false
+      state.user.id = ''
       state.user.name = ''
       state.user.profileImage = ''
       state.user.role = 'guest'
