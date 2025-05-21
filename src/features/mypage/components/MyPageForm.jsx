@@ -137,7 +137,7 @@ JSON 외에는 아무 것도 출력하지 마세요.
     if (!isOpen) return null
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
         <div className="bg-white p-6 rounded-lg shadow-xl relative z-10 w-[300px]">
           <h2 className="text-lg font-semibold mb-4">프로필 설정</h2>
 
