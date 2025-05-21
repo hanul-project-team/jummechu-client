@@ -5,8 +5,6 @@ import axios from 'axios'
 import { useNavigate, useLocation, NavLink } from 'react-router-dom'
 import Logo from '../../assets/images/logo.png'
 import LogoSm from '../../assets/images/logo-small.png'
-// import GoogleMaps from '../../features/googleMapsApi/GoogleMaps'
-import usePlaceStore from '../../store/usePlaceStore'
 import KakaoMaps from '../../features/kakaoMapsApi/KakaoMaps.jsx'
 
 const MainHeader = () => {
@@ -24,6 +22,7 @@ const MainHeader = () => {
       if (confirm('로그아웃 하시겠습니까?')) {
         axios.get('http://localhost:3000/auth/logout', { withCredentials: true })
         dispatch(logout())
+        localStorage.removeItem('place-storage');
         navigate('/')
       }
     } catch {
@@ -31,14 +30,14 @@ const MainHeader = () => {
     }
   }
   // const isList = location.pathname.startsWith('/list')
-  const setKakaoPlace = usePlaceStore(state => state.setKakaoPlace)
+
   const navigateLogin = () => {
     navigate('/login')
-    console.log('로그인 이동')
+    // console.log('로그인 이동')
   }
-  const navigateSignup = () => {
-    navigate('/signup')
-    console.log('회원가입 이동')
+  const navigateRegist = () => {
+    navigate('/regist/type')
+    // console.log('회원가입 이동')
   }
   const navigateHome = () => {
     navigate('/')
@@ -75,7 +74,7 @@ const MainHeader = () => {
                   <button
                     type="button"
                     className="border bg-white text-teal-400 border-black rounded-3xl p-2 font-sans mouse_pointer"
-                    onClick={navigateSignup}
+                    onClick={navigateRegist}
                   >
                     회원가입
                   </button>
@@ -83,7 +82,6 @@ const MainHeader = () => {
               )}
             </div>
             <h1 className="text-center text-5xl font-sans font-bold">어디로 가시나요?</h1>
-            {/* <GoogleMaps /> */}
             <KakaoMaps />
           </div>
         ) : (
@@ -115,14 +113,13 @@ const MainHeader = () => {
                   <button
                     type="button"
                     className="border bg-white text-teal-400 border-black rounded-3xl p-2 font-sans mouse_pointer"
-                    onClick={navigateSignup}
+                    onClick={navigateRegist}
                   >
                     회원가입
                   </button>
                 </div>
               )}
             </div>
-            {/* <GoogleMaps /> */}
             {<KakaoMaps />}
           </div>
         )}
