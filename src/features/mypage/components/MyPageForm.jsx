@@ -4,7 +4,7 @@ import '../MyPage.css' // 경로 기준: 현재 컴포넌트 파일 위치 기�
 const MyPageForm = () => {
   const [active, setActive] = useState('최근기록')
   const [bookmarked, setBookmarked] = useState([])
-  const tabs = ['최근기록', '찜', '공유', '음식점 추천']
+  const tabs = ['최근기록', '찜', '리뷰', '음식점 추천', '계정 설정']
   const [isopen, setIsOpen] = useState(false)
   const [openai, setOpenAi] = useState([])
   const [dalleImage, setDalleImage] = useState(null)
@@ -199,7 +199,7 @@ const MyPageForm = () => {
     if (!isOpen) return null
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
         <div className="bg-white p-6 rounded-lg shadow-xl relative z-10 w-[300px]">
           <h2 className="text-lg font-semibold mb-4">프로필 설정</h2>
 
@@ -223,24 +223,20 @@ const MyPageForm = () => {
             <p> 사용자 이름 </p>
           </div>
           <hr className="py-3" />
-          <div className="py-3 flex justify-between">
-            <p>이메일 관리</p>
-            <p> 사용자 이메일 </p>
-          </div>
+<div className="py-3 flex justify-between">
+  <p>소개글</p>
+  <input type="text" name="aboutme" id="aboutme" />
+  
+</div>
           <hr className="py-3" />
-          <div className="py-3 flex justify-between">
-            <p>비밀번호</p>
-            <p> 사용자 비밀번호 </p>
-          </div>
-          <hr className="py-3" />
-
           <div className="flex gap-2">
-            <button className="mt-4 px-4 py-2 text-black bg-red-600 hover:bg-gray-500 rounded">
-              계정 삭제
+            <button className="mt-4 px-4 py-2 text-black bg-green-600 rounded cursor-pointer"
+            onClick={onClose}>
+              확인/저장
             </button>
             <button
               onClick={onClose}
-              className="mt-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
+              className="mt-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded cursor-pointer"
             >
               닫기
             </button>
@@ -269,57 +265,58 @@ const MyPageForm = () => {
     switch (active) {
       case '최근기록':
         return (
-          <ul className="flex flex-col gap-9 py-5">
-            {example.map(item => (
-              <li key={item.id} className="flex gap-4">
-                <div className="relative w-[250px] h-[250px]">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover rounded-lg"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => toggleBookmark(item)}
-                    className="absolute top-2 right-2 bg-white bg-opacity-70 rounded-full p-2 shadow hover:bg-opacity-100"
-                  >
-                    {isBookmarked(item) ? (
-                      <span role="img" aria-label="bookmarked">
-                        ❤️
-                      </span>
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="size-6"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
-                        />
-                      </svg>
-                    )}
-                  </button>
-                  
-                </div>
-                <div className="py-3">
-                  <h2 className="text-lg font-SinchonRhapsody">{item.title}</h2>
-                  <p>{item.rating} ⭐</p>
-                  <p>{item.description}</p>
-                  <p className="text-sm text-gray-500">{item.keyword}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className='flex justify-center'>
+            <ul className="flex flex-col gap-9 py-5">
+              {example.map(item => (
+                <li key={item.id} className="flex gap-4">
+                  <div className="relative w-[250px] h-[250px]">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleBookmark(item)}
+                      className="absolute top-2 right-2 bg-white bg-opacity-70 rounded-full p-2 shadow hover:bg-opacity-100"
+                    >
+                      {isBookmarked(item) ? (
+                        <span role="img" aria-label="bookmarked">
+                          ❤️
+                        </span>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="size-6"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  <div className="py-3">
+                    <h2 className="text-lg font-SinchonRhapsody">{item.title}</h2>
+                    <p>{item.rating} ⭐</p>
+                    <p>{item.description}</p>
+                    <p className="text-sm text-gray-500">{item.keyword}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         )
 
       case '찜':
         return (
-          <div>
+          <div className='flex justify-center'>
             {bookmarked.length === 0 ? (
               <p>찜한 목록이 없습니다.</p>
             ) : (
@@ -336,8 +333,8 @@ const MyPageForm = () => {
             )}
           </div>
         )
-      case '공유':
-        return <p>친구에게 공유한 음식점 기록을 여기에 보여줍니다.</p>
+      case '리뷰':
+        return <p> 작성한 리뷰가 없습니다. </p>
 
       case '음식점 추천':
         return (
@@ -351,7 +348,9 @@ const MyPageForm = () => {
             )}
             {openai.length > 2 ? (
               <ul className="flex flex-col gap-9 py-5">
-                <p className='py-2'>사용자닉네임 님이 가장 좋아하시는 음식은 "{mostFrequentKeywords}" 입니다.</p>
+                <p className="py-2">
+                  사용자닉네임 님이 가장 좋아하시는 음식은 "{mostFrequentKeywords}" 입니다.
+                </p>
                 <h2>이 음식점들을 추천해요!</h2>
                 {openai.map((item, index) => (
                   <li key={index} className="flex gap-4">
@@ -369,6 +368,44 @@ const MyPageForm = () => {
             )}
           </div>
         )
+      case '계정 설정':
+        return (
+          <div className='flex justify-center'>
+            <div className="flex flex-col w-[700px] h-[700px] gap-5 py-5">
+              <div className="flex justify-center">
+                <div
+                  className="w-[100px] h-[100px] bg-cover mask-radial-fade"
+                  style={{ backgroundImage: "url('https://picsum.photos/200')" }}
+                />
+                
+              </div>
+            
+              <div className='py-5'>
+                <div>
+                  <div className="py-3 flex justify-between">
+                    <p>이메일 관리</p>
+                    <p> 사용자 이메일 </p>
+                  </div>
+                  <hr className="py-3" />
+                  <div className="py-3 flex justify-between">
+                    <p>비밀번호</p>
+                    <p> 사용자 비밀번호 </p>
+                  </div>
+                <hr className="py-3" />
+                </div>
+                <div className="py-3 flex justify-between">
+                  <p>닉네임</p>
+                  <p>사용자 닉네임</p>
+                </div>
+                <hr className="py-3" />
+              </div>
+            <div className = "flex gap-5 justify-center">
+              <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded cursor-pointer"> 계정 삭제 </button>
+              <button className="mt-4 px-4 py-2 text-white bg-blue-600 rounded cursor-pointer"> 수정 </button>
+            </div>
+            </div>
+          </div>
+        )
 
       default:
         return null
@@ -379,10 +416,14 @@ const MyPageForm = () => {
     <div className="w-full pb-5">
       <div className="max-w-6xl mx-auto">
         <div className="py-3 flex justify-between items-center ">
-          <div
-            className="w-[100px] h-[100px] bg-cover mask-radial-fade"
-            style={{ backgroundImage: "url('https://picsum.photos/200')" }}
-          />
+          <div className='flex flex-col items-center '>
+            <div
+              className="w-[100px] h-[100px] bg-cover mask-radial-fade"
+              style={{ backgroundImage: "url('https://picsum.photos/200')" }}
+            />
+            <p className='py-2'>닉네임</p>
+            <p className='py-3'>소개글 </p>
+          </div>
           <div className="flex gap-3 ">
             <p>프로필설정</p>
             <button onClick={() => setIsOpen(true)} className="text-xl cursor-pointer">
@@ -414,7 +455,7 @@ const MyPageForm = () => {
       </div>
       <hr className=" border-gray-500" />
 
-      <div className="flex justify-center">{renderContent()}</div>
+      <div>{renderContent()}</div>
     </div>
   )
 }
