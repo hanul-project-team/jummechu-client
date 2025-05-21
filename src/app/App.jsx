@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React, { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Mainlayout from '../layouts/Mainlayout.jsx'
 import HomeSearch from '../features/home/HomeSearch.jsx'
@@ -14,7 +14,7 @@ const App = () => {
   const dispatch = useDispatch()
   useEffect(() => {
     dispatch(authCheck())
-  },[dispatch])
+  }, [dispatch])
   return (
     <Routes>
       <Route path="/" element={<Mainlayout />}>

@@ -1,0 +1,7 @@
+.redirectBtn {
+    outline: none;
+    border-bottom: 1px solid black;
+}
+.redirectBtn:hover {
+    font-weight: bold;
+}

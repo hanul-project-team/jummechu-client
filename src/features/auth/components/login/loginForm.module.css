@@ -34,6 +34,7 @@
     background-color: black;
     color: white;
     border-radius: 0.25rem;
+    outline: none;
 }
 .errorSpan {
     color: red;
