@@ -1,0 +1,55 @@
+.findIdVerifyForm {
+
+}
+.findIdVerifyFormField {
+    position: relative;
+}
+.findIdVerifyFormField input {
+    text-indent: 0.25rem;
+    padding: 1rem 0.5rem ;
+    background-color: #d9d9d9;
+    outline: none;
+    border-radius: 0.25rem;
+}
+.findIdVerifyFormField label {
+    color: black;
+}
+.noSpinner::-webkit-outer-spin-button,
+.noSpinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.getCodeBtn {
+    padding: 1rem 0.5rem;
+    border-radius: 0.25rem;
+    color: white;
+    background-color: black;
+    min-width: 6rem;
+}
+.getCodeBtn:disabled {
+    background-color: gray;
+}
+.resendBtn {
+    padding: 1rem 0.5rem;
+    border-radius: 0.25rem;
+    color: white;
+    background-color: black;
+    min-width: 6rem;
+}
+.resendBtn:disabled {
+    background-color: gray;
+}
+.submitBtn {
+    padding: 1rem 0.5rem;
+    border-radius: 0.25rem;
+    color: white;
+    background-color: black;
+    min-width: 6rem
+}
+.submitBtn:disabled {
+    background-color: gray;
+}
+.errorSpan {
+    color: red;
+    font-size: 0.75rem;
+}
