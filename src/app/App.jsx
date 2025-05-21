@@ -6,6 +6,7 @@ import List from '../features/List.jsx'
 import SearchResult from '../features/search/SearchResult.jsx'
 import { useDispatch } from 'react-redux'
 import { authCheck } from '../features/auth/authSlice'
+import RegistPage from '../pages/auth/RegistPage'
 import LoginPage from '../pages/auth/LoginPage'
 import ViewPlace from '../features/search/ViewPlace.jsx'
 import MyPages from '../pages/mypage/MyPage.jsx'
@@ -22,6 +23,7 @@ const App = () => {
         <Route path="mypage" element={<MyPages />}></Route>
         <Route path="list" element={<List />}></Route>
         <Route path="search/:query" element={<SearchResult />}></Route>
+        <Route path="regist/:step" element={<RegistPage />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="place/:id" element={<ViewPlace />}></Route>
       </Route>

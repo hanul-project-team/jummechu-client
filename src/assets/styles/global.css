@@ -39,3 +39,8 @@ gmp-map {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
 }
+.custom-toast-container .Toastify__toast {
+    border-radius: 0.25rem;
+    box-shadow: none;
+    width: 21.875rem;
+  }
