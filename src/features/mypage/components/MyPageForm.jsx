@@ -10,8 +10,6 @@ const MyPageForm = () => {
   const [dalleImage, setDalleImage] = useState(null)
   const [loading, setLoading] = useState(false)
 
-
-
   const example = [
     {
       id: 1,
@@ -47,27 +45,27 @@ const MyPageForm = () => {
     },
   ]
 
-  const callOpenAi = async keywords => {
+  const callOpenAi = async keywordsWithThreshold => {
     const prompt = `
       다음은 사용자가 최근 본 음식점의 키워드 목록입니다:
-      ${keywords.join(', ')}
+      ${keywordsWithThreshold.join(', ')}
   
-      다음은 사용자가 최근에 방문한 음식점들의 키워드 목록입니다.  
-이 키워드와 2개 이상 겹치는 음식점만 골라 추천해 주세요.
-
-결과는 아래 JSON 형식의 배열로만 출력하세요.  
-각 추천 음식점은 다음 필드를 포함해야 합니다:  
-- title: 음식점 이름  
-- rating: 평점 (0.0 ~ 5.0)  
-- description: 음식점 설명 (간단하고 매력적인 한 줄)  
-- keyword: 이 음식점의 키워드 배열
-
-JSON 외에는 아무 것도 출력하지 마세요.
-
-[예시 키워드 목록]: #한식, #떡볶이, #매운맛, #분식, #치즈, #일식
+      다음은 사용자가 최근에 방문한 음식점들의 키워드 목록입니다.
+  이 키워드들과 **2개 이상** 겹치거나, 겹치는 키워드 수가 **가장 많은** 음식점만 골라 추천해 주세요.
+  만약 겹치는 키워드 수가 같다면, 평점이 높은 음식점을 먼저 보여주세요.
+  
+  결과는 아래 JSON 형식의 배열로만 출력하세요.
+  각 추천 음식점은 다음 필드를 포함해야 합니다:
+  - title: 음식점 이름
+  - rating: 평점 (0.0 ~ 5.0)
+  - description: 음식점 설명 (간단하고 매력적인 한 줄)
+  - keyword: 이 음식점의 키워드 배열
+  - overlap_count: 겹치는 키워드 수
+  
+  JSON 외에는 아무 것도 출력하지 마세요.
+  
+  [예시 키워드 목록]: #한식, #떡볶이, #매운맛, #분식, #치즈, #일식
     `
-
-    
 
     const response = await fetch('http://localhost:3000/api/openai', {
       method: 'POST',
@@ -81,59 +79,121 @@ JSON 외에는 아무 것도 출력하지 마세요.
       return []
     }
 
-    const data = await response.json()
-    console.log('OpenAI 응답 raw:', data) // 전체 응답 데이터 로깅
-   
-    return data;
+    try {
+      const data = await response.json()
+      console.log('OpenAI 응답 raw:', data)
+      return data
+    } catch (error) {
+      console.error('JSON 파싱 오류:', error)
+      const errorText = await response.text()
+      console.error('OpenAI 응답 (텍스트):', errorText)
+      return []
+    }
   }
 
+  const extractKeywordsWithThreshold = (data, threshold = 2) => {
+    const allKeywords = {}
+    data.forEach(item => {
+      item.keyword
+        .split(',')
+        .map(k => k.trim())
+        .forEach(keyword => {
+          allKeywords[keyword] = (allKeywords[keyword] || 0) + 1
+        })
+    })
 
-  const callDalleImage = async (keyword) => {
+    return Object.keys(allKeywords).filter(keyword => allKeywords[keyword] >= threshold)
+  }
+
+  const extractMostFrequentKeywords = data => {
+    const allKeywords = {}
+    data.forEach(item => {
+      item.keyword
+        .split(',')
+        .map(k => k.trim())
+        .forEach(keyword => {
+          allKeywords[keyword] = (allKeywords[keyword] || 0) + 1
+        })
+    })
+
+    let maxCount = 0
+    for (const keyword in allKeywords) {
+      if (allKeywords[keyword] > maxCount) {
+        maxCount = allKeywords[keyword]
+      }
+    }
+
+    return Object.keys(allKeywords).filter(keyword => allKeywords[keyword] === maxCount)
+  }
+
+  // 2개 이상 등장하는 키워드 추출
+  const keywordsWithThreshold = extractKeywordsWithThreshold(example)
+  console.log('2번 이상 등장하는 키워드:', keywordsWithThreshold)
+  callOpenAi(keywordsWithThreshold).then(recommendations => {
+    console.log('OpenAI 추천 결과 (2번 이상):', recommendations)
+  })
+
+  // 가장 많이 등장하는 키워드 추출
+  const mostFrequentKeywords = extractMostFrequentKeywords(example)
+  console.log('가장 많이 등장하는 키워드:', mostFrequentKeywords)
+  callOpenAi(mostFrequentKeywords).then(recommendations => {
+    console.log('OpenAI 추천 결과 (가장 많이 등장):', recommendations)
+  })
+
+  // 모든 키워드 추출 (기존 방식)
+  const allKeywords = Array.from(
+    new Set(example.flatMap(item => item.keyword.split(',').map(k => k.trim()))),
+  )
+  console.log('모든 키워드:', allKeywords)
+  callOpenAi(allKeywords).then(recommendations => {
+    console.log('OpenAI 추천 결과 (모든 키워드):', recommendations)
+  })
+
+  const callDalleImage = async keyword => {
     try {
       const res = await fetch('http://localhost:3000/api/dalle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          prompt: `일러스트 스타일로 다음 키워드들을 반영한 음식점 장면을 그려주세요: ${keyword}. 음식이 놓인 테이블, 가게 외관, 손님들, 분위기 등을 포함해 주세요.`,
+          prompt: `실제 사진처럼 다음 키워드를 가지고 이미지를 그려주세요: ${mostFrequentKeywords}.`,
         }),
-      });
+      })
 
       if (!res.ok) {
-        const errorResult = await res.json();
-        console.error(`DALL·E 호출 실패 (${keyword}):`, errorResult);
-        return null;
+        const errorResult = await res.json()
+        console.error(`DALL·E 호출 실패 (${keyword}):`, errorResult)
+        return null
       }
 
-      const result = await res.json();
-      return result?.imageUrl;
+      const result = await res.json()
+      return result?.imageUrl
     } catch (err) {
-      console.error(`DALL·E 호출 실패 (${keyword}):`, err);
-      return null;
+      console.error(`DALL·E 호출 실패 (${keyword}):`, err)
+      return null
     }
   }
-
 
   useEffect(() => {
     console.log(dalleImage)
     if (active === '음식점 추천') {
-      const allkeywords = example.flatMap(item => item.keyword.split(',').map(k => k.trim()));
-      setLoading(true);
+      const allkeywords = example.flatMap(item => item.keyword.split(',').map(k => k.trim()))
+      setLoading(true)
       callOpenAi(allkeywords).then(data => {
-        setOpenAi(data);
+        setOpenAi(data)
         // 대표 키워드를 추출하여 DALL-E 이미지 생성 (음식점 추천 탭 대표 이미지)
-        const keywordSummary = Array.from(new Set(allkeywords)).slice(0, 10).join(',');
+        const keywordSummary = Array.from(new Set(allkeywords)).slice(0, 10).join(',')
         callDalleImage(keywordSummary).then(imageUrl => {
-          setDalleImage(imageUrl);
-          setLoading(false);
-        });
-      });
+          setDalleImage(imageUrl)
+          setLoading(false)
+        })
+      })
     } else {
-      setDalleImage(null); // 다른 탭에서는 DALL-E 이미지 초기화
-      setOpenAi([]); // 다른 탭에서는 OpenAI 추천 결과 초기화
-      setLoading(false);
+      setDalleImage(null) // 다른 탭에서는 DALL-E 이미지 초기화
+      setOpenAi([]) // 다른 탭에서는 OpenAI 추천 결과 초기화
+      setLoading(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active]);
+  }, [active])
 
   const Modal = ({ isOpen, onClose }) => {
     if (!isOpen) return null
@@ -143,12 +203,19 @@ JSON 외에는 아무 것도 출력하지 마세요.
         <div className="bg-white p-6 rounded-lg shadow-xl relative z-10 w-[300px]">
           <h2 className="text-lg font-semibold mb-4">프로필 설정</h2>
 
-          <div className="py-3 flex justify-between">
+          <div className="py-3 flex items-center justify-between">
             <p>프로필 사진</p>
-            <div
-              className="w-[100px] h-[100px] bg-cover mask-radial-fade"
-              style={{ backgroundImage: "url('https://picsum.photos/200')" }}
-            />
+            <div className="relative w-[100px] h-[100px] bg-cover mask-radial-fade group cursor-pointer">
+              <div
+                className="absolute inset-0 bg-cover mask-radial-fade transition-opacity duration-300"
+                style={{ backgroundImage: "url('https://picsum.photos/200')" }}
+              >
+                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-30 transition-opacity duration-300" />
+                <p className="absolute text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  이미지 변경
+                </p>
+              </div>
+            </div>
           </div>
           <hr className="py-3" />
           <div className="py-3 flex justify-between">
@@ -237,6 +304,7 @@ JSON 외에는 아무 것도 출력하지 마세요.
                       </svg>
                     )}
                   </button>
+                  
                 </div>
                 <div className="py-3">
                   <h2 className="text-lg font-SinchonRhapsody">{item.title}</h2>
@@ -278,11 +346,13 @@ JSON 외에는 아무 것도 출력하지 마세요.
               <img
                 src={dalleImage}
                 alt="AI 음식점 이미지"
-                className="w-[300px] h-[300px] rounded shadow-md"
+                className="w-[300px] h-[300px] rounded shadow-md py-5"
               />
             )}
             {openai.length > 2 ? (
               <ul className="flex flex-col gap-9 py-5">
+                <p className='py-2'>사용자닉네임 님이 가장 좋아하시는 음식은 "{mostFrequentKeywords}" 입니다.</p>
+                <h2>이 음식점들을 추천해요!</h2>
                 {openai.map((item, index) => (
                   <li key={index} className="flex gap-4">
                     <div>
