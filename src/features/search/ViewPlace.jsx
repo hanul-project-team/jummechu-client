@@ -1,24 +1,26 @@
 import React, { useEffect, useState } from 'react'
 import usePlaceStore from '../../store/usePlaceStore'
 import ViewPlaceDetail from './components/ViewPlaceDetail'
+import { useLocation } from 'react-router-dom'
 
 const ViewPlace = () => {
-  const placeDetail = usePlaceStore(state => state.placeDetail)
-  const [placeInfo, setPlaceInfo] = useState([])
+  // const [placeInfo, setPlaceInfo] = useState([])
   const [defaultBookmarked, setdefaultBookmarked] = useState(false)
-  // const bookmarkId = placeDetail?.id
+  const location = useLocation();
+  const setPlaceDetail = usePlaceStore(state => state.setPlaceDetail)
 
   useEffect(() => {
-    if (placeDetail) {
-      setPlaceInfo(placeDetail)
+    if (location.state) {
+      // setPlaceInfo(location.state)
+      setPlaceDetail(location.state)
     }
-  }, [placeDetail, defaultBookmarked])
+  }, [location.state, defaultBookmarked])
 
   // console.log(placeInfo)
-  // console.log(placeDetail)
+  
   return (
     <ViewPlaceDetail
-      placeInfo={placeInfo}
+      // placeInfo={placeInfo}
       defaultBookmarked={defaultBookmarked}
     />
   )
