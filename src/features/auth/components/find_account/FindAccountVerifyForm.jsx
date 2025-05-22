@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 import { findId } from '../../slice/findAccountIdSlice'
 import { findAccountVerifySchema } from '../../schema/findAccountVerifySchema'
 import Timer from '../../../../shared/Timer'
-import style from './findIdVerifyForm.module.css'
+import style from './findAccountVerifyForm.module.css'
 import axios from 'axios'
 
 const FindAccountVerifyForm = ({ type }) => {
@@ -80,18 +80,18 @@ const FindAccountVerifyForm = ({ type }) => {
   }
   return (
     <form
-      className={style.findIdVerifyForm}
+      className={style.findAccountVerifyForm}
       autoComplete="off"
       onSubmit={handleSubmit(onSubmit, onIsValid)}
     >
       <fieldset className="flex flex-col gap-3">
         <legend className="hidden">sms 인증 폼</legend>
-        <div className={`${style.findIdVerifyFormField} flex flex-col`}>
+        <div className={`${style.findAccountVerifyFormField} flex flex-col`}>
           <label htmlFor="name">이름</label>
           <input type="text" placeholder="이름" {...register('name')} />
           {errors.name && <span className={style.errorSpan}>{errors.name.message}</span>}
         </div>
-        <div className={`${style.findIdVerifyFormField} flex flex-col`}>
+        <div className={`${style.findAccountVerifyFormField} flex flex-col`}>
           <label htmlFor="phone">전화번호</label>
           <div className="flex gap-3">
             <input
@@ -128,7 +128,7 @@ const FindAccountVerifyForm = ({ type }) => {
           </div>
           {errors.phone && <span className={style.errorSpan}>{errors.phone.message}</span>}
         </div>
-        <div className={`${style.findIdVerifyFormField} flex flex-col`}>
+        <div className={`${style.findAccountVerifyFormField} flex flex-col`}>
           {isRequested && (
             <label htmlFor="phone">
               <Timer key={timerKey} duration={180} onExpire={onExpire} />

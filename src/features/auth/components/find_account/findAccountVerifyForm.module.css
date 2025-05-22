@@ -1,17 +1,14 @@
-.findIdVerifyForm {
-
-}
-.findIdVerifyFormField {
+.findAccountVerifyFormField {
     position: relative;
 }
-.findIdVerifyFormField input {
+.findAccountVerifyFormField input {
     text-indent: 0.25rem;
     padding: 1rem 0.5rem ;
     background-color: #d9d9d9;
     outline: none;
     border-radius: 0.25rem;
 }
-.findIdVerifyFormField label {
+.findAccountVerifyFormField label {
     color: black;
 }
 .noSpinner::-webkit-outer-spin-button,
