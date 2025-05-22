@@ -16,7 +16,7 @@ const ViewPlace = () => {
     }
   }, [location.state, defaultBookmarked])
 
-  // console.log(placeInfo)
+  // console.log(location.state)
   
   return (
     <ViewPlaceDetail
