@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import usePlaceStore from '../../store/usePlaceStore.js'
-import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 import '../../assets/styles/global.css'
 
 const SearchResult = () => {
@@ -41,6 +43,8 @@ const SearchResult = () => {
   // console.log(searchData)
 
   const handleNavigate = sd => {
+    // axios 저장요청 
+
     navigate(`/place/${sd.id}`, { state: sd })
   }
 
