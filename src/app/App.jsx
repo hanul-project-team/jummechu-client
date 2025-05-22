@@ -5,7 +5,8 @@ import { authCheck } from '../features/auth/slice/authSlice'
 import Mainlayout from '../layouts/Mainlayout'
 import RegistPage from '../pages/auth/RegistPage'
 import LoginPage from '../pages/auth/LoginPage'
-import HelpPage from '../pages/auth/HelpPage'
+import FindAccountPage from '../pages/auth/FindAccountPage'
+import FindAccountResultPage from '../pages/auth/FindAccountResultPage'
 
 const App = () => {
   const dispatch = useDispatch()
@@ -17,7 +18,8 @@ const App = () => {
       <Route path="/" element={<Mainlayout />}>
         <Route path="regist/:step" element={<RegistPage />} />
         <Route path="login" element={<LoginPage />} />
-        <Route path="help" element={<HelpPage />} />
+        <Route path="find_account" element={<FindAccountPage />} />
+        <Route path="find_account/result" element={<FindAccountResultPage />} />
       </Route>
     </Routes>
   )
