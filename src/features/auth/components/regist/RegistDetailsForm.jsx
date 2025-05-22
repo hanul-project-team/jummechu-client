@@ -94,7 +94,7 @@ const RegistDetailsForm = () => {
   const onSubmit = async data => {
     const role = JSON.parse(localStorage.getItem('role'))
     const termsAgreement = JSON.parse(localStorage.getItem('termsAgreement'))
-    const { passwordCheck, code, ...rest } = data
+    const {passwordCheck: _passwordCheck, code: _code, ...rest } = data
     const submitData = { ...role, termsAgreement, ...rest }
     try {
       await axios.post('http://localhost:3000/auth/regist', submitData)
