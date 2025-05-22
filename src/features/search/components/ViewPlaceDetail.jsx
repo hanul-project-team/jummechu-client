@@ -6,8 +6,9 @@ import usePlaceStore from '../../../store/usePlaceStore.js'
 import 'swiper/css'
 import PlaceReview from './PlaceReview.jsx'
 
-const ViewPlaceDetail = ({ /* placeDetail, */ defaultBoomarked }) => {
+const ViewPlaceDetail = ({ defaultBoomarked }) => {
   const [isBookmarked, setIsBookmarked] = useState(defaultBoomarked)
+  const [rate, setRate] = useState(0)
   const [category, setCategory] = useState([])
   const [showAddress, setShowAddress] = useState(false)
   const setReviewInfo = usePlaceStore(state => state.setReviewInfo)
@@ -15,7 +16,11 @@ const ViewPlaceDetail = ({ /* placeDetail, */ defaultBoomarked }) => {
   const [score, setScore] = useState(null)
 
   const searchData = usePlaceStore(state => state.searchData)
-
+  const ratingStar = star => {
+    if (star) {
+      setRate(star)
+    }
+  }
   const rateRef = useRef()
   // console.log(score)
   const toggleAddress = () => {
@@ -36,7 +41,7 @@ const ViewPlaceDetail = ({ /* placeDetail, */ defaultBoomarked }) => {
     }
     const preScore = rateRef.current.dataset.score
     setScore(preScore)
-  }, [isBookmarked, placeDetail, rateRef.current])
+  }, [isBookmarked, placeDetail, rateRef, rate])
 
   const handleBookmark = () => {
     if (isBookmarked === true) {
@@ -86,7 +91,7 @@ const ViewPlaceDetail = ({ /* placeDetail, */ defaultBoomarked }) => {
         <div className="flex items-center">
           <div
             className="relative w-fit text-2xl leading-none my-2"
-            data-score={placeDetail.rate ? placeDetail.rate : '2.4'}
+            data-score={placeDetail.rate ? placeDetail.rate : rate}
             ref={rateRef}
           >
             <div className="text-gray-300">★★★★★</div>
@@ -223,7 +228,7 @@ const ViewPlaceDetail = ({ /* placeDetail, */ defaultBoomarked }) => {
           )}
         </div>
       </div>
-      <PlaceReview />
+      <PlaceReview ratingStar={ratingStar} />
     </div>
   )
 }
