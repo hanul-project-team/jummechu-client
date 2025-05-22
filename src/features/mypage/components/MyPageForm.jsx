@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import Modal from '../components/UserModal.jsx'
 import '../MyPage.css' // 경로 기준: 현재 컴포넌트 파일 위치 기준
 
 const MyPageForm = () => {
@@ -51,8 +52,7 @@ const MyPageForm = () => {
       ${keywordsWithThreshold.join(', ')}
   
       다음은 사용자가 최근에 방문한 음식점들의 키워드 목록입니다.
-  이 키워드들과 **2개 이상** 겹치거나, 겹치는 키워드 수가 **가장 많은** 음식점만 골라 추천해 주세요.
-  만약 겹치는 키워드 수가 같다면, 평점이 높은 음식점을 먼저 보여주세요.
+  이 키워드들과 **가장 많이** 겹치는 음식점만 골라 추천해 주세요.
   
   결과는 아래 JSON 형식의 배열로만 출력하세요.
   각 추천 음식점은 다음 필드를 포함해야 합니다:
@@ -67,43 +67,43 @@ const MyPageForm = () => {
   [예시 키워드 목록]: #한식, #떡볶이, #매운맛, #분식, #치즈, #일식
     `
 
-    const response = await fetch('http://localhost:3000/api/openai', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt }),
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('OpenAI 응답 오류:', errorText)
-      return []
-    }
-
     try {
+      const response = await fetch('http://localhost:3000/api/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('OpenAI 응답 오류:', errorText)
+        return []
+      }
+
       const data = await response.json()
       console.log('OpenAI 응답 raw:', data)
       return data
     } catch (error) {
-      console.error('JSON 파싱 오류:', error)
-      const errorText = await response.text()
-      console.error('OpenAI 응답 (텍스트):', errorText)
+      console.error('JSON 파싱 오류 또는 OpenAI 호출 실패:', error)
       return []
     }
   }
 
-  const extractKeywordsWithThreshold = (data, threshold = 2) => {
-    const allKeywords = {}
-    data.forEach(item => {
-      item.keyword
-        .split(',')
-        .map(k => k.trim())
-        .forEach(keyword => {
-          allKeywords[keyword] = (allKeywords[keyword] || 0) + 1
-        })
-    })
+  // ====키워드 2개 이상===
+  // const extractKeywordsWithThreshold = (data, threshold = 2) => {
+  //   const allKeywords = {}
+  //   data.forEach(item => {
+  //     item.keyword
+  //       .split(',')
+  //       .map(k => k.trim())
+  //       .forEach(keyword => {
+  //         allKeywords[keyword] = (allKeywords[keyword] || 0) + 1
+  //       })
+  //   })
 
-    return Object.keys(allKeywords).filter(keyword => allKeywords[keyword] >= threshold)
-  }
+  //   return Object.keys(allKeywords).filter(keyword => allKeywords[keyword] >= threshold)
+  // }
+  // =========
 
   const extractMostFrequentKeywords = data => {
     const allKeywords = {}
@@ -123,31 +123,41 @@ const MyPageForm = () => {
       }
     }
 
+    // maxCount가 0일 경우 빈 배열 반환하여 오류 방지
+    if (maxCount === 0) return []
+
     return Object.keys(allKeywords).filter(keyword => allKeywords[keyword] === maxCount)
   }
 
-  // 2개 이상 등장하는 키워드 추출
-  const keywordsWithThreshold = extractKeywordsWithThreshold(example)
-  console.log('2번 이상 등장하는 키워드:', keywordsWithThreshold)
-  callOpenAi(keywordsWithThreshold).then(recommendations => {
-    console.log('OpenAI 추천 결과 (2번 이상):', recommendations)
-  })
+  // // 2개 이상 등장하는 키워드 추출
+  // const keywordsWithThreshold = extractKeywordsWithThreshold(example)
 
   // 가장 많이 등장하는 키워드 추출
   const mostFrequentKeywords = extractMostFrequentKeywords(example)
-  console.log('가장 많이 등장하는 키워드:', mostFrequentKeywords)
-  callOpenAi(mostFrequentKeywords).then(recommendations => {
-    console.log('OpenAI 추천 결과 (가장 많이 등장):', recommendations)
-  })
 
-  // 모든 키워드 추출 (기존 방식)
-  const allKeywords = Array.from(
-    new Set(example.flatMap(item => item.keyword.split(',').map(k => k.trim()))),
-  )
-  console.log('모든 키워드:', allKeywords)
-  callOpenAi(allKeywords).then(recommendations => {
-    console.log('OpenAI 추천 결과 (모든 키워드):', recommendations)
-  })
+  useEffect(() => {
+    if (active === '음식점 추천') {
+      if (openai.length > 0 || loading) {
+        return
+      }
+
+      const keywordsForAI = extractMostFrequentKeywords(example)
+      setLoading(true)
+      callOpenAi(keywordsForAI).then(data => {
+        setOpenAi(data)
+        // 대표 키워드를 추출하여 DALL-E 이미지 생성 (음식점 추천 탭 대표 이미지)
+        const keywordSummary = Array.from(new Set(keywordsForAI)).slice(0, 10).join(',')
+        callDalleImage(keywordSummary).then(imageUrl => {
+          setDalleImage(imageUrl)
+          setLoading(false)
+        })
+      })
+    } else {
+      setDalleImage(null) // 다른 탭에서는 DALL-E 이미지 초기화
+      setLoading(false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active])
 
   const callDalleImage = async keyword => {
     try {
@@ -173,79 +183,6 @@ const MyPageForm = () => {
     }
   }
 
-  useEffect(() => {
-    console.log(dalleImage)
-    if (active === '음식점 추천') {
-      const allkeywords = example.flatMap(item => item.keyword.split(',').map(k => k.trim()))
-      setLoading(true)
-      callOpenAi(allkeywords).then(data => {
-        setOpenAi(data)
-        // 대표 키워드를 추출하여 DALL-E 이미지 생성 (음식점 추천 탭 대표 이미지)
-        const keywordSummary = Array.from(new Set(allkeywords)).slice(0, 10).join(',')
-        callDalleImage(keywordSummary).then(imageUrl => {
-          setDalleImage(imageUrl)
-          setLoading(false)
-        })
-      })
-    } else {
-      setDalleImage(null) // 다른 탭에서는 DALL-E 이미지 초기화
-      setOpenAi([]) // 다른 탭에서는 OpenAI 추천 결과 초기화
-      setLoading(false)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active])
-
-  const Modal = ({ isOpen, onClose }) => {
-    if (!isOpen) return null
-
-    return (
-      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-        <div className="bg-white p-6 rounded-lg shadow-xl relative z-10 w-[300px]">
-          <h2 className="text-lg font-semibold mb-4">프로필 설정</h2>
-
-          <div className="py-3 flex items-center justify-between">
-            <p>프로필 사진</p>
-            <div className="relative w-[100px] h-[100px] bg-cover mask-radial-fade group cursor-pointer">
-              <div
-                className="absolute inset-0 bg-cover mask-radial-fade transition-opacity duration-300"
-                style={{ backgroundImage: "url('https://picsum.photos/200')" }}
-              >
-                <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-30 transition-opacity duration-300" />
-                <p className="absolute text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  이미지 변경
-                </p>
-              </div>
-            </div>
-          </div>
-          <hr className="py-3" />
-          <div className="py-3 flex justify-between">
-            <p>이름</p>
-            <p> 사용자 이름 </p>
-          </div>
-          <hr className="py-3" />
-<div className="py-3 flex justify-between">
-  <p>소개글</p>
-  <input type="text" name="aboutme" id="aboutme" />
-  
-</div>
-          <hr className="py-3" />
-          <div className="flex gap-2">
-            <button className="mt-4 px-4 py-2 text-black bg-green-600 rounded cursor-pointer"
-            onClick={onClose}>
-              확인/저장
-            </button>
-            <button
-              onClick={onClose}
-              className="mt-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded cursor-pointer"
-            >
-              닫기
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   const handleClick = (e, tab) => {
     e.preventDefault()
     setActive(tab)
@@ -265,7 +202,7 @@ const MyPageForm = () => {
     switch (active) {
       case '최근기록':
         return (
-          <div className='flex justify-center'>
+          <div className="flex justify-center">
             <ul className="flex flex-col gap-9 py-5">
               {example.map(item => (
                 <li key={item.id} className="flex gap-4">
@@ -316,7 +253,7 @@ const MyPageForm = () => {
 
       case '찜':
         return (
-          <div className='flex justify-center'>
+          <div className="flex justify-center">
             {bookmarked.length === 0 ? (
               <p>찜한 목록이 없습니다.</p>
             ) : (
@@ -368,19 +305,46 @@ const MyPageForm = () => {
             )}
           </div>
         )
+
       case '계정 설정':
         return (
-          <div className='flex justify-center'>
+          <div className="flex justify-center">
             <div className="flex flex-col w-[700px] h-[700px] gap-5 py-5">
               <div className="flex justify-center">
-                <div
-                  className="w-[100px] h-[100px] bg-cover mask-radial-fade"
-                  style={{ backgroundImage: "url('https://picsum.photos/200')" }}
-                />
-                
+                <div className="relative">
+                  <div
+                    className=" w-[100px] h-[100px] bg-cover mask-radial-fade"
+                    onClick={() => setIsOpen(true)}
+                    style={{ backgroundImage: "url('https://picsum.photos/200')" }}
+                  />
+                  <span
+                    className="absolute bottom-1 right-1 bg-white  rounded-full p-2 shadow hover:bg-opacity-100 cursor-pointer"
+                    onClick={() => setIsOpen(true)}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                      class="size-6"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"
+                      />
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"
+                      />
+                    </svg>
+                  </span>
+                </div>
               </div>
-            
-              <div className='py-5'>
+
+              <div className="py-5">
                 <div>
                   <div className="py-3 flex justify-between">
                     <p>이메일 관리</p>
@@ -391,7 +355,7 @@ const MyPageForm = () => {
                     <p>비밀번호</p>
                     <p> 사용자 비밀번호 </p>
                   </div>
-                <hr className="py-3" />
+                  <hr className="py-3" />
                 </div>
                 <div className="py-3 flex justify-between">
                   <p>닉네임</p>
@@ -399,10 +363,16 @@ const MyPageForm = () => {
                 </div>
                 <hr className="py-3" />
               </div>
-            <div className = "flex gap-5 justify-center">
-              <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded cursor-pointer"> 계정 삭제 </button>
-              <button className="mt-4 px-4 py-2 text-white bg-blue-600 rounded cursor-pointer"> 수정 </button>
-            </div>
+              <div className="flex gap-5 justify-center">
+                <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded cursor-pointer">
+                  {' '}
+                  계정 삭제{' '}
+                </button>
+                <button className="mt-4 px-4 py-2 text-white bg-blue-600 rounded cursor-pointer">
+                  {' '}
+                  수정{' '}
+                </button>
+              </div>
             </div>
           </div>
         )
@@ -416,13 +386,15 @@ const MyPageForm = () => {
     <div className="w-full pb-5">
       <div className="max-w-6xl mx-auto">
         <div className="py-3 flex justify-between items-center ">
-          <div className='flex flex-col items-center '>
+          <div className="flex gap-5 items-center ">
             <div
               className="w-[100px] h-[100px] bg-cover mask-radial-fade"
               style={{ backgroundImage: "url('https://picsum.photos/200')" }}
             />
-            <p className='py-2'>닉네임</p>
-            <p className='py-3'>소개글 </p>
+            <div className="flex-col">
+              <p className="text-2xl py-2"> "사용자닉네임" 님</p>
+              <span className="text-2xl">안녕하세요.</span>
+            </div>
           </div>
           <div className="flex gap-3 ">
             <p>프로필설정</p>
