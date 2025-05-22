@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
+import { useDispatch } from 'react-redux'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'react-toastify'
+import { findId } from '../../slice/findAccountIdSlice'
+import { findAccountVerifySchema } from '../../schema/findAccountVerifySchema'
 import Timer from '../../../../shared/Timer'
 import style from './findIdVerifyForm.module.css'
+import axios from 'axios'
 
-const FindIdVerifyForm = ({ nextStep }) => {
+const FindAccountVerifyForm = ({ type }) => {
   const [isPhone, setIsPhone] = useState(false)
   const [isCode, setIsCode] = useState(false)
   const [isRequested, setIsRequested] = useState(false)
@@ -16,8 +22,15 @@ const FindIdVerifyForm = ({ nextStep }) => {
     trigger,
     getValues,
     resetField,
+    setFocus,
     formState: { errors },
-  } = useForm()
+  } = useForm({
+    resolver: zodResolver(findAccountVerifySchema),
+    mode: 'onSubmit',
+    reValidateMode: 'onSubmit',
+  })
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
   const phoneValue = watch('phone')
   const codeValue = watch('code')
   useEffect(() => {
@@ -35,16 +48,31 @@ const FindIdVerifyForm = ({ nextStep }) => {
       setIsRequested(true)
       toast.success(<div>인증번호 발송에 성공하였습니다.</div>, { autoClose: 4000 })
       setTimerKey(prev => prev + 1)
+      setFocus('code')
       console.log(phone)
     }
   }
-  const onSubmit = data => {
-    console.log(data)
-    nextStep()
+  const onSubmit = async data => {
+    const actionMap = {
+      id: findId,
+    }
+    try {
+      const response = await axios.post(`http://localhost:3000/auth/find_${type}`, data)
+      const action = actionMap[type]
+      if (action) dispatch(action(response.data))
+      navigate(`/find_account/result?type=${type}`)
+    } catch (e) {
+      console.log(e)
+    }
   }
-
   const onIsValid = errors => {
-    console.log(errors)
+    if (errors.name) {
+      setFocus('name')
+    } else if (errors.phone) {
+      setFocus('phone')
+    } else if (errors.code) {
+      setFocus('code')
+    }
   }
   const onExpire = () => {
     setIsRequested(false)
@@ -57,7 +85,7 @@ const FindIdVerifyForm = ({ nextStep }) => {
       onSubmit={handleSubmit(onSubmit, onIsValid)}
     >
       <fieldset className="flex flex-col gap-3">
-        <legend className="hidden">아이디 찾기 sms 인증 폼</legend>
+        <legend className="hidden">sms 인증 폼</legend>
         <div className={`${style.findIdVerifyFormField} flex flex-col`}>
           <label htmlFor="name">이름</label>
           <input type="text" placeholder="이름" {...register('name')} />
@@ -128,4 +156,4 @@ const FindIdVerifyForm = ({ nextStep }) => {
   )
 }
 
-export default FindIdVerifyForm
+export default FindAccountVerifyForm
