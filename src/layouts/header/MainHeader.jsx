@@ -53,7 +53,7 @@ const MainHeader = () => {
               </div>
               {isAuthenticated ? (
                 <div className='flex gap-2'>
-                  <button className="border p-2 rounded-xl bg-red-500 text-white hover:bg-red-700 mouse_pointer" onClick={setLogout}>
+                  <button className="mouse_pointer border p-2 rounded-xl bg-red-500 text-white hover:bg-red-700 mouse_pointer" onClick={setLogout}>
                     로그아웃
                   </button>
                   <NavLink to='/mypage'>
@@ -92,7 +92,7 @@ const MainHeader = () => {
               </div>
               {isAuthenticated ? (
                 <div className='flex gap-2'>
-                  <button className="border p-2 rounded-xl bg-red-500 text-white hover:bg-red-700" onClick={setLogout}>
+                  <button className="mouse_pointer border p-2 rounded-xl bg-red-500 text-white hover:bg-red-700" onClick={setLogout}>
                     로그아웃
                   </button>
                   <NavLink to='/mypage'>
