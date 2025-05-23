@@ -29,7 +29,7 @@
     border-radius: 6px;
   }
   
-  Link:hover,
+  #Dashboard_Link_Var:hover,
   .sidebar-menu a:hover {
     background-color: #ffffff;
     color: #000000; /* hover 효과 */
@@ -49,7 +49,7 @@
     border-bottom: 1px solid #cdcdcd;
   }
 
-  .title {
+  .title-style {
     font-size: 1.5rem;
     font-weight: 700;
   }
@@ -59,32 +59,22 @@
     font-size: 1.2rem;
     font-weight: 500;
   }
-table {
+.table-ih {
   margin: auto;
   width: 800px;
   border-collapse: collapse;
   margin-top: 20px;
 }
 
-th, td, tr {
+.table-style-ih {
   border: 1px solid #ccc;
   padding: 8px 12px;
   text-align: center;
-}
-td {
-  padding: 10px;
 }
 
 .shop-input {
   text-align: center;
 }
-
-input:focus {
-  outline: none;
-  border-color: inherit; /* 필요 시 */
-  box-shadow: none; /* 필요 시 */
-}
-
 
 .plus-b {
   font-size: 1.5rem;

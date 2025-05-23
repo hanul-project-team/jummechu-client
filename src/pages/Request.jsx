@@ -1,60 +1,37 @@
-import { useState } from 'react';
+import { useState } from 'react'
 
 export default function StoreEntryForm() {
-  const [entryType, setEntryType] = useState('individual');
-  const [bizNumber, setBizNumber] = useState('');
-  const [lookupSuccess, setLookupSuccess] = useState(false);
-  const [postcode, setPostcode] = useState('');
-  const [address, setAddress] = useState('');
-  const [detailAddress, setDetailAddress] = useState('');
+  const [entryType, setEntryType] = useState('individual')
+  const [bizNumber, setBizNumber] = useState('')
+  const [lookupSuccess, setLookupSuccess] = useState(false)
+  const [postcode, setPostcode] = useState('')
+  const [address, setAddress] = useState('')
+  const [detailAddress, setDetailAddress] = useState('')
 
-  const handleLookup = async () => {
-    if (!bizNumber.trim()) return alert('사업자등록번호를 입력해주세요.');
-
-    try {
-      const response = await fetch(
-        'https://api.odcloud.kr/api/nts-businessman/v1/validate?serviceKey=TTQUYZDXRlDNZv%2FpQXJoDZb2fyVqZQog3murmf1lkUZ%2FVnbFa1Q8P5wR8Lz2OWCKFP%2FqKpobqLDOl%2Bpbr%2Bvr5g%3D%3D',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            businesses: [{ b_no: bizNumber.replace(/-/g, '') }],
-          }),
-        }
-      );
-      
-
-      const data = await response.json();
-      if (data?.status_code === 'OK' && data?.data?.[0]?.valid === '01') {
-        setLookupSuccess(true);
-      } else {
-        alert('사업자등록번호가 유효하지 않거나 휴업/폐업 상태입니다.');
-        setLookupSuccess(false);
-      }
-    } catch (error) {
-      console.error('사업자 조회 오류:', error);
-      alert('조회 중 오류가 발생했습니다.');
-    }
-  };
+  const handleLookup = () => {
+    if (!bizNumber.trim()) return alert('사업자등록번호를 입력해주세요.')
+    setLookupSuccess(true) // API 연동 시 수정
+  }
 
   const openPostcodePopup = () => {
     new window.daum.Postcode({
-      oncomplete: (data) => {
-        setPostcode(data.zonecode);
-        setAddress(data.roadAddress);
+      oncomplete: data => {
+        setPostcode(data.zonecode)
+        setAddress(data.roadAddress)
       },
-    }).open();
-  };
+    }).open()
+  }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async e => {
+    e.preventDefault()
     if (!postcode || !address || !detailAddress) {
-      alert('주소를 모두 입력해주세요.');
-      return;
+      alert('주소를 모두 입력해주세요.')
+      return
     }
 
     try {
-      const response = await fetch('/your-submit-endpoint', {  // 실제 제출할 엔드포인트로 변경
+      const response = await fetch('/your-submit-endpoint', {
+        // 실제 제출할 엔드포인트로 변경
         method: 'POST',
         body: JSON.stringify({
           bizNumber,
@@ -67,22 +44,25 @@ export default function StoreEntryForm() {
           detailAddress,
         }),
         headers: { 'Content-Type': 'application/json' },
-      });
+      })
 
-      const data = await response.json();
+      const data = await response.json()
       if (data.success) {
-        alert('입점 신청이 완료되었습니다!');
+        alert('입점 신청이 완료되었습니다!')
       } else {
-        alert('입점 신청에 실패했습니다.');
+        alert('입점 신청에 실패했습니다.')
       }
     } catch (error) {
-      console.error('제출 오류:', error);
-      alert('제출 중 오류가 발생했습니다.');
+      console.error('제출 오류:', error)
+      alert('제출 중 오류가 발생했습니다.')
     }
-  };
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-6 bg-white rounded shadow space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-xl mx-auto p-6 bg-white rounded shadow space-y-6"
+    >
       <header>
         <h2 className="text-xl font-bold">온라인 입점신청서</h2>
         <p className="text-sm text-gray-600">
@@ -96,7 +76,7 @@ export default function StoreEntryForm() {
         <label className="block font-medium mb-2">입점 형태</label>
         <div className="flex gap-4">
           {['개인사업자', '법인사업자'].map((label, idx) => {
-            const value = idx === 0 ? 'individual' : 'corporate';
+            const value = idx === 0 ? 'individual' : 'corporate'
             return (
               <label key={value}>
                 <input
@@ -107,7 +87,7 @@ export default function StoreEntryForm() {
                 />
                 <span className="ml-1">{label}</span>
               </label>
-            );
+            )
           })}
         </div>
       </div>
@@ -121,9 +101,9 @@ export default function StoreEntryForm() {
             className="border rounded p-2 flex-1"
             placeholder="사업자번호 입력"
             value={bizNumber}
-            onChange={(e) => {
-              setBizNumber(e.target.value);
-              setLookupSuccess(false);
+            onChange={e => {
+              setBizNumber(e.target.value)
+              setLookupSuccess(false)
             }}
             required
           />
@@ -135,30 +115,61 @@ export default function StoreEntryForm() {
           <p className="text-green-600 text-sm mt-2">✅ 조회가 성공적으로 완료되었습니다.</p>
         )}
       </div>
-
       {/* 대표자 정보 입력 */}
-      {['대표자명', '대표자 생년월일', '전화번호'].map((label) => (
-        <div key={label}>
-          <label className="block font-medium mb-1">{label}</label>
-          <input type="text" name={label} className="border rounded w-full p-2" placeholder={label} required />
+      <div className=" gap-2 mb-2">
+        <label className="block font-medium mb-1"> 대표자명 </label>
+        <input type="text" name="name" id="name" className="border rounded w-full p-2" required />
+      </div>
+      <div className=" gap-2 mb-2">
+        <label className="block font-medium mb-1"> 대표자 생년월일 </label>
+        <input type="text" name="name" id="name" className="border rounded w-full p-2" required />
+      </div>
+
+      <label> 전화번호</label>
+        <div className="flex gap-2 mb-2">
+          <input
+            type="text"
+            placeholder="전화번호 입력"
+            required
+            className="border rounded flex-1 p-2"
+          />
+          <button type="button" className="bg-gray-100 px-4 rounded border">
+            인증번호 전송
+          </button>
         </div>
-      ))}
+      <label>인증번호</label>
+        <div className="flex gap-2 mb-2">
+          <input
+            type="text"
+            placeholder="인증번호 입력"
+            required
+            className="border rounded flex-1 p-2"
+          />
+          <button type="button" className="bg-gray-100 px-4 rounded border">
+            인증하기
+          </button>
+        </div>
 
       {/* 주소 입력 */}
-      <div className="flex gap-2 mb-2">
-        <input
-          type="text"
-          name="postcode"
-          value={postcode}
-          placeholder="우편번호"
-          readOnly
-          required
-          className="border rounded flex-1 p-2"
-        />
-        <button type="button" className="bg-gray-100 px-4 rounded border" onClick={openPostcodePopup}>
-          주소 조회
-        </button>
-      </div>
+      <label> 우편번호</label>
+        <div className="flex gap-2 mb-1">
+          <input
+            type="text"
+            name="postcode"
+            value={postcode}
+            placeholder="우편번호"
+            readOnly
+            required
+            className="border rounded flex-1 p-2"
+          />
+          <button
+            type="button"
+            className="bg-gray-100 px-4 rounded border"
+            onClick={openPostcodePopup}
+          >
+            주소 조회
+          </button>
+        </div>
 
       <input
         type="text"
@@ -176,12 +187,12 @@ export default function StoreEntryForm() {
         placeholder="상세 주소 입력"
         className="border rounded w-full p-2"
         value={detailAddress}
-        onChange={(e) => setDetailAddress(e.target.value)}
+        onChange={e => setDetailAddress(e.target.value)}
         required
       />
 
       {/* 파일 업로드 */}
-      {['사업자등록증 첨부', '통장사본 첨부'].map((label) => (
+      {['사업자등록증 첨부', '통장사본 첨부'].map(label => (
         <div key={label}>
           <label className="block font-medium mb-1">{label}</label>
           <input type="file" className="border rounded p-2 w-full" />
@@ -194,15 +205,17 @@ export default function StoreEntryForm() {
         <div className="border rounded p-4 h-48 overflow-y-scroll bg-gray-50 text-sm mb-3">
           <p>
             본인은 귀사가 수집하는 개인정보(성명, 연락처, 주소 등)를 본 서비스 제공을 위한 목적으로
-            수집 및 이용하는 데 동의합니다. 수집된 정보는 본 목적 외에는 사용되지 않으며, 관련 법령에 따라 보호됩니다.
+            수집 및 이용하는 데 동의합니다. 수집된 정보는 본 목적 외에는 사용되지 않으며, 관련
+            법령에 따라 보호됩니다.
           </p>
           <p className="mt-2">
-            동의하지 않으실 경우 서비스 이용이 제한될 수 있습니다. 자세한 사항은 개인정보처리방침을 확인해주세요.
+            동의하지 않으실 경우 서비스 이용이 제한될 수 있습니다. 자세한 사항은 개인정보처리방침을
+            확인해주세요.
           </p>
         </div>
         <label className="inline-flex items-center">
-          <input type="checkbox" className="form-checkbox text-blue-600 mr-2" required />
-          위 내용에 동의합니다.
+          <input type="checkbox" className="form-checkbox text-blue-600 mr-2" required />위 내용에
+          동의합니다.
         </label>
       </div>
 
@@ -213,5 +226,5 @@ export default function StoreEntryForm() {
         </button>
       </div>
     </form>
-  );
+  )
 }
