@@ -1,28 +1,14 @@
-.registFormField {
+.findAccountVerifyFormField {
     position: relative;
 }
-.registFormField input[name='password'] + button[type=button] {
-    position: absolute;
-    top: 2.75rem;
-    right: 0.75rem;
-}
-.registFormField input[name='passwordCheck'] + button[type=button] {
-    position: absolute;
-    top: 1.25rem;
-    right: 0.75rem;
-}
-.requiredSpan {
-    padding-left: 0.25rem;
-    color: red;
-}
-.registFormField input {
+.findAccountVerifyFormField input {
     text-indent: 0.25rem;
     padding: 1rem 0.5rem ;
     background-color: #d9d9d9;
     outline: none;
     border-radius: 0.25rem;
 }
-.registFormField label {
+.findAccountVerifyFormField label {
     color: black;
     font-weight: bold;
 }
@@ -51,32 +37,17 @@
 .resendBtn:disabled {
     background-color: gray;
 }
-.sendCodeBtn {
+.submitBtn {
     padding: 1rem 0.5rem;
     border-radius: 0.25rem;
     color: white;
     background-color: black;
     min-width: 6rem
 }
-.sendCodeBtn:disabled {
-    background-color: gray;
-}
-.registBtn {
-    border: 1px solid black;
-    padding: 0.75rem;
-    border-radius: 0.25rem;
-    color: white;
-    background-color: black;
-}
-.registBtn:disabled {
-    border: 1px solid gray;
+.submitBtn:disabled {
     background-color: gray;
 }
 .errorSpan {
     color: red;
     font-size: 0.75rem;
-}
-.hintSpan {
-    font-size: 0.75rem;
-    color: gray;
 }

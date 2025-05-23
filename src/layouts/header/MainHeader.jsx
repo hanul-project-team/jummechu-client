@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { logout } from '../../features/auth/authSlice'
+import { logout } from '../../features/auth/slice/authSlice'
 import axios from 'axios'
 import '../../assets/styles/global.css'
 import { useNavigate, useLocation, NavLink } from 'react-router-dom'
