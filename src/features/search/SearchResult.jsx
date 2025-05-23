@@ -11,11 +11,6 @@ const SearchResult = () => {
   const setIsLoading = usePlaceStore(state => state.setIsLoading)
   const navigate = useNavigate()
 
-  const storage = localStorage.getItem('place-storage')
-  const parsed = storage ? JSON.parse(storage) : null
-  const storageSearchData = parsed?.state?.searchData
-  // console.log(parsed)
-
   useEffect(() => {
     if (searchData.length === 0) {
       setIsLoading(true)
