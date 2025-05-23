@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Modal from '../components/UserModal.jsx'
+import axios from 'axios'
 import '../MyPage.css' // 경로 기준: 현재 컴포넌트 파일 위치 기준
 
 const MyPageForm = () => {
@@ -58,7 +59,7 @@ const MyPageForm = () => {
   ]
 
   const callOpenAi = async keywordsWithThreshold => {
-    const prompt = `
+    /*     const prompt = `
       다음은 사용자가 최근 본 음식점의 키워드 목록입니다:
       ${keywordsWithThreshold.join(', ')}
   
@@ -76,24 +77,47 @@ const MyPageForm = () => {
   JSON 외에는 아무 것도 출력하지 마세요.
   
   [예시 키워드 목록]: #한식, #떡볶이, #매운맛, #분식, #치즈, #일식
-    `
+    ` */
+    // {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ prompt }),
+    // }
 
     try {
-      const response = await fetch('http://localhost:3000/api/openai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
-      })
+      const response = axios
+        .post('http://localhost:3000/api/azure/openai', {
+          headers: {
+            prompt: `
+      다음은 사용자가 최근 본 음식점의 키워드 목록입니다:
+      ${keywordsWithThreshold.join(', ')}
+  
+      다음은 사용자가 최근에 방문한 음식점들의 키워드 목록입니다.
+  이 키워드들과 **가장 많이** 겹치는 음식점만 골라 추천해 주세요.
+  
+  결과는 아래 JSON 형식의 배열로만 출력하세요.
+  각 추천 음식점은 다음 필드를 포함해야 합니다:
+  - title: 음식점 이름
+  - rating: 평점 (0.0 ~ 5.0)
+  - description: 음식점 설명 (간단하고 매력적인 한 줄)
+  - keyword: 이 음식점의 키워드 배열
+  - overlap_count: 겹치는 키워드 수
+  
+  JSON 외에는 아무 것도 출력하지 마세요.
+  
+  [예시 키워드 목록]: #한식, #떡볶이, #매운맛, #분식, #치즈, #일식
+    `,
+          },
+        })
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('OpenAI 응답 오류:', errorText)
-        return []
-      }
+      // if (!response.ok) {
+      //   const errorText = await response.text()
+      //   console.error('OpenAI 응답 오류:', errorText)
+      //   return []
+      // }
 
-      const data = await response.json()
-      console.log('OpenAI 응답 raw:', data)
-      return data
+      // console.log('OpenAI 응답 raw:', response)
+      return response
     } catch (error) {
       console.error('JSON 파싱 오류 또는 OpenAI 호출 실패:', error)
       return []
@@ -148,14 +172,15 @@ const MyPageForm = () => {
 
   useEffect(() => {
     if (active === '음식점 추천') {
-      if (openai.length > 0 || loading) {
+      if (openai?.length > 0 || loading) {
         return
       }
 
       const keywordsForAI = extractMostFrequentKeywords(example)
       setLoading(true)
       callOpenAi(keywordsForAI).then(data => {
-        setOpenAi(data)
+        const parsedData = JSON.parse(data.data)
+        setOpenAi(parsedData)
         // 대표 키워드를 추출하여 DALL-E 이미지 생성 (음식점 추천 탭 대표 이미지)
         const keywordSummary = Array.from(new Set(keywordsForAI)).slice(0, 10).join(',')
         callDalleImage(keywordSummary).then(imageUrl => {
@@ -171,27 +196,21 @@ const MyPageForm = () => {
   }, [active])
 
   useEffect(() => {
-    localStorage.setItem('bookmarkedItems', JSON.stringify(bookmarked));
-  }, [bookmarked]); // bookmarked 배열이 변경될 때마다 이 훅이 실행됩니다.
+    localStorage.setItem('bookmarkedItems', JSON.stringify(bookmarked))
+  }, [bookmarked]) // bookmarked 배열이 변경될 때마다 이 훅이 실행됩니다.
 
   const callDalleImage = async keyword => {
     try {
-      const res = await fetch('http://localhost:3000/api/dalle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const res = axios
+        .post('http://localhost:3000/api/azure/dalle', {
           prompt: `실제 사진처럼 다음 키워드를 가지고 이미지를 그려주세요: ${mostFrequentKeywords}.`,
-        }),
-      })
-
-      if (!res.ok) {
-        const errorResult = await res.json()
-        console.error(`DALL·E 호출 실패 (${keyword}):`, errorResult)
-        return null
-      }
-
-      const result = await res.json()
-      return result?.imageUrl
+        })
+        .catch(err => {
+          console.error(`DALL·E 호출 실패 (${keyword}):`, err)
+        })
+        console.log(res)
+      // const result = await res.json()
+      return res
     } catch (err) {
       console.error(`DALL·E 호출 실패 (${keyword}):`, err)
       return null
@@ -312,12 +331,12 @@ const MyPageForm = () => {
           <div className="flex flex-col gap-5 items-center">
             {dalleImage && (
               <img
-                src={dalleImage}
+                src={dalleImage.data.imageUrl}
                 alt="AI 음식점 이미지"
                 className="w-[300px] h-[300px] rounded shadow-md py-5"
               />
             )}
-            {openai.length > 0 ? (
+            {openai?.length > 0 ? (
               <ul className="flex flex-col gap-9 py-5">
                 <p className="py-2">
                   사용자닉네임 님이 가장 좋아하시는 음식은 "{mostFrequentKeywords}" 입니다.
