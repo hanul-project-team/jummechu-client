@@ -193,7 +193,7 @@ const PlaceReview = ({ reportRate }) => {
       if (user?.id) {
         setFormData({
           ...formData,
-          user: user.id
+          user: user.id,
         })
       }
     } else {
@@ -301,8 +301,16 @@ const PlaceReview = ({ reportRate }) => {
   const handleSubmit = e => {
     e.preventDefault()
     // console.log(formData)
-    axios.post('http://localhost:3000/api/review/write')
-
+    axios
+      .post('http://localhost:3000/user/review/write', formData, {
+        withCredentials: true 
+      })
+      .then(res => {
+        console.log(res)
+      })
+      .catch(err => {
+        console.log(err)
+      })
   }
   const handleChange = e => {
     if (e.target.value.length === 0) {
