@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import Icon from '../../../../../assets/images/icon.png'
 import StarRatingComponent from 'react-star-rating-component'
 import ReviewChart from './ReviewChart.jsx'
+import axios from 'axios'
 
 const PlaceReview = ({ reportRate }) => {
   const [showMore, setShowMore] = useState(5)
@@ -20,14 +21,10 @@ const PlaceReview = ({ reportRate }) => {
   const navigate = useNavigate()
   const [starRating, setStarRating] = useState(0)
   const [formData, setFormData] = useState({
-    user: user?.id,
+    user: '',
     comment: '',
     rating: 0,
   })
-
-  // console.log(placeDetail)
-  // model에 review 추천 시스템 추가 필요
-
   {
     /* 임시데이터 */
   }
@@ -193,6 +190,12 @@ const PlaceReview = ({ reportRate }) => {
   useEffect(() => {
     if (user) {
       setIsUser(true)
+      if (user?.id) {
+        setFormData({
+          ...formData,
+          user: user.id
+        })
+      }
     } else {
       setIsUser(false)
     }
@@ -297,10 +300,10 @@ const PlaceReview = ({ reportRate }) => {
   }
   const handleSubmit = e => {
     e.preventDefault()
-    console.log('리뷰 남기기')
-    console.log(formData)
-  }
+    // console.log(formData)
+    axios.post('http://localhost:3000/api/review/write')
 
+  }
   const handleChange = e => {
     if (e.target.value.length === 0) {
       setErrorMessage('내용을 입력해주세요.')
@@ -329,6 +332,7 @@ const PlaceReview = ({ reportRate }) => {
         <div className="max-w-3/5 mx-auto text-center">
           <span className="text-2xl italic">고객 리뷰</span>
         </div>
+        {/* 리뷰 토글 버튼 */}
         <div className="flex justify-between max-w-3/5 mx-auto items-center">
           <div>
             <p className="font-bold text-3xl">{handleTotalRating(reviews)}</p>
@@ -364,12 +368,12 @@ const PlaceReview = ({ reportRate }) => {
             <ReviewChart reviews={reviews} />
           </div>
         </div>
+        {/* 리뷰 작성 폼 */}
         {showReviewForm === true ? (
           <div className="max-w-3/5 mx-auto">
             <form onSubmit={handleSubmit} className="w-fit mx-auto p-2 text-center">
               <div className="text-start my-1 bg-white p-2 w-fit rounded-3xl">
-                <span>작성자:</span>
-                <span>{user.name}</span>
+                <span>작성자:{user.name}</span>
               </div>
               {/* 이하 textarea */}
               <div>
@@ -386,7 +390,7 @@ const PlaceReview = ({ reportRate }) => {
                 />
                 {errorMessage && <p className="mt-1 text-sm text-red-600">{errorMessage}</p>}
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between my-2">
                 {/* 이하 별점 매기기 */}
                 <div>
                   <StarRatingComponent

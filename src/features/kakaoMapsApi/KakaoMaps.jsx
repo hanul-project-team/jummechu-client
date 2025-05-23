@@ -75,7 +75,7 @@ const KakaoMaps = () => {
       // console.log(kakaoPlace?.length)
       axios
       .post(
-        'http://localhost:3000/api/nearplace',
+        'http://localhost:3000/api/kakao/nearplace',
         { location: center },
         {
           withCredentials: true,
@@ -107,7 +107,7 @@ const KakaoMaps = () => {
       navigate(`/search/${sliced}`)
       axios
         .post(
-          'http://localhost:3000/api/search',
+          'http://localhost:3000/api/kakao/search',
           {
             place: sliced,
             center: center,
@@ -128,7 +128,7 @@ const KakaoMaps = () => {
       navigate(`/search/${formData.place}`)
       axios
         .post(
-          'http://localhost:3000/api/search',
+          'http://localhost:3000/api/kakao/search',
           {
             place: formData.place,
             center: center,
