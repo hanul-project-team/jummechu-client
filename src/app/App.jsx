@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux'
 import { authCheck } from '../features/auth/authSlice'
 import RegistPage from '../pages/auth/RegistPage'
 import LoginPage from '../pages/auth/LoginPage'
-import ViewPlace from '../features/search/ViewPlace.jsx'
+import ViewPlace from '../features/search/place/ViewPlace.jsx'
 import MyPages from '../pages/mypage/MyPage.jsx'
 
 const App = () => {
