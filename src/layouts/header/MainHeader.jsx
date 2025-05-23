@@ -6,7 +6,7 @@ import '../../assets/styles/global.css'
 import { useNavigate, useLocation, NavLink } from 'react-router-dom'
 import Logo from '../../assets/images/logo.png'
 import LogoSm from '../../assets/images/logo-small.png'
-import KakaoMaps from '../../features/kakaoMapsApi/KakaoMaps.jsx'
+import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
 
 const MainHeader = () => {
   const dispatch = useDispatch()
