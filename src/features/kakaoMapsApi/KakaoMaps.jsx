@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import usePlaceStore from '../../store/usePlaceStore'
 import axios from 'axios'
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import KakaoNearPlace from './KakaoNearPlace.jsx'
 
 const KakaoMaps = () => {
@@ -11,9 +11,11 @@ const KakaoMaps = () => {
   const kakaoPlace = usePlaceStore(state => state.kakaoPlace)
   const setSearchData = usePlaceStore(state => state.setSearchData)
 
-  const [searchParams] = useSearchParams()
+  const intervalRef = useRef(null)
+  const [lat, setLat] = useState('')
+  const [lng, setLng] = useState('')
   const navigate = useNavigate()
-  const [retryCount, setRetryCount] = useState(0)
+  const retryCountRef = useRef(0);
   const [formData, setFormData] = useState({
     place: '',
   })
@@ -21,77 +23,91 @@ const KakaoMaps = () => {
   const isRoot = location.pathname === '/'
 
   useEffect(() => {
-    const getNowLocation = () => {
-      navigator.geolocation.getCurrentPosition(
-        position => {
-          const latitude = position.coords.latitude
-          const longitude = position.coords.longitude
-          // console.log('y:'+latitude, 'x:'+longitude)
-          if (!center || center.lat !== latitude || center.lng !== longitude) {
-            setCenter({ lat: latitude, lng: longitude })
-            setRetryCount(0)
-          }
-        },
-        err => {
-          console.error('error msg:', err)
-          if (retryCount < 3) {
-            console.log(`위치정보 획득 실패, ${retryCount + 1}회 째 재시도...`)
-            setRetryCount(prevCount => prevCount + 1)
-            setTimeout(() => getNowLocation(retryCount, 1000))
-          } else {
-            console.log('위치 정보 획득 실패 및 재시도 실패')
-          }
-        },
-      )
-    }
     getNowLocation()
+
+    intervalRef.current = setInterval(() => {
+      getNowLocation()
+    }, 60000)
 
     try {
       if (isRoot) {
-        if (center !== null && !kakaoPlace) {
+        // console.log(isRoot)
+        if (!center || center.lat !== lat || center.lng !== lng || kakaoPlace?.length === 0) {
           getKakaoData(center)
         }
       }
     } catch (err) {
       console.log(err)
     }
+
+    return () => clearInterval(intervalRef.current)
   }, [center])
 
-  const getKakaoData = center => {
-    // console.log('재시도 횟수', retryCount)
-    axios
-      .post(
-        'http://localhost:3000/api/nearplace',
-        { location: center },
-        {
-          withCredentials: true,
-        },
-      )
-      .then(res => {
-        const data = res.data
-        // console.log(data)
-        setKakaoPlace(data)
-        setRetryCount(0)
-      })
-      .catch(err => {
-        console.error('error msg:', err)
-        if (retryCount < 3) {
-          console.log(`데이터 로딩 실패 ${retryCount + 1}회 째 재시도...`)
-          setRetryCount(prevCount => prevCount + 1)
-          setTimeout(() => getKakaoData(center, retryCount, 1000))
-        } else {
-          console.log('kakao map 데이터 로딩 실패 및 재시도 실패')
+  const getNowLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const latitude = position.coords.latitude
+        const longitude = position.coords.longitude
+        // console.log('y:'+latitude, 'x:'+longitude)
+        setLat(latitude)
+        setLng(longitude)
+        if (!center || center.lat !== latitude || center.lng !== longitude) {
+          setCenter({ lat: latitude, lng: longitude })
         }
-      })
+        // console.log(center)
+      },
+      err => {
+        console.error('error msg:', err)
+        if (retryCountRef.current < 3) {
+          retryCountRef.current += 1
+          console.log(`위치정보 획득 실패, ${retryCountRef.current}회 째 재시도...`)
+          setTimeout(() => getNowLocation(retryCountRef, 1000))
+        } else {
+          console.log('위치 정보 획득 실패 및 재시도 실패')
+        }
+      },
+    )
+  }
+
+  const getKakaoData = center => {
+    console.log('재시도 횟수', retryCountRef.current)
+    // if(kakaoPlace?.length === 0 || !kakaoPlace) {
+    //   // console.log(kakaoPlace?.length)
+    //   axios
+    //   .post(
+    //     'http://localhost:3000/api/kakao/nearplace',
+    //     { location: center },
+    //     {
+    //       withCredentials: true,
+    //     },
+    //   )
+    //   .then(res => {
+    //     const data = res.data
+    //     // console.log(data)
+    //     setKakaoPlace(data)
+    //     retryCountRef.current == 0;
+    //   })
+    //   .catch(err => {
+    //     // console.error('error msg:', err)
+    //     if (retryCountRef.current < 3) {
+    //       retryCountRef.current += 1
+    //       console.log(`데이터 로딩 실패 ${retryCountRef.current}회 째 재시도...`)
+    //       setTimeout(() => getKakaoData(center, 1000))
+    //     } else {
+    //       console.log('kakao map 데이터 로딩 실패 및 재시도 실패', err)
+    //     }
+    //   })
+    // }
   }
   const handleSubmit = e => {
     e.preventDefault()
+    setSearchData(null)
     if (formData.place.startsWith('#')) {
       const sliced = formData.place.slice(1)
       navigate(`/search/${sliced}`)
       axios
         .post(
-          'http://localhost:3000/api/search',
+          'http://localhost:3000/api/kakao/search',
           {
             place: sliced,
             center: center,
@@ -101,8 +117,8 @@ const KakaoMaps = () => {
           },
         )
         .then(res => {
-          const data = res
-          console.log(data)
+          const data = res.data
+          // console.log(data)
           setSearchData(data)
         })
         .catch(err => {
@@ -112,7 +128,7 @@ const KakaoMaps = () => {
       navigate(`/search/${formData.place}`)
       axios
         .post(
-          'http://localhost:3000/api/search',
+          'http://localhost:3000/api/kakao/search',
           {
             place: formData.place,
             center: center,
@@ -122,8 +138,8 @@ const KakaoMaps = () => {
           },
         )
         .then(res => {
-          const data = res
-          console.log(data)
+          const data = res.data
+          // console.log(data)
           setSearchData(data)
         })
         .catch(err => {
@@ -139,6 +155,7 @@ const KakaoMaps = () => {
       [e.target.name]: e.target.value,
     })
   }
+  // console.log(searchData)
   return (
     <>
       {isRoot === true ? (
@@ -171,13 +188,13 @@ const KakaoMaps = () => {
                         name="place"
                         value={formData.place}
                         onChange={handleChange}
-                        className="py-1 indent-1 w-full"
+                        className="py-3 indent-1 w-full outline-none"
                         placeholder="검색어를 입력해주세요"
                       />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 text-center">
                       <button
-                        className="button w-full rounded-3xl px-2 py-2 bg-teal-400 focus:bg-teal-700 text-yellow-300"
+                        className="button w-fit rounded-3xl px-5 py-2 bg-teal-200 focus:bg-teal-500 text-gray-700"
                         type="submit"
                       >
                         <span className="max-[426px]:text-sm mouse_pointer">검색</span>
@@ -198,8 +215,8 @@ const KakaoMaps = () => {
             <form className="px-3 my-3" onSubmit={handleSubmit} autoComplete="off">
               <fieldset>
                 <legend className="hidden">kakao search</legend>
-                <div className="flex items-center mx-auto gap-1 border-1 rounded-3xl px-3 py-1">
-                  <div className="max-w-6">
+                <div className="flex items-center mx-auto gap-1 border-1 rounded-3xl px-3 py-1 bg-gray-200">
+                  {/* <div className="max-w-6">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -214,7 +231,7 @@ const KakaoMaps = () => {
                         d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
                       />
                     </svg>
-                  </div>
+                  </div> */}
                   <div className="flex gap-1 items-center w-full">
                     <div className="flex-5">
                       <input
@@ -222,17 +239,31 @@ const KakaoMaps = () => {
                         name="place"
                         value={formData.place}
                         onChange={handleChange}
-                        className="py-1 indent-1 w-full"
+                        className="py-2 indent-5 w-full outline-none"
                         placeholder="검색어를 입력해주세요"
                       />
                     </div>
-                    <div className="flex-1">
-                      <button
-                        className="button mouse_pointer w-full rounded-3xl px-2 py-2 bg-teal-400 focus:bg-teal-700 text-yellow-300"
+                    <div className="flex-1 text-center">
+                      {/* <button
+                        className="button mouse_pointer w-full rounded-3xl px-2 py-2 bg-teal-200 focus:bg-teal-500 text-gray-700"
                         type="submit"
                       >
                         <span className="max-[426px]:text-sm">검색</span>
-                      </button>
+                      </button> */}
+                      <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="size-6 ml-auto"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                      />
+                    </svg>
                     </div>
                   </div>
                 </div>

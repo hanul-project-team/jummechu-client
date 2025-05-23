@@ -1,11 +1,11 @@
-import React from 'react'
 import usePlaceStore from '../../store/usePlaceStore.js'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import 'swiper/css'
+import { Link } from 'react-router-dom'
 
 const KakaoNearPlace = () => {
   const kakaoPlace = usePlaceStore(state => state.kakaoPlace)
-  // console.log(kakaoPlace)
+  
   return (
     <>
       <div>
@@ -15,15 +15,20 @@ const KakaoNearPlace = () => {
         <Swiper
           spaceBetween={50}
           slidesPerView={3}
-          // onSlideChange={() => console.log('slide change')}
-          // onSwiper={(swiper) => console.log(swiper)}
         >
           {kakaoPlace &&
             kakaoPlace.map((kp, i) => (
-              <SwiperSlide key={i} className='md:max-w-full' style={{margin: '0px'}}>
-                <img src="https://picsum.photos/200/150" alt="lorem picture" />
-                <p className='font-bold font-sans max-[426px]:text-sm'>{kp.place_name}</p>
-                <p className='max-[426px]:text-sm'>소재지:{kp.address_name}</p>
+              <SwiperSlide key={i} className="md:max-w-full" style={{ margin: '0px' }}>
+                <Link to={`/place/${kp.id}`} state={kp}>
+                  <img
+                    src={`https://picsum.photos/200/150?random=${Math.floor(Math.random() * 1000)}`}
+                    alt="lorem picture"
+                  />
+                </Link>
+                <Link to={`/place/${kp.id}`} state={kp}>
+                  <p className="font-bold font-sans max-[426px]:text-sm">{kp.place_name}</p>
+                </Link>
+                <p className="max-[426px]:text-sm">소재지:{kp.address_name}</p>
               </SwiperSlide>
             ))}
         </Swiper>

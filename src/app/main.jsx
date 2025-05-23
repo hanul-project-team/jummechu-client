@@ -13,6 +13,7 @@ createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <Provider store={reduxStore}>
       <App />
+      <ToastContainer className='custom-toast-container' />
     </Provider>
   </BrowserRouter>,
 )

@@ -71,6 +71,7 @@ const RegistDetailsForm = () => {
       console.log(phone)
       // await axios.post('http://localhost:3000/auth/sendCode', phone)
       setIsRequested(true)
+      toast.success(<div>인증번호 발송에 성공하였습니다.</div>, { autoClose: 4000 })
       resetField('code')
       setFocus('code')
       setTimerKey(prev => prev + 1)
@@ -86,13 +87,14 @@ const RegistDetailsForm = () => {
       //   if (response.data === true) {
       //   }
       // } catch {}
+      toast.success('인증에 성공하였습니다', { autoClose: 3000 })
       setIsSMSAuthenticated(true)
     }
   }
   const onSubmit = async data => {
     const role = JSON.parse(localStorage.getItem('role'))
     const termsAgreement = JSON.parse(localStorage.getItem('termsAgreement'))
-    const { passwordCheck, code, ...rest } = data
+    const {passwordCheck: _passwordCheck, code: _code, ...rest } = data
     const submitData = { ...role, termsAgreement, ...rest }
     try {
       await axios.post('http://localhost:3000/auth/regist', submitData)
@@ -100,7 +102,14 @@ const RegistDetailsForm = () => {
       localStorage.removeItem('role')
       localStorage.removeItem('termsAgreement')
       navigate('/login')
-      toast.success('회원가입 완료!', { autoClose:3000 })
+      toast.success(
+        <div>
+          회원가입이 완료되었습니다.
+          <br />
+          로그인해주세요.
+        </div>,
+        { autoClose: 3000 },
+      )
     } catch (e) {
       if (e.response.status === 400) {
         setError('email', { message: e.response.data.message })
@@ -166,9 +175,7 @@ const RegistDetailsForm = () => {
             <label htmlFor="password">
               비밀번호<span className={style.requiredSpan}>*</span>
             </label>
-            <span className={style.hintSpan}>
-              영문/숫자/특수문자(~!@#^*_=+-) 포함 8자 이상 
-            </span>
+            <span className={style.hintSpan}>영문/숫자/특수문자(~!@#^*_=+-) 포함 8자 이상</span>
           </div>
           <input
             className="grow"
