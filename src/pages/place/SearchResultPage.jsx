@@ -42,8 +42,9 @@ const SearchResult = () => {
       axios
         .post('http://localhost:3000/store/regist', sd)
         .then(res => {
-          console.log(res)
-          // navigate(`/place/${sd.id}`, { state: sd })
+          const place = res.data
+          console.log(place)
+          navigate(`/place/${place._id}`, { state: sd })
         })
         .catch(err => {
           console.log('axios 요청 실패', err)
