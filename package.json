@@ -2,6 +2,7 @@
   "name": "jummechu-client",
   "private": true,
   "version": "0.0.0",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -22,7 +23,6 @@
     "react-markdown": "^10.1.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.0",
-    "react-toastify": "^11.0.5",
     "react-star-rating-component": "^1.4.1",
     "react-toastify": "^11.0.5",
     "recharts": "^2.15.3",
