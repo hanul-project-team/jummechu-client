@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
 import FindAccountVerifyForm from '../../features/auth/components/find_account/FindAccountVerifyForm'
+import FindAccountTargetEmailForm from '../../features/auth/components/find_account/FindAccountTargetEmailForm'
 
 const FindAccountPage = () => {
   const [tabIndex, setTabIndex] = useState(0)
@@ -33,7 +34,7 @@ const FindAccountPage = () => {
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 56 56"
             fill="none"
-            className='size-14'
+            className="size-14"
           >
             <path
               d="M21.1944 22.4908C21.1944 25.086 19.018 27.1899 16.3333 27.1899C13.6485 27.1899 11.4722 25.086 11.4722 22.4908C11.4722 19.8955 13.6485 17.7917 16.3333 17.7917C19.018 17.7917 21.1944 19.8955 21.1944 22.4908Z"
@@ -86,12 +87,13 @@ const FindAccountPage = () => {
               </h2>
               <FindAccountVerifyForm type={type} />
             </TabPanel>
-            <TabPanel>
+            <TabPanel className="flex flex-col gap-3">
               <h2 className="text-center font-bold">
                 비밀번호를 찾고자하는
                 <br />
                 이메일을 입력해 주세요
               </h2>
+              <FindAccountTargetEmailForm />
             </TabPanel>
           </TabPanels>
         </TabGroup>

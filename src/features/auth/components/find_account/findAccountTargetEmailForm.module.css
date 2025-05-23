@@ -1,0 +1,17 @@
+.findAccountTargetEmailFormField input {
+    text-indent: 0.25rem;
+    padding: 1rem 0.5rem ;
+    background-color: #d9d9d9;
+    outline: none;
+    border-radius: 0.25rem;
+}
+.findAccountTargetEmailForm button[type=submit] {
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+    color: white;
+    background-color: black;
+}
+.errorSpan {
+    color: red;
+    font-size: 0.75rem;
+}
