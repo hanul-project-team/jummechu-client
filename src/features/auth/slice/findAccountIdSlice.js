@@ -9,7 +9,7 @@ const initialState = {
 }
 
 const findAccountIdSlice = createSlice({
-  name: 'help',
+  name: 'findAccountId',
   initialState,
   reducers: {
     findId: (state, action) => {
