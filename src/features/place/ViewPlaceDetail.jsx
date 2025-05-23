@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import Icon from '../../../../assets/images/icon.png'
-import '../../../../assets/styles/global.css'
-import usePlaceStore from '../../../../store/usePlaceStore.js'
+import Icon from '../../assets/images/icon.png'
+import '../../assets/styles/global.css'
+import zustandStore from '../../app/zustandStore.js'
 import 'swiper/css'
 import PlaceReview from './reviews/PlaceReview.jsx'
 
@@ -11,11 +11,11 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
   const [childRate, setChildRate] = useState(0)
   const [category, setCategory] = useState([])
   const [showAddress, setShowAddress] = useState(false)
-  const setReviewInfo = usePlaceStore(state => state.setReviewInfo)
-  const placeDetail = usePlaceStore(state => state.placeDetail)
+  const setReviewInfo = zustandStore(state => state.setReviewInfo)
+  const placeDetail = zustandStore(state => state.placeDetail)
   const [score, setScore] = useState(null)
 
-  const searchData = usePlaceStore(state => state.searchData)
+  const searchData = zustandStore(state => state.searchData)
 
   const rateRef = useRef()
   // console.log(score)

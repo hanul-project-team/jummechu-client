@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import usePlaceStore from '../../../../../store/usePlaceStore.js'
+import zustandStore from '../../../app/zustandStore.js'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import Icon from '../../../../../assets/images/icon.png'
+import Icon from '../../../assets/images/icon.png'
 import StarRatingComponent from 'react-star-rating-component'
 import ReviewChart from './ReviewChart.jsx'
 import axios from 'axios'
@@ -16,8 +16,8 @@ const PlaceReview = ({ reportRate }) => {
   const [errorMessage, setErrorMessage] = useState('')
   let count = showMore
   let MIN_LENGTH = 10
-  const reviewInfo = usePlaceStore(state => state.reviewInfo)
-  const placeDetail = usePlaceStore(state => state.placeDetail)
+  const reviewInfo = zustandStore(state => state.reviewInfo)
+  const placeDetail = zustandStore(state => state.placeDetail)
   const navigate = useNavigate()
   const [starRating, setStarRating] = useState(0)
   const [formData, setFormData] = useState({
@@ -303,7 +303,7 @@ const PlaceReview = ({ reportRate }) => {
     // console.log(formData)
     axios
       .post('http://localhost:3000/user/review/write', formData, {
-        withCredentials: true 
+        withCredentials: true,
       })
       .then(res => {
         console.log(res)

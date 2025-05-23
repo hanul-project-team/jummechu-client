@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import usePlaceStore from '../../store/usePlaceStore.js'
+import zustandStore from '../../app/zustandStore.js'
 import axios from 'axios'
-import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 import '../../assets/styles/global.css'
 
 const SearchResult = () => {
-  const searchData = usePlaceStore(state => state.searchData)
-  const isLoading = usePlaceStore(state => state.isLoading)
-  const setIsLoading = usePlaceStore(state => state.setIsLoading)
+  const searchData = zustandStore(state => state.searchData)
+  const isLoading = zustandStore(state => state.isLoading)
+  const setIsLoading = zustandStore(state => state.setIsLoading)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -17,8 +16,8 @@ const SearchResult = () => {
     } else {
       setIsLoading(false)
     }
-    const unsub = usePlaceStore.persist.onFinishHydration(() => {
-      const data = usePlaceStore.getState().searchData
+    const unsub = zustandStore.persist.onFinishHydration(() => {
+      const data = zustandStore.getState().searchData
       setIsLoading(false)
     })
     return () => unsub?.()
@@ -38,9 +37,20 @@ const SearchResult = () => {
   // console.log(searchData)
 
   const handleNavigate = sd => {
-    // axios 저장요청 
-
-    navigate(`/place/${sd.id}`, { state: sd })
+    // console.log(sd)
+    try {
+      axios
+        .post('http://localhost:3000/store/regist', sd)
+        .then(res => {
+          console.log(res)
+          // navigate(`/place/${sd.id}`, { state: sd })
+        })
+        .catch(err => {
+          console.log('axios 요청 실패', err)
+        })
+    } catch (err) {
+      console.log('try 실패', err)
+    }
   }
 
   return (
