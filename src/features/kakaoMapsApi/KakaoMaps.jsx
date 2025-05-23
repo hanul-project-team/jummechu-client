@@ -188,13 +188,13 @@ const KakaoMaps = () => {
                         name="place"
                         value={formData.place}
                         onChange={handleChange}
-                        className="py-1 indent-1 w-full"
+                        className="py-3 indent-1 w-full outline-none"
                         placeholder="검색어를 입력해주세요"
                       />
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 text-center">
                       <button
-                        className="button w-full rounded-3xl px-2 py-2 bg-teal-400 focus:bg-teal-700 text-yellow-300"
+                        className="button w-fit rounded-3xl px-5 py-2 bg-teal-200 focus:bg-teal-500 text-gray-700"
                         type="submit"
                       >
                         <span className="max-[426px]:text-sm mouse_pointer">검색</span>
@@ -215,8 +215,8 @@ const KakaoMaps = () => {
             <form className="px-3 my-3" onSubmit={handleSubmit} autoComplete="off">
               <fieldset>
                 <legend className="hidden">kakao search</legend>
-                <div className="flex items-center mx-auto gap-1 border-1 rounded-3xl px-3 py-1">
-                  <div className="max-w-6">
+                <div className="flex items-center mx-auto gap-1 border-1 rounded-3xl px-3 py-1 bg-gray-200">
+                  {/* <div className="max-w-6">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -231,7 +231,7 @@ const KakaoMaps = () => {
                         d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
                       />
                     </svg>
-                  </div>
+                  </div> */}
                   <div className="flex gap-1 items-center w-full">
                     <div className="flex-5">
                       <input
@@ -239,17 +239,31 @@ const KakaoMaps = () => {
                         name="place"
                         value={formData.place}
                         onChange={handleChange}
-                        className="py-1 indent-1 w-full"
+                        className="py-2 indent-5 w-full outline-none"
                         placeholder="검색어를 입력해주세요"
                       />
                     </div>
-                    <div className="flex-1">
-                      <button
-                        className="button mouse_pointer w-full rounded-3xl px-2 py-2 bg-teal-400 focus:bg-teal-700 text-yellow-300"
+                    <div className="flex-1 text-center">
+                      {/* <button
+                        className="button mouse_pointer w-full rounded-3xl px-2 py-2 bg-teal-200 focus:bg-teal-500 text-gray-700"
                         type="submit"
                       >
                         <span className="max-[426px]:text-sm">검색</span>
-                      </button>
+                      </button> */}
+                      <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="size-6 ml-auto"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                      />
+                    </svg>
                     </div>
                   </div>
                 </div>
