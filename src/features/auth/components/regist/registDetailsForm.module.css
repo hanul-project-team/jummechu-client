@@ -24,19 +24,7 @@
 }
 .registFormField label {
     color: black;
-}
-.modalWrapper {
-    position: fixed;
-    display: flex;
-    top: 10rem;
-    left: 40rem;
-}
-.modalPanel {
-    font-size: 0.75rem;
-    border: 1px solid gray;
-    background-color: white;
-    padding: 0.5rem 0.25rem;
-    border-radius: 0.25rem;
+    font-weight: bold;
 }
 .noSpinner::-webkit-outer-spin-button,
 .noSpinner::-webkit-inner-spin-button {
@@ -74,12 +62,14 @@
     background-color: gray;
 }
 .registBtn {
-    padding: 1rem 0.5rem;
+    border: 1px solid black;
+    padding: 0.75rem;
     border-radius: 0.25rem;
     color: white;
     background-color: black;
 }
 .registBtn:disabled {
+    border: 1px solid gray;
     background-color: gray;
 }
 .errorSpan {

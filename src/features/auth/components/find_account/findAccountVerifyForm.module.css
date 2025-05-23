@@ -10,6 +10,7 @@
 }
 .findAccountVerifyFormField label {
     color: black;
+    font-weight: bold;
 }
 .noSpinner::-webkit-outer-spin-button,
 .noSpinner::-webkit-inner-spin-button {

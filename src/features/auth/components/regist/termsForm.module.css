@@ -2,18 +2,17 @@
     height: 1px;
     background-color: gray;
 }
-.loginForm button[type=submit] {
-    padding: 0.75rem 0.25rem;
+.termsForm button[type=submit] {
+    border: 1px solid black;
+    padding: 0.75rem;
     background-color: black;
     color: white;
     border-radius: 0.25rem;
     outline: none;
 }
-.loginForm button[type=submit]:disabled {
-    padding: 0.75rem 0.25rem;
+.termsForm button[type=submit]:disabled {
+    border: 1px solid gray;
     background-color: gray;
-    color: white;
-    border-radius: 0.25rem;
 }
 .termBox {
     border: 1px solid gray;
