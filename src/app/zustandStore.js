@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-const usePlaceStore = create(
+const zustandStore = create(
   persist(
     (set, get) => ({
       placeDetail: [],
@@ -45,4 +45,4 @@ const usePlaceStore = create(
   ),
 )
 
-export default usePlaceStore
+export default zustandStore
