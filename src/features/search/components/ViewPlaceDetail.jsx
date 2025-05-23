@@ -72,7 +72,7 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="size-6"
+              className={`size-6 transition-all duration-300 ${isBookmarked ? 'text-red-500 scale-120' : 'text-black/80 scale-100'}`}
             >
               <path
                 strokeLinecap="round"
