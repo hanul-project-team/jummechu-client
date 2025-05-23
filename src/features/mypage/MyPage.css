@@ -1,0 +1,14 @@
+.mask-radial-fade {
+    -webkit-mask-image: radial-gradient(circle at center, black 100%, transparent 100%);
+    mask-image: radial-gradient(circle at center, black 70%, transparent 0%);
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+
+
+li {
+    list-style: none;
+}
+  
