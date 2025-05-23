@@ -9,7 +9,7 @@ import ReviewChart from './ReviewChart.jsx'
 const PlaceReview = ({ reportRate }) => {
   const [showMore, setShowMore] = useState(5)
   const [isUser, setIsUser] = useState(false)
-  const [prevResult, setPrevResult] = useState(null);
+  const [prevResult, setPrevResult] = useState(null)
   const user = useSelector(state => state.auth.user)
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -223,7 +223,7 @@ const PlaceReview = ({ reportRate }) => {
     setInitialItems(sorted)
 
     const result = handleTotalRating(reviews)
-    if(typeof result == 'number' && prevResult !== result) {
+    if (typeof result == 'number' && prevResult !== result) {
       setPrevResult(result)
       reportRate(result)
     }
@@ -324,6 +324,7 @@ const PlaceReview = ({ reportRate }) => {
 
   return (
     <div>
+      {/* 리뷰 헤더 영역 */}
       <div className="container max-w-full bg-gray-300 py-15">
         <div className="max-w-3/5 mx-auto text-center">
           <span className="text-2xl italic">고객 리뷰</span>
@@ -422,6 +423,7 @@ const PlaceReview = ({ reportRate }) => {
           </div>
         ) : null}
       </div>
+      {/* 리뷰 보이는곳 */}
       <div className="container max-w-3/5 mx-auto">
         {/* 정렬 버튼 */}
         <div className="max-w-4/5 flex gap-3 mx-auto my-3">
@@ -456,6 +458,7 @@ const PlaceReview = ({ reportRate }) => {
             별점낮은순
           </button>
         </div>
+        {/* 리뷰 박스 */}
         <div>
           {initialItems &&
             showMore &&
@@ -480,6 +483,7 @@ const PlaceReview = ({ reportRate }) => {
               </div>
             ))}
         </div>
+        {/* 더보기 버튼 */}
         <div className="mx-auto max-w-fit my-2">
           <button
             type="button"
