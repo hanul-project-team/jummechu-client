@@ -4,7 +4,10 @@ import '../MyPage.css' // 경로 기준: 현재 컴포넌트 파일 위치 기�
 
 const MyPageForm = () => {
   const [active, setActive] = useState('최근기록')
-  const [bookmarked, setBookmarked] = useState([])
+  const [bookmarked, setBookmarked] = useState(() => {
+    const savedBookmarks = localStorage.getItem('bookmarkedItems')
+    return savedBookmarks ? JSON.parse(savedBookmarks) : []
+  })
   const tabs = ['최근기록', '찜', '리뷰', '음식점 추천', '계정 설정']
   const [isopen, setIsOpen] = useState(false)
   const [openai, setOpenAi] = useState([])
@@ -14,11 +17,11 @@ const MyPageForm = () => {
   const example = [
     {
       id: 1,
-      title: '맛있다 초밥집',
+      title: '맛있다 백반',
       image: 'https://picsum.photos/250/250?random=1',
       rating: '4.0',
       description: '맛있다. 이 집 괜찮다.',
-      keyword: '초밥, 일식, 스시',
+      keyword: '백반, 한식',
     },
     {
       id: 2,
@@ -43,6 +46,14 @@ const MyPageForm = () => {
       rating: '5',
       description: '존맛',
       keyword: '일식, 덮밥, 가츠동',
+    },
+    {
+      id: 5,
+      title: '왕뼈사랑',
+      image: 'https://picsum.photos/250/250?random=8',
+      rating: '4.3',
+      description: '맛 굿',
+      keyword: '한식, 뼈해장국,',
     },
   ]
 
@@ -159,6 +170,10 @@ const MyPageForm = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active])
 
+  useEffect(() => {
+    localStorage.setItem('bookmarkedItems', JSON.stringify(bookmarked));
+  }, [bookmarked]); // bookmarked 배열이 변경될 때마다 이 훅이 실행됩니다.
+
   const callDalleImage = async keyword => {
     try {
       const res = await fetch('http://localhost:3000/api/dalle', {
@@ -257,13 +272,32 @@ const MyPageForm = () => {
             {bookmarked.length === 0 ? (
               <p>찜한 목록이 없습니다.</p>
             ) : (
-              <ul>
+              // 찜한 목록을 렌더링할 때도 북마크 버튼을 포함하여 찜 해제 기능을 제공할 수 있습니다.
+              <ul className="flex flex-col gap-9 py-5">
                 {bookmarked.map(shop => (
-                  <li key={shop.id}>
-                    <img src={shop.image} alt={shop.title} />
-                    <h4 className="font-semibold">{shop.title}</h4>
-                    <p>{shop.rating} ⭐</p>
-                    <p>{shop.description}</p>
+                  <li key={shop.id} className="flex gap-4">
+                    <div className="relative w-[250px] h-[250px]">
+                      <img
+                        src={shop.image}
+                        alt={shop.title}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => toggleBookmark(shop)} // 찜 해제 기능
+                        className="absolute top-2 right-2 bg-white bg-opacity-70 rounded-full p-2 shadow hover:bg-opacity-100"
+                      >
+                        <span role="img" aria-label="bookmarked">
+                          ❤️
+                        </span>
+                      </button>
+                    </div>
+                    <div className="py-3">
+                      <h4 className="text-lg font-semibold">{shop.title}</h4>
+                      <p>{shop.rating} ⭐</p>
+                      <p>{shop.description}</p>
+                      <p className="text-sm text-gray-500">{shop.keyword}</p>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -283,7 +317,7 @@ const MyPageForm = () => {
                 className="w-[300px] h-[300px] rounded shadow-md py-5"
               />
             )}
-            {openai.length > 2 ? (
+            {openai.length > 0 ? (
               <ul className="flex flex-col gap-9 py-5">
                 <p className="py-2">
                   사용자닉네임 님이 가장 좋아하시는 음식은 "{mostFrequentKeywords}" 입니다.
@@ -318,25 +352,25 @@ const MyPageForm = () => {
                     style={{ backgroundImage: "url('https://picsum.photos/200')" }}
                   />
                   <span
-                    className="absolute bottom-1 right-1 bg-white  rounded-full p-2 shadow hover:bg-opacity-100 cursor-pointer"
+                    className="absolute bottom-0 right-0 bg-white  rounded-full p-2 shadow hover:bg-opacity-100 cursor-pointer"
                     onClick={() => setIsOpen(true)}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke-width="1.5"
+                      strokeWidth="1.5"
                       stroke="currentColor"
-                      class="size-6"
+                      className="size-6"
                     >
                       <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                         d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"
                       />
                       <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                         d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"
                       />
                     </svg>
