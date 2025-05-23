@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import Icon from '../../../assets/images/icon.png'
-import '../../../assets/styles/global.css'
-import usePlaceStore from '../../../store/usePlaceStore.js'
+import Icon from '../../../../assets/images/icon.png'
+import '../../../../assets/styles/global.css'
+import usePlaceStore from '../../../../store/usePlaceStore.js'
 import 'swiper/css'
-import PlaceReview from './PlaceReview.jsx'
+import PlaceReview from './reviews/PlaceReview.jsx'
 
 const ViewPlaceDetail = ({ defaultBoomarked }) => {
   const [isBookmarked, setIsBookmarked] = useState(defaultBoomarked)
-  const [rate, setRate] = useState(0)
+  const [childRate, setChildRate] = useState(0)
   const [category, setCategory] = useState([])
   const [showAddress, setShowAddress] = useState(false)
   const setReviewInfo = usePlaceStore(state => state.setReviewInfo)
@@ -16,11 +16,7 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
   const [score, setScore] = useState(null)
 
   const searchData = usePlaceStore(state => state.searchData)
-  const ratingStar = star => {
-    if (star) {
-      setRate(star)
-    }
-  }
+
   const rateRef = useRef()
   // console.log(score)
   const toggleAddress = () => {
@@ -41,7 +37,7 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
     }
     const preScore = rateRef.current.dataset.score
     setScore(preScore)
-  }, [isBookmarked, placeDetail, rateRef, rate])
+  }, [isBookmarked, placeDetail, rateRef])
 
   const handleBookmark = () => {
     if (isBookmarked === true) {
@@ -91,7 +87,7 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
         <div className="flex items-center">
           <div
             className="relative w-fit text-2xl leading-none my-2"
-            data-score={placeDetail.rate ? placeDetail.rate : rate}
+            data-score={placeDetail.rate ? placeDetail.rate : childRate}
             ref={rateRef}
           >
             <div className="text-gray-300">★★★★★</div>
@@ -228,7 +224,7 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
           )}
         </div>
       </div>
-      <PlaceReview ratingStar={ratingStar} />
+      <PlaceReview reportRate={setChildRate} />
     </div>
   )
 }

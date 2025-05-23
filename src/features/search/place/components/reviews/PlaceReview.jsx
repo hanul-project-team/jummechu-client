@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react'
-import usePlaceStore from '../../../store/usePlaceStore'
+import usePlaceStore from '../../../../../store/usePlaceStore.js'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import Icon from '../../../assets/images/icon.png'
+import Icon from '../../../../../assets/images/icon.png'
 import StarRatingComponent from 'react-star-rating-component'
 import ReviewChart from './ReviewChart.jsx'
 
-const PlaceReview = ({ ratingStar }) => {
+const PlaceReview = ({ reportRate }) => {
   const [showMore, setShowMore] = useState(5)
   const [isUser, setIsUser] = useState(false)
+  const [prevResult, setPrevResult] = useState(null);
   const user = useSelector(state => state.auth.user)
   const [showReviewForm, setShowReviewForm] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -184,96 +185,6 @@ const PlaceReview = ({ ratingStar }) => {
       store: placeDetail.place_name,
       isExternal: false,
     },
-    {
-      user: '신사임당',
-      comment:
-        '아이들이 소란스러워 걱정이었는데 작은 객실 형태의 식사공간이 따로 준비되어 있어 그곳을 이용했습니다. 다만 이용하려면 예약이 필수라서 사전에 동행인들과 상의를 해야하겠습니다.',
-      rating: 4,
-      createdAt: new Date('2025-01-25'),
-      store: placeDetail.place_name,
-      isExternal: false,
-    },
-    {
-      user: '신사임당',
-      comment:
-        '아이들이 소란스러워 걱정이었는데 작은 객실 형태의 식사공간이 따로 준비되어 있어 그곳을 이용했습니다. 다만 이용하려면 예약이 필수라서 사전에 동행인들과 상의를 해야하겠습니다.',
-      rating: 4,
-      createdAt: new Date('2025-04-29'),
-      store: placeDetail.place_name,
-      isExternal: false,
-    },
-    {
-      user: '신사임당',
-      comment:
-        '아이들이 소란스러워 걱정이었는데 작은 객실 형태의 식사공간이 따로 준비되어 있어 그곳을 이용했습니다. 다만 이용하려면 예약이 필수라서 사전에 동행인들과 상의를 해야하겠습니다.',
-      rating: 5,
-      createdAt: new Date('2025-03-07'),
-      store: placeDetail.place_name,
-      isExternal: false,
-    },
-    {
-      user: '신사임당',
-      comment:
-        '아이들이 소란스러워 걱정이었는데 작은 객실 형태의 식사공간이 따로 준비되어 있어 그곳을 이용했습니다. 다만 이용하려면 예약이 필수라서 사전에 동행인들과 상의를 해야하겠습니다.',
-      rating: 1,
-      createdAt: new Date('2024-12-01'),
-      store: placeDetail.place_name,
-      isExternal: false,
-    },
-    {
-      user: '신사임당',
-      comment:
-        '아이들이 소란스러워 걱정이었는데 작은 객실 형태의 식사공간이 따로 준비되어 있어 그곳을 이용했습니다. 다만 이용하려면 예약이 필수라서 사전에 동행인들과 상의를 해야하겠습니다.',
-      rating: 3,
-      createdAt: new Date('2024-09-02'),
-      store: placeDetail.place_name,
-      isExternal: false,
-    },
-    {
-      user: '신사임당',
-      comment:
-        '아이들이 소란스러워 걱정이었는데 작은 객실 형태의 식사공간이 따로 준비되어 있어 그곳을 이용했습니다. 다만 이용하려면 예약이 필수라서 사전에 동행인들과 상의를 해야하겠습니다.',
-      rating: 4,
-      createdAt: new Date('2024-07-18'),
-      store: placeDetail.place_name,
-      isExternal: false,
-    },
-    {
-      user: '신사임당',
-      comment:
-        '아이들이 소란스러워 걱정이었는데 작은 객실 형태의 식사공간이 따로 준비되어 있어 그곳을 이용했습니다. 다만 이용하려면 예약이 필수라서 사전에 동행인들과 상의를 해야하겠습니다.',
-      rating: 3,
-      createdAt: new Date('2025-05-22T10:30:00+09:00'),
-      store: placeDetail.place_name,
-      isExternal: false,
-    },
-    {
-      user: '신사임당',
-      comment:
-        '아이들이 소란스러워 걱정이었는데 작은 객실 형태의 식사공간이 따로 준비되어 있어 그곳을 이용했습니다. 다만 이용하려면 예약이 필수라서 사전에 동행인들과 상의를 해야하겠습니다.',
-      rating: 5,
-      createdAt: new Date('2025-05-22T15:03:00+09:00'),
-      store: placeDetail.place_name,
-      isExternal: false,
-    },
-    {
-      user: '신사임당',
-      comment:
-        '아이들이 소란스러워 걱정이었는데 작은 객실 형태의 식사공간이 따로 준비되어 있어 그곳을 이용했습니다. 다만 이용하려면 예약이 필수라서 사전에 동행인들과 상의를 해야하겠습니다.',
-      rating: 4,
-      createdAt: new Date('2025-05-21T13:12:00+09:00'),
-      store: placeDetail.place_name,
-      isExternal: false,
-    },
-    {
-      user: '신사임당',
-      comment:
-        '아이들이 소란스러워 걱정이었는데 작은 객실 형태의 식사공간이 따로 준비되어 있어 그곳을 이용했습니다. 다만 이용하려면 예약이 필수라서 사전에 동행인들과 상의를 해야하겠습니다.',
-      rating: 5,
-      createdAt: new Date('2025-05-22T08:45:00+09:00'),
-      store: placeDetail.place_name,
-      isExternal: false,
-    },
   ]
 
   const [initialItems, setInitialItems] = useState(reviews)
@@ -310,6 +221,12 @@ const PlaceReview = ({ ratingStar }) => {
         break
     }
     setInitialItems(sorted)
+
+    const result = handleTotalRating(reviews)
+    if(typeof result == 'number' && prevResult !== result) {
+      setPrevResult(result)
+      reportRate(result)
+    }
   }, [currentSort, isUser])
 
   const handleReviewDate = createdAt => {
@@ -344,13 +261,12 @@ const PlaceReview = ({ ratingStar }) => {
       return <p>매우 불만족</p>
     }
   }
-  const handleTotalrating = reviews => {
+  const handleTotalRating = reviews => {
     const result = reviews.reduce((acc, cur) => acc + cur.rating, 0) / reviews.length
     const rounded = Math.round(result * 10) / 10
-    ratingStar(rounded)
     return rounded
   }
-  const handleReviewWriteToggle = () => {
+  const handleReviewWrite = () => {
     if (isUser === false) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니가?')) {
         navigate('/login')
@@ -414,8 +330,8 @@ const PlaceReview = ({ ratingStar }) => {
         </div>
         <div className="flex justify-between max-w-3/5 mx-auto items-center">
           <div>
-            <p className="font-bold text-3xl">{handleTotalrating(reviews)}</p>
-            <StarRatingComponent name="rating1" starCount={5} value={handleTotalrating(reviews)} />
+            <p className="font-bold text-3xl">{handleTotalRating(reviews)}</p>
+            <StarRatingComponent name="rating1" starCount={5} value={handleTotalRating(reviews)} />
             {handleratingText(reviews)}
             <p>
               총 <strong>{reviews.length}</strong>분의 고객님이 리뷰를 남기셨습니다.
@@ -424,7 +340,7 @@ const PlaceReview = ({ ratingStar }) => {
               <Link to="#" className="underline font-bold">
                 모든 리뷰
               </Link>
-              <div className="flex mouse_pointer" onClick={handleReviewWriteToggle}>
+              <div className="flex mouse_pointer" onClick={handleReviewWrite}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -490,7 +406,7 @@ const PlaceReview = ({ ratingStar }) => {
                   <button
                     type="button"
                     className="bg-red-400 mouse_pointer px-2 py-1 rounded-xl text-white mr-2"
-                    onClick={handleReviewWriteToggle}
+                    onClick={handleReviewWrite}
                   >
                     취소
                   </button>
