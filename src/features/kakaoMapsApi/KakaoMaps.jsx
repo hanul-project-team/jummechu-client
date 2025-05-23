@@ -70,34 +70,34 @@ const KakaoMaps = () => {
   }
 
   const getKakaoData = center => {
-    // console.log('재시도 횟수', retryCountRef.current)
-    if(kakaoPlace?.length === 0 || !kakaoPlace) {
-      // console.log(kakaoPlace?.length)
-      axios
-      .post(
-        'http://localhost:3000/api/kakao/nearplace',
-        { location: center },
-        {
-          withCredentials: true,
-        },
-      )
-      .then(res => {
-        const data = res.data
-        // console.log(data)
-        setKakaoPlace(data)
-        retryCountRef.current == 0;
-      })
-      .catch(err => {
-        // console.error('error msg:', err)
-        if (retryCountRef.current < 3) {
-          retryCountRef.current += 1
-          console.log(`데이터 로딩 실패 ${retryCountRef.current}회 째 재시도...`)
-          setTimeout(() => getKakaoData(center, 1000))
-        } else {
-          console.log('kakao map 데이터 로딩 실패 및 재시도 실패', err)
-        }
-      })
-    }
+    console.log('재시도 횟수', retryCountRef.current)
+    // if(kakaoPlace?.length === 0 || !kakaoPlace) {
+    //   // console.log(kakaoPlace?.length)
+    //   axios
+    //   .post(
+    //     'http://localhost:3000/api/kakao/nearplace',
+    //     { location: center },
+    //     {
+    //       withCredentials: true,
+    //     },
+    //   )
+    //   .then(res => {
+    //     const data = res.data
+    //     // console.log(data)
+    //     setKakaoPlace(data)
+    //     retryCountRef.current == 0;
+    //   })
+    //   .catch(err => {
+    //     // console.error('error msg:', err)
+    //     if (retryCountRef.current < 3) {
+    //       retryCountRef.current += 1
+    //       console.log(`데이터 로딩 실패 ${retryCountRef.current}회 째 재시도...`)
+    //       setTimeout(() => getKakaoData(center, 1000))
+    //     } else {
+    //       console.log('kakao map 데이터 로딩 실패 및 재시도 실패', err)
+    //     }
+    //   })
+    // }
   }
   const handleSubmit = e => {
     e.preventDefault()
