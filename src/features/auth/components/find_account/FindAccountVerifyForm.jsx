@@ -4,8 +4,8 @@ import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'react-toastify'
-import { findId } from '../../slice/findAccountIdSlice'
-import { findAccountVerifySchema } from '../../schema/findAccountVerifySchema'
+import { find } from '../../slice/findAccountSlice'
+import { verifySchema } from '../../schema/verifySchema'
 import Timer from '../../../../shared/Timer'
 import style from './findAccountVerifyForm.module.css'
 import axios from 'axios'
@@ -25,7 +25,7 @@ const FindAccountVerifyForm = ({ type }) => {
     setFocus,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(findAccountVerifySchema),
+    resolver: zodResolver(verifySchema),
     mode: 'onSubmit',
     reValidateMode: 'onSubmit',
   })
@@ -53,13 +53,9 @@ const FindAccountVerifyForm = ({ type }) => {
     }
   }
   const onSubmit = async data => {
-    const actionMap = {
-      id: findId,
-    }
     try {
-      const response = await axios.post(`http://localhost:3000/auth/find_${type}`, data)
-      const action = actionMap[type]
-      if (action) dispatch(action(response.data))
+      const response = await axios.post('http://localhost:3000/auth/find_account', data)
+      dispatch(find(response.data))
       navigate(`/find_account/result?type=${type}`)
     } catch (e) {
       console.log(e)
