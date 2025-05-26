@@ -7,12 +7,14 @@ import FindAccountTargetEmailForm from '../../features/auth/components/find_acco
 const FindAccountPage = () => {
   const [tabIndex, setTabIndex] = useState(0)
   const [searchParams, setSearchParams] = useSearchParams()
+  const [step, setStep] = useState()
   const type = searchParams.get('type')
   useEffect(() => {
     if (type === 'id') {
       setTabIndex(0)
     } else if (type === 'password') {
       setTabIndex(1)
+      setStep('target')
     } else {
       setSearchParams({ type: 'id' })
     }
@@ -21,10 +23,14 @@ const FindAccountPage = () => {
     if (type === 'id') {
       setSearchParams({ type: 'password' })
       setTabIndex(1)
+      setStep('target')
     } else if (type === 'password') {
       setSearchParams({ type: 'id' })
       setTabIndex(0)
     }
+  }
+  const nextStep = () => {
+    if (step === 'target') setStep('verify')
   }
   return (
     <main className="container mx-auto flex justify-center ">
@@ -88,12 +94,26 @@ const FindAccountPage = () => {
               <FindAccountVerifyForm type={type} />
             </TabPanel>
             <TabPanel className="flex flex-col gap-3">
-              <h2 className="text-center font-bold">
-                비밀번호를 찾고자하는
-                <br />
-                이메일을 입력해 주세요
-              </h2>
-              <FindAccountTargetEmailForm />
+              {step === 'target' && (
+                <>
+                  <h2 className="text-center font-bold">
+                    비밀번호를 찾고자하는
+                    <br />
+                    이메일을 입력해 주세요
+                  </h2>
+                  <FindAccountTargetEmailForm nextStep={nextStep} />
+                </>
+              )}
+              {step === 'verify' && (
+                <>
+                  <h2 className="text-center font-bold">
+                    안전한 비밀번호 재설정을 위해
+                    <br />
+                    본인 인증이 필요합니다
+                  </h2>
+                  <FindAccountVerifyForm type={type} />
+                </>
+              )}
             </TabPanel>
           </TabPanels>
         </TabGroup>
