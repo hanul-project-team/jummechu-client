@@ -53,7 +53,7 @@ const TermsForm = ({ nextStep }) => {
     nextStep()
   }
   return (
-    <form className={style.loginForm} autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+    <form className={style.termsForm} autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
       <fieldset className="flex flex-col gap-3">
         <legend className="hidden">이용약관 동의 폼</legend>
         <Field className="flex items-center cursor-pointer select-none gap-1">

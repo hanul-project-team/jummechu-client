@@ -11,7 +11,7 @@ export const registScheam = z
     name: z
       .string()
       .trim()
-      .regex(/^[가-힣]{3,5}$/, '이름을 입력해주세요'),
+      .regex(/^[가-힣]{2,5}$/, '이름은 두 글자 이상 입력해주세요.'),
     phone: z.string().regex(/^01[016789][0-9]{8}$/,'휴대전화 번호를 확인해주세요'),
     code: z.string().regex(/^\d{6}$/)
   })

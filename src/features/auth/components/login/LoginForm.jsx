@@ -7,7 +7,7 @@ import axios from 'axios'
 import { Field, Label } from '@headlessui/react'
 import { toast } from 'react-toastify'
 import { loginSchema } from '../../schema/loginSchema'
-import { login } from '../../authSlice'
+import { login } from '../../slice/authSlice'
 import VisibleBtn from '../../../../shared/VisibleBtn'
 import CustomCheckBox from '../../../../shared/CustomCheckBox'
 import style from './loginForm.module.css'
@@ -49,22 +49,21 @@ const LoginForm = () => {
       })
       reset()
       dispatch(login(response.data))
-      toast.success('로그인에 성공하셨습니다.', { autoClose: 3000 })
       navigate('/')
     } catch (e) {
       if (e.response.status === 400) {
-        setError('password',{message:e.response.data.message})
+        setError('password', { message: e.response.data.message })
         resetField('password', { keepError: true })
         setFocus('password')
       } else {
-      toast.error(
-        <div>
-          서버 오류가 발생했습니다.
-          <br />
-          잠시 후 다시 시도해주세요.
-        </div>,
-        { autoClose: 3000 },
-      )
+        toast.error(
+          <div>
+            서버 오류가 발생했습니다.
+            <br />
+            잠시 후 다시 시도해주세요.
+          </div>,
+          { autoClose: 3000 },
+        )
       }
     }
   }
