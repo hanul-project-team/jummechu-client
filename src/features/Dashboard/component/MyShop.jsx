@@ -35,6 +35,7 @@ function MyShop() {
       </div>
       <div className="m-auto w-200" >
         <img src={banner} alt="banner" />
+        <label htmlFor="">이미지 변경 | </label>
         <input type="file"  accept='.jpg, .png'/>
       </div>
       <table style={{ width: 800, tableLayout: 'fixed' }} className='table-ih'>

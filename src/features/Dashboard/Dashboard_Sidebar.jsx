@@ -17,14 +17,6 @@ function Dashboard_Sidebar() {
           <Link id='Dashboard_Link_Var' to="/Dashboard/Request" className="active"> •  입점 신청하기</Link>
         </nav>
       </aside>
-
-        <main className="main-content">
-          <Routes>
-            <Route path="Dashboard/" element={<MyShop />} />
-            <Route path="Dashboard/Request" element={<Request />} />
-            <Route path="Dashboard/ReqSet" element={<ReqSet />} />
-          </Routes>
-        </main>
     </div>
   )
 }
