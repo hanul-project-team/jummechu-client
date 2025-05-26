@@ -11,6 +11,7 @@ import RegistPage from '../pages/auth/RegistPage'
 import LoginPage from '../pages/auth/LoginPage'
 import FindAccountPage from '../pages/auth/FindAccountPage'
 import FindAccountResultPage from '../pages/auth/FindAccountResultPage'
+import ResetPasswordPage from '../pages/auth/ResetPasswordPage.jsx'
 
 const App = () => {
   const dispatch = useDispatch()
@@ -28,6 +29,7 @@ const App = () => {
         <Route path="regist/:step" element={<RegistPage />} />
         <Route path="find_account" element={<FindAccountPage />} />
         <Route path="find_account/result" element={<FindAccountResultPage />} />
+        <Route path='find_account/reset' element={<ResetPasswordPage />} />
       </Route>
     </Routes>
   )
