@@ -2,9 +2,9 @@
 import React from 'react'
 import { Routes, Route, Link } from 'react-router-dom'
 import '../../assets/styles/App.css'
-import MyShop from '../../pages/MyShop'
-import Request from '../../pages/Request'
-import ReqSet from '../../pages/ReqSet'
+import MyShop from './component/MyShop'
+import Request from './component/Request'
+import ReqSet from './component/ReqSet'
 
 function Dashboard_Sidebar() {
   return (
@@ -20,9 +20,9 @@ function Dashboard_Sidebar() {
 
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<MyShop />} />
-            <Route path="/Request" element={<Request />} />
-            <Route path="/ReqSet" element={<ReqSet />} />
+            <Route path="Dashboard/" element={<MyShop />} />
+            <Route path="Dashboard/Request" element={<Request />} />
+            <Route path="Dashboard/ReqSet" element={<ReqSet />} />
           </Routes>
         </main>
     </div>

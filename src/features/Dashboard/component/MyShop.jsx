@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import '../assets/styles/App.css'
-import banner from '../assets/images/food-banner.png'
+import '../../../assets/styles/App.css'
+import banner from '../../../assets/images/food-banner.png'
 
 function MyShop() {
   const [rows, setRows] = useState([{ name: '', price: '' }])
