@@ -4,8 +4,8 @@ import Dashboard from '../features/Dashboard/Dashboard_Sidebar'
 function Dashboardlayout() {
   return (<>
     
-        <Dashboard />
-        <Outlet />
+          <Dashboard />
+          <Outlet />
   </>
   )
 }
