@@ -1,9 +1,16 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { reset } from '../../slice/findAccountSlice'
 
 const AccountFound = ({ type }) => {
   const user = useSelector(state => state.findAccount.user)
+  const dispatch = useDispatch()
+  useEffect(() => {
+    return () => {
+      dispatch(reset())
+    }
+  }, [dispatch])
   return (
     <>
       <div className="flex flex-col gap-1 w-full items-center py-3 bg-gray-200 rounded-sm">
