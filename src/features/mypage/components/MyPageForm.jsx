@@ -14,7 +14,47 @@ const MyPageForm = () => {
   const [openai, setOpenAi] = useState([])
   const [dalleImage, setDalleImage] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [userNickname, setUserNickname] = useState('로딩중')
+  const [userEmail, setUserEmail] = useState('')
+  const [userPhone, setUserPhone] = useState('')
 
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        // ★★★ 여기에서 localStorage.getItem('token') 부분을 제거합니다.
+        // 토큰은 httpOnly 쿠키에 저장되어 있으므로 JavaScript에서 직접 접근할 수 없습니다.
+        // 따라서 이 조건문도 필요 없습니다.
+        /*
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.warn('로그인 토큰이 없어 사용자 프로필을 불러올 수 없습니다.');
+          setUserNickname('로그인 필요');
+          return;
+        }
+        */
+
+        const response = await axios.get('http://localhost:3000/auth/myprofile', {
+          // ★★★ Authorization 헤더를 제거합니다. 토큰은 쿠키로 자동 전송됩니다.
+          // headers: {
+          //   Authorization: `Bearer ${token}`,
+          // },
+          withCredentials: true, // ★★★ 이 옵션이 중요합니다! 쿠키를 요청에 포함시킵니다.
+        })
+
+        const callUserNickname = response.data.nickname
+        setUserNickname(callUserNickname || '익명 사용자')
+
+        const callUserEmail = response.data.email
+        setUserEmail(callUserEmail)
+
+        const callUserPhone = response.data.phone
+        setUserPhone(callUserPhone)
+      } catch (error) {
+        console.error('사용자 프로필 정보를 불러오는데 실패했습니다:', error)
+      }
+    }
+    fetchUserProfile()
+  }, [])
   const example = [
     {
       id: 1,
@@ -85,10 +125,9 @@ const MyPageForm = () => {
     // }
 
     try {
-      const response = axios
-        .post('http://localhost:3000/api/azure/openai', {
-          headers: {
-            prompt: `
+      const response = axios.post('http://localhost:3000/api/azure/openai', {
+        headers: {
+          prompt: `
       다음은 사용자가 최근 본 음식점의 키워드 목록입니다:
       ${keywordsWithThreshold.join(', ')}
   
@@ -107,8 +146,8 @@ const MyPageForm = () => {
   
   [예시 키워드 목록]: #한식, #떡볶이, #매운맛, #분식, #치즈, #일식
     `,
-          },
-        })
+        },
+      })
 
       // if (!response.ok) {
       //   const errorText = await response.text()
@@ -208,7 +247,7 @@ const MyPageForm = () => {
         .catch(err => {
           console.error(`DALL·E 호출 실패 (${keyword}):`, err)
         })
-        console.log(res)
+      console.log(res)
       // const result = await res.json()
       return res
     } catch (err) {
@@ -274,10 +313,40 @@ const MyPageForm = () => {
                     </button>
                   </div>
                   <div className="py-3">
-                    <h2 className="text-lg font-SinchonRhapsody">{item.title}</h2>
-                    <p>{item.rating} ⭐</p>
-                    <p>{item.description}</p>
-                    <p className="text-sm text-gray-500">{item.keyword}</p>
+                    <h2 className="text-lg py-1 font-SinchonRhapsody flex">{item.title}</h2>
+                    <p className="py-1">⭐{item.rating} </p>
+                    <p className="py-1 flex items-center text-sm text-gray-500">
+                      <svg
+                        fill="#000000"
+                        height="25px"
+                        width="25px"
+                        version="1.1"
+                        id="Capa_1"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink"
+                        viewBox="0 0 487.379 487.379"
+                        xml:space="preserve"
+                      >
+                        <g>
+                          <path
+                            d="M393.722,438.868L371.37,271.219h0.622c6.564,0,11.885-5.321,11.885-11.885V17.668c0-4.176-2.183-8.03-5.751-10.18
+		c-3.569-2.152-7.998-2.279-11.679-0.335c-46.345,24.454-75.357,72.536-75.357,124.952v101.898
+		c0,20.551,16.665,37.215,37.218,37.215h2.818l-22.352,167.649c-1.625,12.235,2.103,24.599,10.228,33.886
+		c8.142,9.289,19.899,14.625,32.246,14.625c12.346,0,24.104-5.336,32.246-14.625C391.619,463.467,395.347,451.104,393.722,438.868z"
+                          />
+                          <path
+                            d="M207.482,0c-9.017,0-16.314,7.297-16.314,16.313v91.128h-16.314V16.313C174.854,7.297,167.557,0,158.54,0
+		c-9.017,0-16.313,7.297-16.313,16.313v91.128h-16.314V16.313C125.912,7.297,118.615,0,109.599,0
+		c-9.018,0-16.314,7.297-16.314,16.313v91.128v14.913v41.199c0,24.2,19.611,43.811,43.811,43.811h3.616L115,438.74
+		c-1.37,12.378,2.596,24.758,10.896,34.047c8.317,9.287,20.186,14.592,32.645,14.592c12.459,0,24.327-5.305,32.645-14.592
+		c8.301-9.289,12.267-21.669,10.896-34.047l-25.713-231.375h3.617c24.199,0,43.811-19.611,43.811-43.811v-41.199v-14.913V16.313
+		C223.796,7.297,216.499,0,207.482,0z"
+                          />
+                        </g>
+                      </svg>
+                      {item.keyword}
+                    </p>
+                    <p className="py-5 text-sm text-black">"{item.description}"</p>
                   </div>
                 </li>
               ))}
@@ -339,7 +408,7 @@ const MyPageForm = () => {
             {openai?.length > 0 ? (
               <ul className="flex flex-col gap-9 py-5">
                 <p className="py-2">
-                  사용자닉네임 님이 가장 좋아하시는 음식은 "{mostFrequentKeywords}" 입니다.
+                  {userNickname} 님이 가장 좋아하시는 음식은 "{mostFrequentKeywords}" 입니다.
                 </p>
                 <h2>이 음식점들을 추천해요!</h2>
                 {openai.map((item, index) => (
@@ -401,7 +470,7 @@ const MyPageForm = () => {
                 <div>
                   <div className="py-3 flex justify-between">
                     <p>이메일 관리</p>
-                    <p> 사용자 이메일 </p>
+                    <p> {userEmail} </p>
                   </div>
                   <hr className="py-3" />
                   <div className="py-3 flex justify-between">
@@ -412,7 +481,12 @@ const MyPageForm = () => {
                 </div>
                 <div className="py-3 flex justify-between">
                   <p>닉네임</p>
-                  <p>사용자 닉네임</p>
+                  <p>{userNickname}</p>
+                </div>
+                <hr className="py-3" />
+                <div className="py-3 flex justify-between">
+                  <p>연락처</p>
+                  <p>{userPhone}</p>
                 </div>
                 <hr className="py-3" />
               </div>
@@ -445,14 +519,30 @@ const MyPageForm = () => {
               style={{ backgroundImage: "url('https://picsum.photos/200')" }}
             />
             <div className="flex-col">
-              <p className="text-2xl py-2"> "사용자닉네임" 님</p>
+              <p className="text-2xl py-2"> "{userNickname}" 님</p>
               <span className="text-2xl">안녕하세요.</span>
             </div>
           </div>
-          <div className="flex gap-3 ">
-            <p>프로필설정</p>
+          <div className="flex gap-3 items-center ">
+            <p className="cursor-pointer" onClick={() => setIsOpen(true)}>프로필설정</p>
             <button onClick={() => setIsOpen(true)} className="text-xl cursor-pointer">
-              ⚙
+              <svg
+                width="30px"
+                height="30px"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  opacity="0.4"
+                  d="M2 12.8799V11.1199C2 10.0799 2.85 9.21994 3.9 9.21994C5.71 9.21994 6.45 7.93994 5.54 6.36994C5.02 5.46994 5.33 4.29994 6.24 3.77994L7.97 2.78994C8.76 2.31994 9.78 2.59994 10.25 3.38994L10.36 3.57994C11.26 5.14994 12.74 5.14994 13.65 3.57994L13.76 3.38994C14.23 2.59994 15.25 2.31994 16.04 2.78994L17.77 3.77994C18.68 4.29994 18.99 5.46994 18.47 6.36994C17.56 7.93994 18.3 9.21994 20.11 9.21994C21.15 9.21994 22.01 10.0699 22.01 11.1199V12.8799C22.01 13.9199 21.16 14.7799 20.11 14.7799C18.3 14.7799 17.56 16.0599 18.47 17.6299C18.99 18.5399 18.68 19.6999 17.77 20.2199L16.04 21.2099C15.25 21.6799 14.23 21.3999 13.76 20.6099L13.65 20.4199C12.75 18.8499 11.27 18.8499 10.36 20.4199L10.25 20.6099C9.78 21.3999 8.76 21.6799 7.97 21.2099L6.24 20.2199C5.33 19.6999 5.02 18.5299 5.54 17.6299C6.45 16.0599 5.71 14.7799 3.9 14.7799C2.85 14.7799 2 13.9199 2 12.8799Z"
+                  fill="#292D32"
+                />
+                <path
+                  d="M12 15.25C13.7949 15.25 15.25 13.7949 15.25 12C15.25 10.2051 13.7949 8.75 12 8.75C10.2051 8.75 8.75 10.2051 8.75 12C8.75 13.7949 10.2051 15.25 12 15.25Z"
+                  fill="#292D32"
+                />
+              </svg>
             </button>
           </div>
         </div>

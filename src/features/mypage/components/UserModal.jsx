@@ -1,8 +1,35 @@
 import { useState, useEffect  } from 'react'
-
+import axios from 'axios'
 
 
 const Modal = ({ isOpen, onClose }) => {
+    const [userName, setUserName] = useState('로딩중')
+    const [userPhone, setUserPhone] = useState('')
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+       
+        const response = await axios.get('http://localhost:3000/auth/myprofile', {
+        
+          withCredentials: true, 
+        });
+
+
+        const callUserName = response.data.name
+        setUserName(callUserName)
+
+        const callUserPhone = response.data.phone
+        setUserPhone(callUserPhone)
+
+        
+      } catch (error) {
+        console.error('사용자 프로필 정보를 불러오는데 실패했습니다:', error);
+      }
+    };
+    fetchUserProfile();
+  }, []);
+  
 
   if (!isOpen) return null
 
@@ -25,10 +52,14 @@ const Modal = ({ isOpen, onClose }) => {
             </div>
           </div>
         </div>
-        <hr className="py-3" />
         <div className="py-3 flex justify-between">
           <p>이름</p>
-          <p> 사용자 이름 </p>
+          <p> {userName} </p>
+        </div>
+        <hr className="py-3" />
+        <div className="py-3 flex justify-between">
+          <p>연락처</p>
+          <p> {userPhone} </p>
         </div>
         <hr className="py-3" />
       
@@ -54,3 +85,4 @@ const Modal = ({ isOpen, onClose }) => {
 
 
 export default Modal
+
