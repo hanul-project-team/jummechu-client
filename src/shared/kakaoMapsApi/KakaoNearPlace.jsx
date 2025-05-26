@@ -1,27 +1,31 @@
 import usePlaceStore from '../../app/zustandStore.js'
+import axios from 'axios'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import 'swiper/css'
 import '../../assets/styles/global.css'
+import { useNavigate } from 'react-router-dom'
 
 const KakaoNearPlace = () => {
   const kakaoPlace = usePlaceStore(state => state.kakaoPlace)
+  const navigate = useNavigate()
+
 
   const handleSaveAndNavigate = kp => {
-    console.log('KakaoNearPlace')
-    // try {
-    //   axios
-    //     .post('http://localhost:3000/store/regist', kp, {
-    //       withCredentials: true,
-    //     })
-    //     .then(res => {
-    //       console.log(res)
-    //     })
-    //     .catch(err => {
-    //       console.log('axios 요청 실패', err)
-    //     })
-    // } catch (err) {
-    //   console.log('try 실패', err)
-    // }
+    // console.log('KakaoNearPlace')
+    try {
+      axios
+        .post('http://localhost:3000/store/save', kp)
+        .then(res => {
+          const place = res.data
+          // console.log(place)
+          navigate(`/place/${place._id}`, { state: kp })
+        })
+        .catch(err => {
+          console.log('axios 요청 실패', err)
+        })
+    } catch (err) {
+      console.log('try 실패', err)
+    }
   }
 
   return (

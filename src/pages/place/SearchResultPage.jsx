@@ -40,10 +40,10 @@ const SearchResult = () => {
     // console.log(sd)
     try {
       axios
-        .post('http://localhost:3000/store/regist', sd)
+        .post('http://localhost:3000/store/save', sd)
         .then(res => {
           const place = res.data
-          console.log(place)
+          // console.log(place)
           navigate(`/place/${place._id}`, { state: sd })
         })
         .catch(err => {

@@ -34,23 +34,21 @@ const HomeRecommand = () => {
   }, [kakaoPlace])
 
   const handleNavigate = kp => {
-    console.log('HomeRecommand')
-    // try {
-    //   axios
-    //     .post('http://localhost:3000/store/regist', kp, {
-    //       withCredentials: true,
-    //     })
-    //     .then(res => {
-    //       console.log(res)
-    //     })
-    //     .catch(err => {
-    //       console.log('axios 요청 실패', err)
-    //     })
-    // } catch (err) {
-    //   console.log('try 실패', err)
-    // }
-
-    // navigate(`/place/${kp.id}`, {state: kp})
+    // console.log('HomeRecommand')
+    try {
+      axios
+        .post('http://localhost:3000/store/save', kp)
+        .then(res => {
+          const place = res.data
+          // console.log(place)
+          navigate(`/place/${place._id}`, { state: kp })
+        })
+        .catch(err => {
+          console.log('axios 요청 실패', err)
+        })
+    } catch (err) {
+      console.log('try 실패', err)
+    }
   }
 
   // console.log(tag)
