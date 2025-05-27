@@ -12,9 +12,9 @@ import LoginPage from '../pages/auth/LoginPage'
 import FindAccountPage from '../pages/auth/FindAccountPage'
 import FindAccountResultPage from '../pages/auth/FindAccountResultPage'
 import Dashboard from '../layouts/Dashboardlayout.jsx'
-import MyShop from '../features/Dashboard/component/MyShop.jsx'
-import Request from '../features/Dashboard/component/Request.jsx'
-import ReqSet from '../features/Dashboard/component/ReqSet.jsx'
+import MyJobpage from '../pages/dashboard/MyJobpage.jsx'
+import MyRequestPage from '../pages/dashboard/MyRequestPage.jsx'
+import ReqsetPage from '../pages/dashboard/ReqsetPage.jsx'
 const App = () => {
   const dispatch = useDispatch()
   useEffect(() => {
@@ -33,9 +33,9 @@ const App = () => {
         <Route path="find_account/result" element={<FindAccountResultPage />} />
       </Route>
       <Route element={<Dashboard/>}>
-            <Route path="Dashboard/" element={<MyShop />} />
-            <Route path="Dashboard/ReqSet" element={<ReqSet />} />
-            <Route path="Dashboard/Request" element={<Request />} />
+          <Route path='Dashboard/' element={<MyJobpage />}/>
+          <Route path='Dashboard/Request' element={<MyRequestPage />}/>
+          <Route path='Dashboard/Reqset' element={<ReqsetPage />}/>
           </Route>
     </Routes>
   )
