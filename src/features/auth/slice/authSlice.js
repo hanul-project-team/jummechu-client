@@ -1,9 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-export const authCheck = createAsyncThunk('auth/authCheck', async (_, { rejectWithValue }) => {
+export const restoreLogin = createAsyncThunk('auth/restoreLogin', async (_, { rejectWithValue }) => {
   try {
-    const response = await axios.get('http://localhost:3000/auth/check', { withCredentials: true })
+    const response = await axios.get('http://localhost:3000/auth/restore_login', { withCredentials: true })
     return response.data
   } catch (e) {
     if (e.response.status === 401 || e.response.status === 404) {
@@ -15,7 +15,7 @@ export const authCheck = createAsyncThunk('auth/authCheck', async (_, { rejectWi
 })
 
 const initialState = {
-  isAuthenticated: false,
+  isAuthenticated: undefined,
   user: {
     id:'',
     name: '',
@@ -43,15 +43,16 @@ const authSlice = createSlice({
     },
   },
   extraReducers: build => {
-    build.addCase(authCheck.pending, state => {
+    build.addCase(restoreLogin.pending, state => {
       state.error = ''
     })
-    build.addCase(authCheck.fulfilled, (state, action) => {
+    build.addCase(restoreLogin.fulfilled, (state, action) => {
       state.isAuthenticated = action.payload.isAuthenticated
       state.user = action.payload.user
     }),
-      build.addCase(authCheck.rejected, (state, action) => {
+      build.addCase(restoreLogin.rejected, (state, action) => {
         state.error = action.payload
+        state.isAuthenticated = false
       })
   },
 })

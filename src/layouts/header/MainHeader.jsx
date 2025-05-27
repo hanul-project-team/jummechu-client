@@ -58,6 +58,7 @@ const MainHeader = () => {
   const handleOpen = () => {
     setOpen(prev => !prev)
   }
+  if (isAuthenticated === undefined) return null
   return (
     <>
       <div className="w-full pb-5">
