@@ -44,17 +44,27 @@ const FindAccountVerifyForm = ({ type }) => {
   const phoneSubmit = async () => {
     const isValid = await trigger('phone')
     if (isValid) {
-      const phone = getValues('phone')
-      setIsRequested(true)
-      toast.success(<div>인증번호 발송에 성공하였습니다.</div>, { autoClose: 4000 })
-      setTimerKey(prev => prev + 1)
-      setFocus('code')
-      console.log(phone)
+      try {
+        const phone = getValues('phone')
+        await axios.post(
+          'http://localhost:3000/auth/send_code',
+          { phone },
+          { withCredentials: true },
+        )
+        setIsRequested(true)
+        toast.success(<div>인증번호 발송에 성공하였습니다.</div>, { autoClose: 4000 })
+        setTimerKey(prev => prev + 1)
+        setFocus('code')
+      } catch (e) {
+        console.log(e)
+      }
     }
   }
   const onSubmit = async data => {
     try {
-      const response = await axios.post('http://localhost:3000/auth/find_account', data)
+      const response = await axios.post('http://localhost:3000/auth/find_account', data, {
+        withCredentials: true,
+      })
       dispatch(find(response.data))
       navigate(`/find_account/result?type=${type}`)
     } catch (e) {
