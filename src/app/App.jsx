@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { authCheck } from '../features/auth/slice/authSlice'
+import { restoreLogin } from '../features/auth/slice/authSlice'
 import Mainlayout from '../layouts/Mainlayout'
 import HomeSearch from '../features/home/HomeSearch.jsx'
 import SearchResult from '../features/search/SearchResult.jsx'
@@ -16,7 +16,7 @@ import ResetPasswordPage from '../pages/auth/ResetPasswordPage.jsx'
 const App = () => {
   const dispatch = useDispatch()
   useEffect(() => {
-    dispatch(authCheck())
+    dispatch(restoreLogin())
   }, [dispatch])
   return (
     <Routes>
@@ -29,7 +29,7 @@ const App = () => {
         <Route path="regist/:step" element={<RegistPage />} />
         <Route path="find_account" element={<FindAccountPage />} />
         <Route path="find_account/result" element={<FindAccountResultPage />} />
-        <Route path='find_account/reset' element={<ResetPasswordPage />} />
+        <Route path="find_account/reset" element={<ResetPasswordPage />} />
       </Route>
     </Routes>
   )
