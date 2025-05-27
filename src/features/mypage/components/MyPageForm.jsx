@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import Modal from '../components/UserModal.jsx'
 import axios from 'axios'
 import '../MyPage.css' // 경로 기준: 현재 컴포넌트 파일 위치 기준
+import image from '../image/mainprofile.jpg'
 
 const MyPageForm = () => {
   const [active, setActive] = useState('최근기록')
@@ -17,30 +18,15 @@ const MyPageForm = () => {
   const [userNickname, setUserNickname] = useState('로딩중')
   const [userEmail, setUserEmail] = useState('')
   const [userPhone, setUserPhone] = useState('')
+  const [userProfileImage, setUserProfileImage] = useState(image)
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        // ★★★ 여기에서 localStorage.getItem('token') 부분을 제거합니다.
-        // 토큰은 httpOnly 쿠키에 저장되어 있으므로 JavaScript에서 직접 접근할 수 없습니다.
-        // 따라서 이 조건문도 필요 없습니다.
-        /*
-        const token = localStorage.getItem('token');
-        if (!token) {
-          console.warn('로그인 토큰이 없어 사용자 프로필을 불러올 수 없습니다.');
-          setUserNickname('로그인 필요');
-          return;
-        }
-        */
-
         const response = await axios.get('http://localhost:3000/auth/myprofile', {
-          // ★★★ Authorization 헤더를 제거합니다. 토큰은 쿠키로 자동 전송됩니다.
-          // headers: {
-          //   Authorization: `Bearer ${token}`,
-          // },
-          withCredentials: true, // ★★★ 이 옵션이 중요합니다! 쿠키를 요청에 포함시킵니다.
+          withCredentials: true,
         })
-
+        const backendBaseUrl = 'http://localhost:3000'
         const callUserNickname = response.data.nickname
         setUserNickname(callUserNickname || '익명 사용자')
 
@@ -49,8 +35,16 @@ const MyPageForm = () => {
 
         const callUserPhone = response.data.phone
         setUserPhone(callUserPhone)
+
+        const callUserImage = response.data.profileImage
+        setUserProfileImage(
+          callUserImage
+            ? `${backendBaseUrl}${callUserImage}`
+            : `${image}`,
+        )
       } catch (error) {
         console.error('사용자 프로필 정보를 불러오는데 실패했습니다:', error)
+        setUserProfileImage`${image}`;
       }
     }
     fetchUserProfile()
@@ -99,31 +93,6 @@ const MyPageForm = () => {
   ]
 
   const callOpenAi = async keywordsWithThreshold => {
-    /*     const prompt = `
-      다음은 사용자가 최근 본 음식점의 키워드 목록입니다:
-      ${keywordsWithThreshold.join(', ')}
-  
-      다음은 사용자가 최근에 방문한 음식점들의 키워드 목록입니다.
-  이 키워드들과 **가장 많이** 겹치는 음식점만 골라 추천해 주세요.
-  
-  결과는 아래 JSON 형식의 배열로만 출력하세요.
-  각 추천 음식점은 다음 필드를 포함해야 합니다:
-  - title: 음식점 이름
-  - rating: 평점 (0.0 ~ 5.0)
-  - description: 음식점 설명 (간단하고 매력적인 한 줄)
-  - keyword: 이 음식점의 키워드 배열
-  - overlap_count: 겹치는 키워드 수
-  
-  JSON 외에는 아무 것도 출력하지 마세요.
-  
-  [예시 키워드 목록]: #한식, #떡볶이, #매운맛, #분식, #치즈, #일식
-    ` */
-    // {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ prompt }),
-    // }
-
     try {
       const response = axios.post('http://localhost:3000/api/azure/openai', {
         headers: {
@@ -437,7 +406,7 @@ const MyPageForm = () => {
                   <div
                     className=" w-[100px] h-[100px] bg-cover mask-radial-fade"
                     onClick={() => setIsOpen(true)}
-                    style={{ backgroundImage: "url('https://picsum.photos/200')" }}
+                    style={{ backgroundImage: `url('${userProfileImage}')` }}
                   />
                   <span
                     className="absolute bottom-0 right-0 bg-white  rounded-full p-2 shadow hover:bg-opacity-100 cursor-pointer"
@@ -516,7 +485,7 @@ const MyPageForm = () => {
           <div className="flex gap-5 items-center ">
             <div
               className="w-[100px] h-[100px] bg-cover mask-radial-fade"
-              style={{ backgroundImage: "url('https://picsum.photos/200')" }}
+              style={{ backgroundImage: `url('${userProfileImage}')` }}
             />
             <div className="flex-col">
               <p className="text-2xl py-2"> "{userNickname}" 님</p>
@@ -524,7 +493,9 @@ const MyPageForm = () => {
             </div>
           </div>
           <div className="flex gap-3 items-center ">
-            <p className="cursor-pointer" onClick={() => setIsOpen(true)}>프로필설정</p>
+            <p className="cursor-pointer" onClick={() => setIsOpen(true)}>
+              프로필설정
+            </p>
             <button onClick={() => setIsOpen(true)} className="text-xl cursor-pointer">
               <svg
                 width="30px"
