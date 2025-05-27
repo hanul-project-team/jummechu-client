@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { resetPasswordSchema } from '../../schema/resetPasswordSchema'
+import { toast } from 'react-toastify'
 import VisibleBtn from '../../../../shared/VisibleBtn'
 import style from './resetPasswordForm.module.css'
+import axios from 'axios'
 
-const ResetPasswordForm = () => {
+const ResetPasswordForm = ({ resetToken }) => {
   const [passwordState, setPasswordState] = useState({
     hasValue: false,
     visible: false,
@@ -19,12 +22,14 @@ const ResetPasswordForm = () => {
     handleSubmit,
     watch,
     setFocus,
+    reset,
     formState: { errors },
   } = useForm({
     mode: 'onSubmit',
     reValidateMode: 'onSubmit',
     resolver: zodResolver(resetPasswordSchema),
   })
+  const navigate = useNavigate()
   const passwordValue = watch('password')
   const passwordCheckValue = watch('passwordCheck')
   useEffect(() => {
@@ -39,8 +44,22 @@ const ResetPasswordForm = () => {
       hasValue: !!passwordCheckValue,
     }))
   }, [passwordCheckValue])
-  const onSubmit = data => {
-    console.log(data)
+  const onSubmit = async data => {
+    const submitData = { password: data.password, resetToken: resetToken }
+    try {
+      await axios.post('http://localhost:3000/auth/reset_password', submitData)
+      reset()
+      navigate('/login')
+    } catch {
+      toast.error(
+        <div>
+          서버 오류가 발생했습니다.
+          <br />
+          잠시 후 다시 시도해주세요.
+        </div>,
+        { autoClose: 3000 },
+      )
+    }
   }
   const onIsvalid = errors => {
     if (errors.password) {
