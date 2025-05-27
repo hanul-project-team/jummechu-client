@@ -1,12 +1,19 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+import { reset } from '../../features/auth/slice/findAccountSlice'
 import AccountFound from '../../features/auth/components/find_account/AccountFound'
 import NoAccountFound from '../../features/auth/components/find_account/NoAccountFound'
 
 const FindAccountResultPage = () => {
   const [searchParams, _setSearchParams] = useSearchParams()
   const type = searchParams.get('type')
+  const dispatch = useDispatch()
+  useEffect(() => {
+    return () => {
+      dispatch(reset())
+    }
+  }, [dispatch])
   const userFound = useSelector(state => state.findAccount.userFound)
   return (
     <main className="container mx-auto flex justify-center ">
