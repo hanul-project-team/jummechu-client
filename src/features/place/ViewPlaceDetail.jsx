@@ -1,38 +1,64 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import Icon from '../../assets/images/icon.png'
 import '../../assets/styles/global.css'
+import axios from 'axios'
 import zustandStore from '../../app/zustandStore.js'
+import { Swiper, SwiperSlide } from 'swiper/react'
 import 'swiper/css'
 import PlaceReview from './reviews/PlaceReview.jsx'
 
 const ViewPlaceDetail = ({ defaultBoomarked }) => {
   const [isBookmarked, setIsBookmarked] = useState(defaultBoomarked)
   const [childRate, setChildRate] = useState(0)
-  const [category, setCategory] = useState([])
-  const [showAddress, setShowAddress] = useState(false)
   const setReviewInfo = zustandStore(state => state.setReviewInfo)
+  const reviewInfo = zustandStore(state => state.reviewInfo)
   const placeDetail = zustandStore(state => state.placeDetail)
   const [score, setScore] = useState(null)
-
+  const navigate = useNavigate()
   const searchData = zustandStore(state => state.searchData)
-
+  const setSearchNearData = zustandStore(state => state.setSearchNearData)
+  const searchNearData = zustandStore(state => state.searchNearData)
   const rateRef = useRef()
+  const lastStoreRef = useRef(placeDetail?._id)
   // console.log(score)
-  const toggleAddress = () => {
-    setShowAddress(prev => !prev)
-  }
 
   useEffect(() => {
-    let cate
-    if ((placeDetail !== null) | (placeDetail !== undefined)) {
-      const categories = placeDetail?.category_name?.split('>')
-      if (categories?.length > 0) {
-        cate = categories.slice(1)
+    if (placeDetail !== null || placeDetail !== undefined) {
+      const storeId = placeDetail._id
+      const isDifferentStore =
+        reviewInfo.length === 0 || reviewInfo[0]?.store?._id !== placeDetail._id
+      if (lastStoreRef.current === storeId) {
+        return
       }
-      setCategory(cate)
-      if (placeDetail?.reivew) {
-        setReviewInfo(placeDetail.review ?? [])
+      if (isDifferentStore) {
+        try {
+          Promise.all([
+            axios.get(`http://localhost:3000/review/read/${placeDetail._id}`),
+            axios.post(`http://localhost:3000/api/kakao/search/${placeDetail._id}`, {
+              headers: {
+                lat: placeDetail.latitude,
+                lng: placeDetail.longitude,
+              },
+            }),
+          ]).then(([revRes, searchRes]) => {
+            if (revRes.statusText === 'OK' || revRes.status === 200) {
+              const data = revRes.data
+              // console.log(data)
+              setReviewInfo(data)
+            } else if (revRes.status === 204) {
+              setReviewInfo([])
+            }
+            if (searchRes.statusText === 'OK' || searchRes.status === 200) {
+              const data = searchRes.data
+              // console.log(data)
+              setSearchNearData(data)
+            }
+            lastStoreRef.current = storeId
+          })
+        } catch (err) {
+          console.log(err)
+        }
       }
     }
     const preScore = rateRef.current.dataset.score
@@ -50,13 +76,31 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
       }
     }
   }
-  // console.log(searchData)
-  // console.log(placeDetail)
+
+  const handleNavigate = snd => {
+    // console.log(snd)
+    try {
+      axios
+        .post('http://localhost:3000/store/save', snd)
+        .then(res => {
+          const place = res.data
+          // console.log(place)
+          navigate(`/place/${place._id}`, { state: place })
+        })
+        .catch(err => {
+          console.log('axios 요청 실패', err)
+        })
+    } catch (err) {
+      console.log('try 실패', err)
+    }
+  }
+
   return (
     <div>
       <div className="container md:max-w-3/5 mx-auto p-3 m-3">
+        {/* 타이틀 & 북마크 영역 */}
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">{placeDetail.place_name}</h1>
+          <h1 className="text-3xl font-bold">{placeDetail.name}</h1>
           {/* 북마크 */}
           <div
             className="flex border-1 py-2 px-3 rounded-3xl mouse_pointer"
@@ -122,32 +166,7 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
             />
           </svg>
           {/* 지도pin 아이콘 */}
-          <p>{placeDetail.road_address_name}</p>
-          <div className="ml-2">
-            <button
-              type="button"
-              className="mouse_pointer text-gray-400 flex"
-              onClick={toggleAddress}
-            >
-              지번
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="size-6"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-              </svg>
-              {/* 아랫 꺽쇠 아이콘 */}
-            </button>
-            {showAddress === true && (
-              <div className="absolute z-20 md:min-w-fit left-40 mt-2 px-3 py-2 rounded-md bg-gray-100 text-sm text-gray-700 shadow transition-all duration-300">
-                {placeDetail.address_name}
-              </div>
-            )}
-          </div>
+          <p>{placeDetail.address}</p>
         </div>
         {/* 전화 */}
         <div className="flex gap-2 my-2">
@@ -193,36 +212,44 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
             </Link>
           </div>
         </div>
-        {/* 다른 장소 추천(현재: 검색 결과중 해당 장소 이외의 장소들) */}
-        <div className="max-w-full my-5 min-h-[200px]">
-          <div className="flex justify-between">
-            <p className="font-bold text-lg font-serif">다른 장소도 둘러보세요!</p>
-            <Link to="#">
-              <span>더보기</span>
-            </Link>
-          </div>
-          {searchData && (
-            <div className="border-t-1 border-gray-700 flex">
-              {searchData
-                .filter(sd => sd.id !== placeDetail.id)
-                .slice(0, 4)
-                .map((sd, i) => {
-                  return (
-                    <div key={i} className="flex-1 gap-3 p-2 text-center">
-                      <Link to={`/place/${sd.id}`} state={sd}>
-                        <img src={Icon} alt="icon" className="w-[100px] h-[100px] mx-auto" />
-                      </Link>
-                      <div>
-                        <Link to={`/place/${sd.id}`} state={sd}>
-                          <p>{sd.place_name}</p>
-                        </Link>
-                      </div>
-                    </div>
-                  )
-                })}
+        {/* 다른 장소 추천 */}
+        {searchNearData.filter(snd => snd.id !== placeDetail.id).length > 0 && (
+          <div className="max-w-full my-5 min-h-[200px]">
+            <div className="text-start">
+              <p className="font-bold text-lg font-serif">다른 장소도 둘러보세요!</p>
             </div>
-          )}
-        </div>
+            {searchNearData && (
+              <Swiper
+                spaceBetween={50}
+                slidesPerView={3}
+                className="border-t-1 border-gray-700 flex"
+              >
+                {searchNearData
+                  .filter(snd => snd.id !== placeDetail.id)
+                  .map((snd, i) => {
+                    return (
+                      <SwiperSlide
+                        key={i}
+                        className="flex-1 gap-3 p-2 text-center"
+                        style={{ marginRight: '0px' }}
+                      >
+                        <div key={i}>
+                          <div className="mouse_pointer" onClick={() => handleNavigate(snd)}>
+                            <img src={Icon} alt="icon" className="w-[100px] h-[100px] mx-auto" />
+                          </div>
+                          <div>
+                            <p className="mouse_pointer" onClick={() => handleNavigate(snd)}>
+                              {snd.place_name}
+                            </p>
+                          </div>
+                        </div>
+                      </SwiperSlide>
+                    )
+                  })}
+              </Swiper>
+            )}
+          </div>
+        )}
       </div>
       <PlaceReview reportRate={setChildRate} />
     </div>

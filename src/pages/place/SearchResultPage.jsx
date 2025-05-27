@@ -44,7 +44,7 @@ const SearchResult = () => {
         .then(res => {
           const place = res.data
           // console.log(place)
-          navigate(`/place/${place._id}`, { state: sd })
+          navigate(`/place/${place._id}`, { state: place })
         })
         .catch(err => {
           console.log('axios 요청 실패', err)
