@@ -8,8 +8,9 @@ const zustandStore = create(
       reviewInfo: [],
       searchData: [],
       center: null,
-      kakaoPlace: [],
+      userNearPlace: [],
       isLoading: true,
+      searchNearData: [],
 
       setSearchData: data => {
         if (!data || data.length === 0) {
@@ -21,15 +22,16 @@ const zustandStore = create(
       setPlaceDetail: data => set({ placeDetail: data }),
       setReviewInfo: data => {
         if (!data || data.length === 0) {
-          set({reviewInfo: []})
+          set({ reviewInfo: [] })
         } else {
-          set({reviewInfo: data ?? []})
+          set({ reviewInfo: data ?? [] })
         }
       },
       clearSearchData: () => set({ searchData: [] }),
       setCenter: data => set({ center: data }),
-      setKakaoPlace: data => set({ kakaoPlace: data }),
+      setUserNearPlace: data => set({ userNearPlace: data }),
       setIsLoading: value => set({ isLoading: value }),
+      setSearchNearData: data => set({ searchNearData: data }),
     }),
     {
       name: 'place-storage',

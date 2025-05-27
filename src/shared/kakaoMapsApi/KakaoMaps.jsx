@@ -7,8 +7,8 @@ import KakaoNearPlace from './KakaoNearPlace.jsx'
 const KakaoMaps = () => {
   const setCenter = zustandStore(state => state.setCenter)
   const center = zustandStore(state => state.center)
-  const setKakaoPlace = zustandStore(state => state.setKakaoPlace)
-  const kakaoPlace = zustandStore(state => state.kakaoPlace)
+  const setUserNearPlace = zustandStore(state => state.setUserNearPlace)
+  const userNearPlace = zustandStore(state => state.userNearPlace)
   const setSearchData = zustandStore(state => state.setSearchData)
 
   const intervalRef = useRef(null)
@@ -32,7 +32,7 @@ const KakaoMaps = () => {
     try {
       if (isRoot) {
         // console.log(isRoot)
-        if (!center || center.lat !== lat || center.lng !== lng || kakaoPlace?.length === 0) {
+        if (!center || center.lat !== lat || center.lng !== lng || userNearPlace?.length === 0) {
           getKakaoData(center)
         }
       }
@@ -66,38 +66,39 @@ const KakaoMaps = () => {
           console.log('위치 정보 획득 실패 및 재시도 실패')
         }
       },
+      { enableHighAccuracy: true }
     )
   }
 
   const getKakaoData = center => {
-    console.log('재시도 횟수', retryCountRef.current)
-    // if (kakaoPlace?.length === 0 || !kakaoPlace) {
-    //   // console.log(kakaoPlace?.length)
-    //   axios
-    //     .post(
-    //       'http://localhost:3000/api/kakao/nearplace',
-    //       { location: center },
-    //       {
-    //         withCredentials: true,
-    //       },
-    //     )
-    //     .then(res => {
-    //       const data = res.data
-    //       // console.log(data)
-    //       setKakaoPlace(data)
-    //       retryCountRef.current == 0
-    //     })
-    //     .catch(err => {
-    //       // console.error('error msg:', err)
-    //       if (retryCountRef.current < 3) {
-    //         retryCountRef.current += 1
-    //         console.log(`데이터 로딩 실패 ${retryCountRef.current}회 째 재시도...`)
-    //         setTimeout(() => getKakaoData(center, 1000))
-    //       } else {
-    //         console.log('kakao map 데이터 로딩 실패 및 재시도 실패', err)
-    //       }
-    //     })
-    // }
+    // console.log('재시도 횟수', retryCountRef.current)
+    if (userNearPlace?.length === 0 || !userNearPlace) {
+      // console.log(userNearPlace?.length)
+      axios
+        .post(
+          'http://localhost:3000/api/kakao/user/nearplace',
+          { location: center },
+          {
+            withCredentials: true,
+          },
+        )
+        .then(res => {
+          const data = res.data
+          // console.log(data)
+          setUserNearPlace(data)
+          retryCountRef.current == 0
+        })
+        .catch(err => {
+          // console.error('error msg:', err)
+          if (retryCountRef.current < 3) {
+            retryCountRef.current += 1
+            console.log(`데이터 로딩 실패 ${retryCountRef.current}회 째 재시도...`)
+            setTimeout(() => getKakaoData(center, 1000))
+          } else {
+            console.log('kakao map 데이터 로딩 실패 및 재시도 실패', err)
+          }
+        })
+    }
   }
   const handleSubmit = e => {
     e.preventDefault()

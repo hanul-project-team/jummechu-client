@@ -11,14 +11,14 @@ const HomeRecommand = () => {
   const [tag, setTag] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
-  const kakaoPlace = zustandStore(state => state.kakaoPlace)
+  const userNearPlace = zustandStore(state => state.userNearPlace)
 
   const navigate = useNavigate()
 
   useEffect(() => {
-    // console.log(kakaoPlace)
-    if (kakaoPlace && kakaoPlace.length > 0) {
-      const categories = kakaoPlace.map(kp => kp.category_name)
+    // console.log(userNearPlace)
+    if (userNearPlace && userNearPlace.length > 0) {
+      const categories = userNearPlace.map(unp => unp.category_name)
       // console.log(categories)
       const setCategory = categories.reduce((acc, cts) => {
         const item = cts.split('>')[1].trim()
@@ -31,17 +31,17 @@ const HomeRecommand = () => {
       setTag(setCategory)
       setIsLoading(false)
     }
-  }, [kakaoPlace])
+  }, [userNearPlace])
 
-  const handleNavigate = kp => {
+  const handleNavigate = unp => {
     // console.log('HomeRecommand')
     try {
       axios
-        .post('http://localhost:3000/store/save', kp)
+        .post('http://localhost:3000/store/save', unp)
         .then(res => {
           const place = res.data
           // console.log(place)
-          navigate(`/place/${place._id}`, { state: kp })
+          navigate(`/place/${place._id}`, { state: place })
         })
         .catch(err => {
           console.log('axios 요청 실패', err)
@@ -52,7 +52,7 @@ const HomeRecommand = () => {
   }
 
   // console.log(tag)
-  // console.log(kakaoPlace)
+  // console.log(userNearPlace)
   return (
     <div className="max-xl:m-3">
       {isLoading === true ? (
@@ -73,10 +73,10 @@ const HomeRecommand = () => {
             <div key={i} className="container shadow-xl/20 max-w-full p-3 my-3 overflow-auto">
               <p className="text-lg font-sans">&#35; {t}</p>
               <Swiper spaceBetween={50} slidesPerView={3}>
-                {kakaoPlace &&
-                  kakaoPlace.length > 0 &&
-                  kakaoPlace.map((kp, idx) => {
-                    if (!kp.category_name.includes(t)) return null
+                {userNearPlace &&
+                  userNearPlace.length > 0 &&
+                  userNearPlace.map((unp, idx) => {
+                    if (!unp.category_name.includes(t)) return null
                     return (
                       <SwiperSlide key={idx}>
                         <div className="min-w-50">
@@ -84,10 +84,10 @@ const HomeRecommand = () => {
                             src={Icon}
                             alt="picsum"
                             className="min-h-[200px] mouse_pointer"
-                            onClick={() => handleNavigate(kp)}
+                            onClick={() => handleNavigate(unp)}
                           />
-                          <p className="text-sm mouse_pointer" onClick={() => handleNavigate(kp)}>
-                            가게명:{kp.place_name}
+                          <p className="text-sm mouse_pointer" onClick={() => handleNavigate(unp)}>
+                            가게명:{unp.place_name}
                           </p>
                           <div className="text-sm flex gap-3 items-center">
                             <span>4.3☆</span>
