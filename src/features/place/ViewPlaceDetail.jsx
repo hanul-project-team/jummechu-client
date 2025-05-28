@@ -10,24 +10,19 @@ import PlaceReview from './reviews/PlaceReview.jsx'
 
 const ViewPlaceDetail = ({ defaultBoomarked }) => {
   const [isBookmarked, setIsBookmarked] = useState(defaultBoomarked)
-  const [childRate, setChildRate] = useState(0)
   const setReviewInfo = zustandStore(state => state.setReviewInfo)
   const reviewInfo = zustandStore(state => state.reviewInfo)
   const placeDetail = zustandStore(state => state.placeDetail)
-  const [score, setScore] = useState(null)
   const navigate = useNavigate()
-  const searchData = zustandStore(state => state.searchData)
+  const userNearPlace = zustandStore(state => state.userNearPlace)
   const setSearchNearData = zustandStore(state => state.setSearchNearData)
   const searchNearData = zustandStore(state => state.searchNearData)
-  const rateRef = useRef()
   const lastStoreRef = useRef(placeDetail?._id)
-  // console.log(score)
 
   useEffect(() => {
     if (placeDetail !== null || placeDetail !== undefined) {
       const storeId = placeDetail._id
-      const isDifferentStore =
-        reviewInfo.length === 0 || reviewInfo[0]?.store?._id !== placeDetail._id
+      const isDifferentStore = lastStoreRef.current !== placeDetail._id
       if (lastStoreRef.current === storeId) {
         return
       }
@@ -35,13 +30,13 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
         try {
           Promise.all([
             axios.get(`http://localhost:3000/review/read/${placeDetail._id}`),
-            axios.post(`http://localhost:3000/api/kakao/search/${placeDetail._id}`, {
-              headers: {
-                lat: placeDetail.latitude,
-                lng: placeDetail.longitude,
-              },
-            }),
-          ]).then(([revRes, searchRes]) => {
+            // axios.post(`http://localhost:3000/api/kakao/search/${placeDetail._id}`, {
+            //   headers: {
+            //     lat: placeDetail.latitude,
+            //     lng: placeDetail.longitude,
+            //   },
+            // }),
+          ]).then(([revRes/* , searchRes */]) => {
             if (revRes.statusText === 'OK' || revRes.status === 200) {
               const data = revRes.data
               // console.log(data)
@@ -49,11 +44,11 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
             } else if (revRes.status === 204) {
               setReviewInfo([])
             }
-            if (searchRes.statusText === 'OK' || searchRes.status === 200) {
-              const data = searchRes.data
-              // console.log(data)
-              setSearchNearData(data)
-            }
+            // if (searchRes.statusText === 'OK' || searchRes.status === 200) {
+            //   const data = searchRes.data
+            //   // console.log(data)
+            //   setSearchNearData(data)
+            // }
             lastStoreRef.current = storeId
           })
         } catch (err) {
@@ -61,9 +56,7 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
         }
       }
     }
-    const preScore = rateRef.current.dataset.score
-    setScore(preScore)
-  }, [isBookmarked, placeDetail, rateRef])
+  }, [isBookmarked, placeDetail])
 
   const handleBookmark = () => {
     if (isBookmarked === true) {
@@ -76,7 +69,6 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
       }
     }
   }
-
   const handleNavigate = snd => {
     // console.log(snd)
     try {
@@ -94,7 +86,16 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
       console.log('try 실패', err)
     }
   }
-
+  const handleTotalRating = data => {
+    if (data.length > 0) {
+      const result = data.reduce((acc, cur) => acc + cur.rating, 0) / data.length
+      const rounded = Math.round(result * 10) / 10
+      return rounded
+    } else {
+      return 0
+    }
+  }
+  const totalRate = reviewInfo ? handleTotalRating(reviewInfo) : 0
   return (
     <div>
       <div className="container md:max-w-3/5 mx-auto p-3 m-3">
@@ -129,20 +130,16 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
         </div>
         {/* 별점 */}
         <div className="flex items-center">
-          <div
-            className="relative w-fit text-2xl leading-none my-2"
-            data-score={placeDetail.rate ? placeDetail.rate : childRate}
-            ref={rateRef}
-          >
+          <div className="relative w-fit text-2xl leading-none my-2">
             <div className="text-gray-300">★★★★★</div>
             <div
               className="absolute top-0 left-0 overflow-hidden text-yellow-400"
-              style={{ width: `${(score / 5) * 100 + '%'}` }}
+              style={{ width: `${(totalRate / 5) * 100 + '%'}` }}
             >
               ★★★★★
             </div>
           </div>
-          <p className="ml-1 pt-1 text-xl text-gray-700 leading-tight">{score}</p>
+          <p className="ml-1 pt-1 text-xl text-gray-700 leading-tight">{totalRate}</p>
         </div>
         {/* 주소지 */}
         <div className="flex gap-2 relative my-2">
@@ -213,26 +210,22 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
           </div>
         </div>
         {/* 다른 장소 추천 */}
-        {searchNearData.filter(snd => snd.id !== placeDetail.id).length > 0 && (
+        {userNearPlace.filter(snd => snd.id !== placeDetail.id).length > 0 && (
           <div className="max-w-full my-5 min-h-[200px]">
             <div className="text-start">
               <p className="font-bold text-lg font-serif">다른 장소도 둘러보세요!</p>
             </div>
-            {searchNearData && (
+            {userNearPlace && (
               <Swiper
                 spaceBetween={50}
                 slidesPerView={3}
                 className="border-t-1 border-gray-700 flex"
               >
-                {searchNearData
-                  .filter(snd => snd.id !== placeDetail.id)
+                {userNearPlace
+                  // .filter(snd => snd.id !== placeDetail._id)
                   .map((snd, i) => {
                     return (
-                      <SwiperSlide
-                        key={i}
-                        className="flex-1 gap-3 p-2 text-center"
-                        style={{ marginRight: '0px' }}
-                      >
+                      <SwiperSlide key={i} className="gap-3 p-2 text-center !mr-0">
                         <div key={i}>
                           <div className="mouse_pointer" onClick={() => handleNavigate(snd)}>
                             <img src={Icon} alt="icon" className="w-[100px] h-[100px] mx-auto" />
@@ -251,7 +244,7 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
           </div>
         )}
       </div>
-      <PlaceReview reportRate={setChildRate} />
+      <PlaceReview />
     </div>
   )
 }
