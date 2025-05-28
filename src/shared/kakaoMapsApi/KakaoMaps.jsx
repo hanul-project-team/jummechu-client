@@ -30,8 +30,7 @@ const KakaoMaps = () => {
     }, 60000)
 
     try {
-      if (isRoot) {
-        // console.log(isRoot)
+      if (isRoot && center && center.lat != null && center.lng != null) {
         if (!center || center.lat !== lat || center.lng !== lng || userNearPlace?.length === 0) {
           getKakaoData(center)
         }
@@ -66,18 +65,25 @@ const KakaoMaps = () => {
           console.log('위치 정보 획득 실패 및 재시도 실패')
         }
       },
-      { enableHighAccuracy: true }
+      { enableHighAccuracy: true },
     )
   }
 
   const getKakaoData = center => {
-    // console.log('재시도 횟수', retryCountRef.current)
+    if (!center || center.lat == null || center.lng == null) {
+      console.warn('유효하지 않은 center 값으로 getKakaoData 호출됨:', center)
+      return
+    }
     if (userNearPlace?.length === 0 || !userNearPlace) {
-      // console.log(userNearPlace?.length)
       axios
         .post(
           'http://localhost:3000/api/kakao/user/nearplace',
-          { location: center },
+          {
+            location: {
+              lat: center.lat,
+              lng: center.lng,
+            },
+          },
           {
             withCredentials: true,
           },
@@ -86,15 +92,16 @@ const KakaoMaps = () => {
           const data = res.data
           // console.log(data)
           setUserNearPlace(data)
-          retryCountRef.current == 0
+          retryCountRef.current = 0
         })
         .catch(err => {
           // console.error('error msg:', err)
           if (retryCountRef.current < 3) {
             retryCountRef.current += 1
             console.log(`데이터 로딩 실패 ${retryCountRef.current}회 째 재시도...`)
-            setTimeout(() => getKakaoData(center, 1000))
+            setTimeout(() => getKakaoData(center), 1000)
           } else {
+            console.error('Kakao API 호출 실패:', err.response?.data || err.message)
             console.log('kakao map 데이터 로딩 실패 및 재시도 실패', err)
           }
         })
