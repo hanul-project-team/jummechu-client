@@ -9,6 +9,7 @@ const zustandStore = create(
       searchData: [],
       center: null,
       userNearPlace: [],
+      nearPlaceReviews: null,
       isLoading: true,
       searchNearData: [],
 
@@ -30,6 +31,7 @@ const zustandStore = create(
       clearSearchData: () => set({ searchData: [] }),
       setCenter: data => set({ center: data }),
       setUserNearPlace: data => set({ userNearPlace: data }),
+      setNearPlaceReviews: data => set({ nearPlaceReviews: data }),
       setIsLoading: value => set({ isLoading: value }),
       setSearchNearData: data => set({ searchNearData: data }),
     }),
