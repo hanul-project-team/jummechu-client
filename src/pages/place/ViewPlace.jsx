@@ -14,6 +14,9 @@ const ViewPlace = () => {
     }
   }, [location.state, defaultBookmarked])
 
+  useEffect(() => {
+    window.scrollTo({ top: 0 })
+  },[location.pathname])
   // console.log(location.state)
 
   return (
