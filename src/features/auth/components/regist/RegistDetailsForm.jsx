@@ -68,10 +68,8 @@ const RegistDetailsForm = () => {
     const isValid = await trigger('phone')
     if (isValid) {
       const phone = getValues('phone')
-      console.log(phone)
-      // await axios.post('http://localhost:3000/auth/sendCode', phone)
+      // await axios.post('http://localhost:3000/auth/send_code', { phone }, { withCredentials: true })
       setIsRequested(true)
-      toast.success(<div>인증번호 발송에 성공하였습니다.</div>, { autoClose: 4000 })
       resetField('code')
       setFocus('code')
       setTimerKey(prev => prev + 1)
@@ -81,20 +79,23 @@ const RegistDetailsForm = () => {
     const isValid = await trigger('code')
     if (isValid) {
       const code = getValues('code')
-      console.log(code)
-      // try {
-      //   const response = await axios.post('http://localhost:3000/auth/verifyCode', code)
-      //   if (response.data === true) {
-      //   }
-      // } catch {}
-      toast.success('인증에 성공하였습니다', { autoClose: 3000 })
-      setIsSMSAuthenticated(true)
+      try {
+        // await axios.post(
+        //   'http://localhost:3000/auth/verify_code',
+        //   { code },
+        //   { withCredentials: true },
+        // )
+        toast.success('인증에 성공하였습니다', { autoClose: 3000 })
+        setIsSMSAuthenticated(true)
+      } catch (e) {
+        console.log(e)
+      }
     }
   }
   const onSubmit = async data => {
     const role = JSON.parse(localStorage.getItem('role'))
     const termsAgreement = JSON.parse(localStorage.getItem('termsAgreement'))
-    const {passwordCheck: _passwordCheck, code: _code, ...rest } = data
+    const { passwordCheck: _passwordCheck, code: _code, ...rest } = data
     const submitData = { ...role, termsAgreement, ...rest }
     try {
       await axios.post('http://localhost:3000/auth/regist', submitData)
