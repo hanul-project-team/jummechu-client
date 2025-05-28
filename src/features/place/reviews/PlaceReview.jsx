@@ -7,7 +7,7 @@ import StarRatingComponent from 'react-star-rating-component'
 import ReviewChart from './ReviewChart.jsx'
 import axios from 'axios'
 
-const PlaceReview = ({ reportRate }) => {
+const PlaceReview = () => {
   const [showMore, setShowMore] = useState(5)
   const [isUser, setIsUser] = useState(false)
   const [prevResult, setPrevResult] = useState(null)
@@ -16,6 +16,7 @@ const PlaceReview = ({ reportRate }) => {
   const [errorMessage, setErrorMessage] = useState('')
   let count = showMore
   let MIN_LENGTH = 10
+  const setReviewInfo  = zustandStore(state => state.setReviewInfo)
   const reviewInfo = zustandStore(state => state.reviewInfo)
   const placeDetail = zustandStore(state => state.placeDetail)
   const navigate = useNavigate()
@@ -27,7 +28,6 @@ const PlaceReview = ({ reportRate }) => {
     store: '',
   })
 
-  const [initialItems, setInitialItems] = useState(reviewInfo)
   const [currentSort, setCurrentSort] = useState('none')
 
   useEffect(() => {
@@ -37,12 +37,12 @@ const PlaceReview = ({ reportRate }) => {
       setIsUser(false)
     }
 
-    let sorted = [...initialItems]
+    let sorted = [...reviewInfo]
     // console.log(sorted)
     switch (currentSort) {
       case 'none':
       default:
-        sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+        sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         break
       case 'rating-high':
         sorted.sort((a, b) => b.rating - a.rating)
@@ -57,14 +57,13 @@ const PlaceReview = ({ reportRate }) => {
         sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
         break
     }
-    setInitialItems(sorted)
+    setReviewInfo(sorted)
 
     const result = handleTotalRating(reviewInfo)
     if (typeof result == 'number' && prevResult !== result) {
       setPrevResult(result)
-      reportRate(result)
     }
-  }, [currentSort, isUser, placeDetail, reviewInfo])
+  }, [currentSort, isUser, placeDetail])
 
   const handleReviewDate = createdAt => {
     const diff = new Date() - createdAt
@@ -103,12 +102,13 @@ const PlaceReview = ({ reportRate }) => {
     }
   }
   const handleTotalRating = reviews => {
-    if (reviews.length < 1 || !reviews) {
-      return 0
-    } else if (reviews.legnth > 0) {
+    if (reviews?.length > 0) {
       const result = reviews.reduce((acc, cur) => acc + cur.rating, 0) / reviews.length
+      // console.log(result)
       const rounded = Math.round(result * 10) / 10
       return rounded
+    } else {
+      return 0
     }
   }
   const handleReviewWrite = () => {
@@ -161,9 +161,17 @@ const PlaceReview = ({ reportRate }) => {
             withCredentials: true,
           })
           .then(res => {
-            console.log(res)
-            alert('리뷰가 작성되었습니다.')
-            navigate(0)
+            // console.log(res)
+            if (res.status === 201) {
+              alert('리뷰가 작성되었습니다.')
+              setFormData({
+                ...formData,
+                rating: 1,
+                comment: '',
+              })
+              setShowReviewForm(prev => !prev)
+              setReviewInfo(res.data.data)
+            }
           })
           .catch(err => {
             console.log(err)
@@ -194,8 +202,10 @@ const PlaceReview = ({ reportRate }) => {
     })
   }
   const handleSeeAllReviews = () => {
-    setShowMore(initialItems.length)
+    setShowMore(reviewInfo.length)
   }
+  // console.log(reviewTrigger)
+  // console.log(reviewInfo)
   return (
     <div>
       {/* 리뷰 헤더 영역 */}
@@ -306,7 +316,7 @@ const PlaceReview = ({ reportRate }) => {
       {/* 리뷰 보이는곳 */}
       <div className="container max-w-3/5 mx-auto">
         {/* 정렬 버튼 */}
-        {initialItems.length > 0 && (
+        {reviewInfo.length > 0 && (
           <div className="max-w-4/5 flex gap-3 mx-auto my-3">
             <button
               className="bg-gray-300 p-2 rounded-3xl mouse_pointer"
@@ -340,10 +350,10 @@ const PlaceReview = ({ reportRate }) => {
             </button>
           </div>
         )}
-        {/* 리뷰 박스 */}
+        {/* 리뷰 영역 */}
         <div>
-          {initialItems.length > 0 && showMore ? (
-            initialItems.slice(0, count).map((rv, i) => (
+          {reviewInfo.length > 0 ? (
+            reviewInfo.slice(0, count).map((rv, i) => (
               <div
                 key={i}
                 className="max-w-4/5 border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto flex items-center"
@@ -374,14 +384,14 @@ const PlaceReview = ({ reportRate }) => {
           <div className="mx-auto max-w-fit my-2">
             <button
               type="button"
-              className={`${reviewInfo.length < 5 ? 'hidden' : 'mouse_pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
+              className={`${reviewInfo.length <= 5 ? 'hidden' : 'mouse_pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
               onClick={handleReviewShowMore}
             >
               {reviewInfo.length - showMore > 5
                 ? '5개 더보기'
                 : reviewInfo.length - showMore <= 5 && reviewInfo.length - showMore > 0
                   ? reviewInfo.length - count + '개 더보기'
-                  : showMore - reviewInfo.length === 0 && '접기'}
+                  : reviewInfo.length > 5 && showMore - reviewInfo.length === 0 && '접기'}
             </button>
           </div>
         )}
