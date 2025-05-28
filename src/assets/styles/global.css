@@ -1,8 +1,17 @@
+:root {
+  --color-gray-900: #15181e;
+  --color-gray-800: #4b515b;
+  --color-gray-700: #717680;
+  --color-gray-300: #dbdee3;
+  --color-gray-50:  #f8f9fb;
+  --color-teal-400: #39D2D7; 
+}
 html,
 body {
   height: 100%;
   margin: 0;
   padding: 0;
+  font-family: 'Pretendard', sans-serif;
 }
 .place-picker-container {
   padding: 20px;
@@ -14,9 +23,6 @@ gmp-map {
   /* height: 20rem; */
   min-width: 60%;
   max-width: 80%;
-}
-.mouse_pointer:hover {
-  cursor: pointer;
 }
 .loading-jump {
   font-size: 1.2rem;
