@@ -4,6 +4,7 @@ import PwdChangeModal from '../components/PwdChangeModal.jsx';
 import axios from 'axios'
 import '../MyPage.css' // 경로 기준: 현재 컴포넌트 파일 위치 기준
 
+// 와이드 1024 py 6 //
 const MyPageForm = () => {
   const [active, setActive] = useState('최근기록')
   const [bookmarked, setBookmarked] = useState(() => {
@@ -615,7 +616,7 @@ const MyPageForm = () => {
 
   return (
     <div className="w-full pb-5">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-5xl py-6 mx-auto">
         <div className="py-3 flex justify-between items-center ">
           <div className="flex gap-5 items-center ">
             <div
@@ -680,7 +681,7 @@ const MyPageForm = () => {
                 isOpen={isPasswordModalOpen}
                 onClose={closePasswordModal}
             />
-      <div>{renderContent()}</div>
+      <div className='max-w-5xl py-6 mx-auto'>{renderContent()}</div>
     </div>
   )
 }
