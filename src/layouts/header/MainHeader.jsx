@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { logout } from '../../features/auth/slice/authSlice'
 import axios from 'axios'
+import zustandStore from '../../app/zustandStore.js'
 import '../../assets/styles/global.css'
 import { useNavigate, useLocation, NavLink } from 'react-router-dom'
 import Logo from '../../assets/images/logo.png'
@@ -17,8 +18,6 @@ const MainHeader = () => {
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated)
   const user = useSelector(state => state.auth.user)
   const dropdownRef = useRef()
-  // console.log(isAuthenticated)
-  // console.log(user)
 
   useEffect(() => {
     const handleClickOutside = event => {
@@ -35,6 +34,7 @@ const MainHeader = () => {
       if (confirm('로그아웃 하시겠습니까?')) {
         axios.get('http://localhost:3000/auth/logout', { withCredentials: true })
         dispatch(logout())
+        zustandStore.persist.clearStorage()
         localStorage.removeItem('place-storage')
         navigate('/')
       }
@@ -42,15 +42,12 @@ const MainHeader = () => {
       alert('다시 시도해주세요')
     }
   }
-  // const isList = location.pathname.startsWith('/list')
 
   const navigateLogin = () => {
     navigate('/login')
-    // console.log('로그인 이동')
   }
   const navigateRegist = () => {
     navigate('/regist/type')
-    // console.log('회원가입 이동')
   }
   const navigateHome = () => {
     navigate('/')
@@ -62,7 +59,7 @@ const MainHeader = () => {
     <>
       <div className="w-full pb-5">
         {isRoot === true ? (
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <div className="flex justify-between items-center">
               <div onClick={navigateHome}>
                 <img src={Logo} alt="logo" className="mouse_pointer" />
@@ -91,16 +88,20 @@ const MainHeader = () => {
           ${open ? 'max-h-60 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95'}
         `}
                   >
-                    <NavLink to="/mypage">
-                      <button className="w-full mouse_pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
-                        마이페이지
-                      </button>
-                    </NavLink>
-                    <NavLink to="#">
-                      <button className="w-full mouse_pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
-                        대시보드
-                      </button>
-                    </NavLink>
+                    {user && user.role === 'member' && (
+                      <NavLink to="/mypage">
+                        <button className="w-full mouse_pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
+                          마이페이지
+                        </button>
+                      </NavLink>
+                    )}
+                    {user && user.role === 'business' && (
+                      <NavLink to="#">
+                        <button className="w-full mouse_pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
+                          대시보드
+                        </button>
+                      </NavLink>
+                    )}
                     <button
                       className="w-full mouse_pointer text-center underline underline-offset-8 p-2 py-3 bg-red-500 text-white hover:bg-red-600 active:bg-red-700"
                       onClick={setLogout}
@@ -113,14 +114,14 @@ const MainHeader = () => {
                 <div className="flex gap-3">
                   <button
                     type="button"
-                    className="border bg-teal-400 text-white border-black rounded-3xl p-2 font-sans mouse_pointer"
+                    className="border bg-teal-400 text-white border-black rounded-3xl p-2 mouse_pointer"
                     onClick={navigateLogin}
                   >
                     로그인
                   </button>
                   <button
                     type="button"
-                    className="border bg-white text-teal-400 border-black rounded-3xl p-2 font-sans mouse_pointer"
+                    className="border bg-white text-teal-400 border-black rounded-3xl p-2 mouse_pointer"
                     onClick={navigateRegist}
                   >
                     회원가입
@@ -128,7 +129,7 @@ const MainHeader = () => {
                 </div>
               )}
             </div>
-            <h1 className="text-center text-5xl font-sans font-bold">어디로 가시나요?</h1>
+            <h1 className="text-center text-5xl font-bold">어디로 가시나요?</h1>
             <KakaoMaps />
           </div>
         ) : (
@@ -161,16 +162,20 @@ const MainHeader = () => {
           ${open ? 'max-h-60 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95'}
         `}
                   >
-                    <NavLink to="/mypage">
-                      <button className="w-full mouse_pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
-                        마이페이지
-                      </button>
-                    </NavLink>
-                    <NavLink to="#">
-                      <button className="w-full mouse_pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
-                        대시보드
-                      </button>
-                    </NavLink>
+                    {user && user.role === 'member' && (
+                      <NavLink to="/mypage">
+                        <button className="w-full mouse_pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
+                          마이페이지
+                        </button>
+                      </NavLink>
+                    )}
+                    {user && user.role === 'business' && (
+                      <NavLink to="#">
+                        <button className="w-full mouse_pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
+                          대시보드
+                        </button>
+                      </NavLink>
+                    )}
                     <button
                       className="w-full mouse_pointer text-center underline underline-offset-8 p-2 py-3 bg-red-500 text-white hover:bg-red-600 active:bg-red-700"
                       onClick={setLogout}
@@ -183,14 +188,14 @@ const MainHeader = () => {
                 <div className="flex gap-3">
                   <button
                     type="button"
-                    className="border bg-teal-400 text-white border-black rounded-3xl p-2 font-sans mouse_pointer"
+                    className="border bg-teal-400 text-white border-black rounded-3xl p-2 mouse_pointer"
                     onClick={navigateLogin}
                   >
                     로그인
                   </button>
                   <button
                     type="button"
-                    className="border bg-white text-teal-400 border-black rounded-3xl p-2 font-sans mouse_pointer"
+                    className="border bg-white text-teal-400 border-black rounded-3xl p-2 mouse_pointer"
                     onClick={navigateRegist}
                   >
                     회원가입
