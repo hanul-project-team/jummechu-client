@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
-import image from '../image/mainprofile.jpg'
 
 // axios.defaults.withCredentials는 앱의 가장 상위 컴포넌트나
 // 별도의 설정 파일에서 한 번만 해주는 것이 좋습니다.
@@ -11,7 +10,7 @@ const Modal = ({ isOpen, onClose }) => {
   const [userPhone, setUserPhone] = useState('')
   // ★★★ userProfileImage 상태 추가
   const [userProfileImage, setUserProfileImage] = useState(
-    image
+    'http://localhost:3000/static/images/defaultProfileImg.jpg'
   ) // 기본 이미지 또는 로딩 중 이미지
   const fileInputRef = useRef(null)
 
@@ -34,7 +33,7 @@ const Modal = ({ isOpen, onClose }) => {
         setUserProfileImage(
           profileImagePath
             ? `${backendBaseUrl}${profileImagePath}`
-            : `${image}`,
+            : 'http://localhost:3000/static/images/defaultProfileImg.jpg',
         )
       } catch (error) {
         console.error('사용자 프로필 정보를 불러오는데 실패했습니다:', error)
@@ -84,6 +83,27 @@ const Modal = ({ isOpen, onClose }) => {
     }
   }
 
+  
+  const handleResetImage = async () => {
+    if (!window.confirm('프로필 이미지를 기본 이미지로 되돌리시겠습니까?')) {
+      return;
+    }
+    try {
+      const response = await axios.put('http://localhost:3000/auth/profile-image/reset', {}, { // PUT 요청, 본문은 비워둠
+        withCredentials: true,
+      }
+    );
+      console.log('프로필 이미지 기본 상태로 변경 성공:', response.data);
+      // 상태를 기본 이미지 URL로 업데이트
+    setUserProfileImage('http://localhost:3000/static/images/defaultProfileImg.jpg');
+    alert('프로필 이미지가 기본 상태로 변경되었습니다!');
+
+  } catch (error) {
+    console.error('프로필 이미지 기본 상태로 변경 실패:', error);
+    alert('프로필 이미지를 기본 상태로 변경하는 데 실패했습니다.');
+  }
+};
+
 const profileUpdate = () => {
   onClose()
   window.location.reload()
@@ -132,6 +152,13 @@ const profileUpdate = () => {
           <p> {userPhone} </p>
         </div>
         <hr className="py-3" />
+
+        <button
+          className="mt-2 px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600 transition-colors"
+          onClick={handleResetImage}
+        >
+          기본 이미지로 변경
+        </button>
 
         <div className="flex gap-2">
           <button
