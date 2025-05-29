@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import Modal from '../components/UserModal.jsx'
+import PwdChangeModal from '../components/PwdChangeModal.jsx';
 import axios from 'axios'
 import '../MyPage.css' // 경로 기준: 현재 컴포넌트 파일 위치 기준
-import image from '../image/mainprofile.jpg'
 
 const MyPageForm = () => {
   const [active, setActive] = useState('최근기록')
@@ -10,7 +10,7 @@ const MyPageForm = () => {
     const savedBookmarks = localStorage.getItem('bookmarkedItems')
     return savedBookmarks ? JSON.parse(savedBookmarks) : []
   })
-  const tabs = ['최근기록', '찜', '리뷰', '음식점 추천', '계정 설정']
+  const tabs = ['최근기록', '찜', '리뷰', '음식점 추천(AI)', '계정 설정']
   const [isopen, setIsOpen] = useState(false)
   const [openai, setOpenAi] = useState([])
   const [dalleImage, setDalleImage] = useState(null)
@@ -18,7 +18,15 @@ const MyPageForm = () => {
   const [userNickname, setUserNickname] = useState('로딩중')
   const [userEmail, setUserEmail] = useState('')
   const [userPhone, setUserPhone] = useState('')
-  const [userProfileImage, setUserProfileImage] = useState(image)
+  const [userName, setUserName] = useState('')
+  const [userProfileImage, setUserProfileImage] = useState(
+    'http://localhost:3000/static/images/defaultProfileImg.jpg',
+  )
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+
+  const [tempNickname, setTempNickname] = useState('');
+
+  const [isEditing, setIsEditing] = useState(false)
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -27,8 +35,10 @@ const MyPageForm = () => {
           withCredentials: true,
         })
         const backendBaseUrl = 'http://localhost:3000'
+
         const callUserNickname = response.data.nickname
         setUserNickname(callUserNickname || '익명 사용자')
+        setTempNickname(callUserNickname || '익명 사용자');
 
         const callUserEmail = response.data.email
         setUserEmail(callUserEmail)
@@ -36,15 +46,18 @@ const MyPageForm = () => {
         const callUserPhone = response.data.phone
         setUserPhone(callUserPhone)
 
+        const callUserName = response.data.name
+        setUserName(callUserName)
+
         const callUserImage = response.data.profileImage
         setUserProfileImage(
           callUserImage
             ? `${backendBaseUrl}${callUserImage}`
-            : `${image}`,
+            : 'http://localhost:3000/static/images/defaultProfileImg.jpg',
         )
       } catch (error) {
         console.error('사용자 프로필 정보를 불러오는데 실패했습니다:', error)
-        setUserProfileImage`${image}`;
+        setUserProfileImage('http://localhost:3000/static/images/defaultProfileImg.jpg')
       }
     }
     fetchUserProfile()
@@ -118,13 +131,6 @@ const MyPageForm = () => {
         },
       })
 
-      // if (!response.ok) {
-      //   const errorText = await response.text()
-      //   console.error('OpenAI 응답 오류:', errorText)
-      //   return []
-      // }
-
-      // console.log('OpenAI 응답 raw:', response)
       return response
     } catch (error) {
       console.error('JSON 파싱 오류 또는 OpenAI 호출 실패:', error)
@@ -239,6 +245,76 @@ const MyPageForm = () => {
       setBookmarked(prev => [...prev, item])
     }
   }
+
+  // ★★★ 편집 모드 토글 함수
+  const handleEditToggle = () => {
+
+    if (!isEditing) {
+      // 수정 모드 진입 시, 현재 실제 값을 임시 상태로 복사
+      setTempNickname(userNickname);
+  }
+    setIsEditing(prev => !prev)
+  }
+
+  // ★★★ 사용자 정보 저장 함수
+  const handleSaveChanges = async () => {
+    try {
+
+
+      const response = await axios.put(
+        'http://localhost:3000/auth/profile',
+        {
+          nickname: tempNickname,
+          email: userEmail,
+          phone: userPhone,
+        },
+        {
+          withCredentials: true,
+        },
+      )
+
+      if (response.status === 200) {
+        alert('프로필 정보가 성공적으로 업데이트되었습니다.')
+        setUserNickname(tempNickname);
+        setIsEditing(false) // 저장 후 편집 모드 종료
+        // 업데이트된 정보로 상태를 다시 설정 (선택 사항, 서버 응답에 따라)
+        // setUserNickname(response.data.user.nickname);
+        // setUserEmail(response.data.user.email);
+        // setUserPhone(response.data.user.phone);
+      } else {
+        alert(`프로필 정보 업데이트 실패: ${response.data.message || '알 수 없는 오류'}`)
+      }
+    } catch (error) {
+      console.error('프로필 정보 업데이트 실패:', error)
+      alert(
+        `프로필 정보 업데이트 중 오류가 발생했습니다: ${error.response?.data?.message || '서버 오류'}`,
+      )
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    if (window.confirm('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      try {
+        const response = await axios.delete('http://localhost:3000/auth/account', {
+          withCredentials: true,
+        })
+
+        if (response.status === 200) {
+          alert('계정이 성공적으로 삭제되었습니다. 로그인 페이지로 이동합니다.')
+          // 계정 삭제 성공 시 로그아웃 처리
+          // 1. 로컬 스토리지/세션 스토리지 등 저장된 토큰이나 사용자 정보 삭제
+          localStorage.removeItem('accessToken') // 예시: 실제 사용하는 토큰 이름
+          // 2. 페이지 리디렉션 (로그인 페이지 등으로)
+          window.location.href = '/login' // 로그인 페이지 URL로 변경
+        }
+      } catch (error) {
+        console.error('계정 삭제 실패:', error)
+      }
+    }
+  }
+
+  const openPasswordModal = () => setIsPasswordModalOpen(true);
+  const closePasswordModal = () => setIsPasswordModalOpen(false);
 
   const renderContent = () => {
     switch (active) {
@@ -364,7 +440,7 @@ const MyPageForm = () => {
       case '리뷰':
         return <p> 작성한 리뷰가 없습니다. </p>
 
-      case '음식점 추천':
+      case '음식점 추천(AI)':
         return (
           <div className="flex flex-col gap-5 items-center">
             {dalleImage && (
@@ -439,35 +515,94 @@ const MyPageForm = () => {
                 <div>
                   <div className="py-3 flex justify-between">
                     <p>이메일 관리</p>
-                    <p> {userEmail} </p>
+                    {isEditing ? (
+                      <input
+                        type="email"
+                        value={userEmail}
+                        onChange={e => setUserEmail(e.target.value)}
+                        className="border border-gray-300 rounded px-2 py-1 w-1/2"
+                      />
+                    ) : (
+                      <p>{userEmail}</p>
+                    )}
                   </div>
                   <hr className="py-3" />
                   <div className="py-3 flex justify-between">
                     <p>비밀번호</p>
-                    <p> 사용자 비밀번호 </p>
+                    <button className="text-blue-500 hover:underline"
+                     onClick={openPasswordModal}
+                    
+                    >비밀번호 변경</button>
                   </div>
                   <hr className="py-3" />
                 </div>
+
+                <div className="py-3 flex justify-between">
+                  <p>이름</p>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={userName}
+                      onChange={e => setUserName(e.target.value)}
+                      className="border border-gray-300 rounded px-2 py-1 w-1/2"
+                    />
+                  ) : (
+                    <p>{userName}</p>
+                  )}
+                </div>
+                
+                <hr className="py-3" />
                 <div className="py-3 flex justify-between">
                   <p>닉네임</p>
-                  <p>{userNickname}</p>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={tempNickname}
+                      onChange={e => setTempNickname(e.target.value)}
+                      className="border border-gray-300 rounded px-2 py-1 w-1/2"
+                    />
+                  ) : (
+                    <p>{userNickname}</p>
+                  )}
                 </div>
                 <hr className="py-3" />
                 <div className="py-3 flex justify-between">
                   <p>연락처</p>
-                  <p>{userPhone}</p>
+                  {isEditing ? (
+                    <input
+                      type="tel" // 전화번호 타입
+                      value={userPhone}
+                      onChange={e => setUserPhone(e.target.value)}
+                      className="border border-gray-300 rounded px-2 py-1 w-1/2"
+                    />
+                  ) : (
+                    <p>{userPhone}</p>
+                  )}
                 </div>
                 <hr className="py-3" />
               </div>
               <div className="flex gap-5 justify-center">
-                <button className="mt-4 px-4 py-2 text-white bg-red-600 rounded cursor-pointer">
-                  {' '}
-                  계정 삭제{' '}
+                <button
+                  className="mt-4 px-4 py-2 text-white bg-red-600 rounded cursor-pointer"
+                  onClick={handleDeleteAccount}
+                >
+                  계정 삭제
                 </button>
-                <button className="mt-4 px-4 py-2 text-white bg-blue-600 rounded cursor-pointer">
-                  {' '}
-                  수정{' '}
-                </button>
+                {isEditing ? (
+                  <button
+                    className="mt-4 px-4 py-2 text-white bg-blue-600 rounded cursor-pointer"
+                    onClick={handleSaveChanges} // ★★★ 저장 버튼 핸들러
+                  >
+                    저장
+                  </button>
+                ) : (
+                  <button
+                    className="mt-4 px-4 py-2 text-white bg-blue-600 rounded cursor-pointer"
+                    onClick={handleEditToggle} // ★★★ 수정 버튼 핸들러
+                  >
+                    수정
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -541,6 +676,10 @@ const MyPageForm = () => {
       </div>
       <hr className=" border-gray-500" />
 
+      <PwdChangeModal
+                isOpen={isPasswordModalOpen}
+                onClose={closePasswordModal}
+            />
       <div>{renderContent()}</div>
     </div>
   )
