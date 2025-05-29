@@ -10,20 +10,18 @@ import PlaceReview from './components/reviews/PlaceReview.jsx'
 import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
 import RecommandPlace from './components/RecommandPlace.jsx'
 
-const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
-  const [isBookmarked, setIsBookmarked] = useState(defaultBoomarked)
+const ViewPlaceDetail = () => {
   const setReviewInfo = zustandStore(state => state.setReviewInfo)
   const reviewInfo = zustandStore(state => state.reviewInfo)
   const placeDetail = zustandStore(state => state.placeDetail)
   const navigate = useNavigate()
-
   const setSearchNearData = zustandStore(state => state.setSearchNearData)
   const searchNearData = zustandStore(state => state.searchNearData)
   const lastStoreRef = useRef(placeDetail?._id)
   const user = useSelector(state => state.auth.user)
+  const setUserBookmark = zustandUser(state => state.setUserBookmark)
   const userBookmark = zustandUser(state => state.userBookmark)
-  // console.log(user)
-  // console.log(placeDetail)
+  const isBookmarked = zustandUser(state => state.isBookmarked)
 
   useEffect(() => {
     if (placeDetail !== null || placeDetail !== undefined) {
@@ -62,14 +60,14 @@ const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
         }
       }
     }
-  }, [isBookmarked, placeDetail])
-
+  }, [isBookmarked, placeDetail, userBookmark])
+  
   const handleBookmark = () => {
-    if (user.role === 'guest') {
+    if (!user.role) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 하시겠습니까?')) {
         navigate('/login')
       }
-    } else if (user?.role === 'member') {
+    } else {
       const userId = user?.id
       const storeId = placeDetail?._id
       if (isBookmarked === true) {
@@ -82,9 +80,9 @@ const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
               },
             })
             .then(res => {
-              const data = res
+              const data = res.data
               // console.log(data)
-              setIsBookmarked(prev => !prev)
+              setUserBookmark(prev => prev.filter(ubm => ubm?.store._id !== placeDetail._id))
             })
             .catch(err => {
               console.error('북마크 해제 요청 실패!', err)
@@ -100,9 +98,9 @@ const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
               },
             })
             .then(res => {
-              const data = res
+              const data = res.data
               // console.log(data)
-              setIsBookmarked(prev => !prev)
+              setUserBookmark(prev => [...prev, data])
             })
             .catch(err => {
               console.error('북마크 등록 요청 실패!', err)
