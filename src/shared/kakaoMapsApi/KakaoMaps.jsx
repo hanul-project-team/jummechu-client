@@ -128,6 +128,9 @@ const KakaoMaps = () => {
           const data = res.data
           // console.log(data)
           setSearchData(data)
+          setFormData({
+            place: '',
+          })
         })
         .catch(err => {
           console.log(err)
@@ -149,6 +152,9 @@ const KakaoMaps = () => {
           const data = res.data
           // console.log(data)
           setSearchData(data)
+          setFormData({
+            place: '',
+          })
         })
         .catch(err => {
           console.log(err)
@@ -205,7 +211,7 @@ const KakaoMaps = () => {
                         className="button w-fit rounded-3xl px-5 py-2 bg-teal-200 focus:bg-teal-500 text-gray-700"
                         type="submit"
                       >
-                        <span className="max-[426px]:text-sm mouse_pointer">검색</span>
+                        <p className="max-[769px]:w-max text-sm max-[769px]:text-xs hover:cursor-pointer">검색</p>
                       </button>
                     </div>
                   </div>
@@ -213,7 +219,7 @@ const KakaoMaps = () => {
               </fieldset>
             </form>
           </div>
-          <div className="container mx-auto max-w-5xl max-xl:m-3">
+          <div className="container mx-auto max-w-7xl max-xl:m-3">
             <KakaoNearPlace />
           </div>
         </>
