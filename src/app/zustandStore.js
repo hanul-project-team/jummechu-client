@@ -1,15 +1,17 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
-const usePlaceStore = create(
+const zustandStore = create(
   persist(
     (set, get) => ({
       placeDetail: [],
       reviewInfo: [],
       searchData: [],
       center: null,
-      kakaoPlace: [],
+      userNearPlace: [],
+      nearPlaceReviews: null,
       isLoading: true,
+      searchNearData: [],
 
       setSearchData: data => {
         if (!data || data.length === 0) {
@@ -21,15 +23,17 @@ const usePlaceStore = create(
       setPlaceDetail: data => set({ placeDetail: data }),
       setReviewInfo: data => {
         if (!data || data.length === 0) {
-          set({reviewInfo: []})
+          set({ reviewInfo: [] })
         } else {
-          set({reviewInfo: data ?? []})
+          set({ reviewInfo: data ?? [] })
         }
       },
       clearSearchData: () => set({ searchData: [] }),
       setCenter: data => set({ center: data }),
-      setKakaoPlace: data => set({ kakaoPlace: data }),
+      setUserNearPlace: data => set({ userNearPlace: data }),
+      setNearPlaceReviews: data => set({ nearPlaceReviews: data }),
       setIsLoading: value => set({ isLoading: value }),
+      setSearchNearData: data => set({ searchNearData: data }),
     }),
     {
       name: 'place-storage',
@@ -45,4 +49,4 @@ const usePlaceStore = create(
   ),
 )
 
-export default usePlaceStore
+export default zustandStore

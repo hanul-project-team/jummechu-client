@@ -39,7 +39,7 @@ const MainHeaderTop = () => {
     }
   }
   return (
-    <div className="flex justify-between items-center pt-4 pb-8">
+    <div className="flex justify-between sm:items-center items-end pt-4 pb-8">
       <Link to="/">
         <img src={Logo} alt="logo" />
       </Link>
@@ -66,16 +66,16 @@ const MainHeaderTop = () => {
             className={`absolute left-0 top-11 w-fit z-10 bg-gray-100 rounded-b-xl overflow-hidden transition-all duration-300 ease-in-out shadow-lg
           ${open ? 'max-h-60 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95'}`}
           >
-            <NavLink to="/mypage">
+            {user.role === 'member' && <NavLink to="/mypage">
               <button className="w-full hover:cursor-pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
                 마이페이지
               </button>
-            </NavLink>
-            <NavLink to="#">
+            </NavLink>}
+            {user.role === 'business' && <NavLink to="#">
               <button className="w-full hover:cursor-pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
                 대시보드
               </button>
-            </NavLink>
+            </NavLink>}
             <button
               className="w-full hover:cursor-pointer text-center underline underline-offset-8 p-2 py-3 bg-red-500 text-white hover:bg-red-600 active:bg-red-700"
               onClick={setLogout}
@@ -88,11 +88,11 @@ const MainHeaderTop = () => {
         <div className="flex gap-3">
           <Link
             to="/login"
-            className="border border-color-gray-700 bg-white text-color-gray-800 rounded-2xl p-2"
+            className="border text-sm sm:text-lg border-color-gray-700 bg-white text-color-gray-800 rounded-2xl p-2"
           >
             로그인
           </Link>
-          <Link to="/regist/type" className="bg-color-teal-400  text-white  rounded-2xl p-2">
+          <Link to="/regist/type" className="bg-color-teal-400 text-sm sm:text-lg text-white  rounded-2xl p-2">
             회원가입
           </Link>
         </div>
