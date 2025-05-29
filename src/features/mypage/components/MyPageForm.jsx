@@ -616,7 +616,7 @@ const MyPageForm = () => {
 
   return (
     <div className="w-full pb-5">
-      <div className="max-w-5xl py-6 mx-auto">
+      <div className="max-w-5xl mx-auto">
         <div className="py-3 flex justify-between items-center ">
           <div className="flex gap-5 items-center ">
             <div
@@ -681,7 +681,7 @@ const MyPageForm = () => {
                 isOpen={isPasswordModalOpen}
                 onClose={closePasswordModal}
             />
-      <div className='max-w-5xl py-6 mx-auto'>{renderContent()}</div>
+        <div className='max-w-5xl mx-auto px-6'>{renderContent()}</div>
     </div>
   )
 }
