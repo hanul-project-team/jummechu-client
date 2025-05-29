@@ -1,21 +1,22 @@
 import React, { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
-import Mainlayout from '../layouts/Mainlayout.jsx'
+import { useDispatch } from 'react-redux'
+import { restoreLogin } from '../features/auth/slice/authSlice'
+import Mainlayout from '../layouts/Mainlayout'
 import HomeSearch from '../features/home/HomeSearch.jsx'
 import SearchResultPage from '../pages/place/SearchResultPage.jsx'
-import { useDispatch } from 'react-redux'
 import RegistPage from '../pages/auth/RegistPage'
 import LoginPage from '../pages/auth/LoginPage'
 import ViewPlace from '../pages/place/ViewPlace.jsx'
-import { authCheck } from '../features/auth/slice/authSlice'
 import MyPages from '../pages/mypage/MyPage.jsx'
 import FindAccountPage from '../pages/auth/FindAccountPage'
 import FindAccountResultPage from '../pages/auth/FindAccountResultPage'
+import ResetPasswordPage from '../pages/auth/ResetPasswordPage.jsx'
 
 const App = () => {
   const dispatch = useDispatch()
   useEffect(() => {
-    dispatch(authCheck())
+    dispatch(restoreLogin())
   }, [dispatch])
   return (
     <Routes>
@@ -28,6 +29,7 @@ const App = () => {
         <Route path="regist/:step" element={<RegistPage />} />
         <Route path="find_account" element={<FindAccountPage />} />
         <Route path="find_account/result" element={<FindAccountResultPage />} />
+        <Route path="find_account/reset" element={<ResetPasswordPage />} />
       </Route>
     </Routes>
   )

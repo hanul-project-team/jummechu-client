@@ -1,6 +1,6 @@
 import z from 'zod'
 
-export const findAccountVerifySchema = z.object({
+export const verifySchema = z.object({
   name: z
     .string()
     .trim()
