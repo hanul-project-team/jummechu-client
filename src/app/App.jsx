@@ -3,12 +3,12 @@ import { Routes, Route } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { restoreLogin } from '../features/auth/slice/authSlice'
 import Mainlayout from '../layouts/Mainlayout'
-import HomeSearch from '../features/home/HomeSearch.jsx'
-import SearchResult from '../features/search/SearchResult.jsx'
-import ViewPlace from '../features/search/place/ViewPlace.jsx'
-import MyPages from '../pages/mypage/MyPage.jsx'
+import HomeSearch from '../pages/home/HomeSearch.jsx'
+import SearchResultPage from '../pages/place/SearchResultPage.jsx'
 import RegistPage from '../pages/auth/RegistPage'
 import LoginPage from '../pages/auth/LoginPage'
+import ViewPlace from '../pages/place/ViewPlace.jsx'
+import MyPages from '../pages/mypage/MyPage.jsx'
 import FindAccountPage from '../pages/auth/FindAccountPage'
 import FindAccountResultPage from '../pages/auth/FindAccountResultPage'
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage.jsx'
@@ -22,7 +22,7 @@ const App = () => {
     <Routes>
       <Route path="/" element={<Mainlayout />}>
         <Route index element={<HomeSearch />}></Route>
-        <Route path="search/:query" element={<SearchResult />}></Route>
+        <Route path="search/:query" element={<SearchResultPage />}></Route>
         <Route path="place/:id" element={<ViewPlace />}></Route>
         <Route path="mypage" element={<MyPages />}></Route>
         <Route path="login" element={<LoginPage />} />

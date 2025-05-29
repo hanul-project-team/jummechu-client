@@ -1,21 +1,21 @@
 import React, { useEffect, useState, useRef } from 'react'
-import usePlaceStore from '../../store/usePlaceStore'
+import zustandStore from '../../app/zustandStore.js'
 import axios from 'axios'
 import { useLocation, useNavigate } from 'react-router-dom'
 import KakaoNearPlace from './KakaoNearPlace.jsx'
 
 const KakaoMaps = () => {
-  const setCenter = usePlaceStore(state => state.setCenter)
-  const center = usePlaceStore(state => state.center)
-  const setKakaoPlace = usePlaceStore(state => state.setKakaoPlace)
-  const kakaoPlace = usePlaceStore(state => state.kakaoPlace)
-  const setSearchData = usePlaceStore(state => state.setSearchData)
+  const setCenter = zustandStore(state => state.setCenter)
+  const center = zustandStore(state => state.center)
+  const setUserNearPlace = zustandStore(state => state.setUserNearPlace)
+  const userNearPlace = zustandStore(state => state.userNearPlace)
+  const setSearchData = zustandStore(state => state.setSearchData)
 
   const intervalRef = useRef(null)
   const [lat, setLat] = useState('')
   const [lng, setLng] = useState('')
   const navigate = useNavigate()
-  const retryCountRef = useRef(0);
+  const retryCountRef = useRef(0)
   const [formData, setFormData] = useState({
     place: '',
   })
@@ -30,9 +30,8 @@ const KakaoMaps = () => {
     }, 60000)
 
     try {
-      if (isRoot) {
-        // console.log(isRoot)
-        if (!center || center.lat !== lat || center.lng !== lng || kakaoPlace?.length === 0) {
+      if (isRoot && center && center.lat != null && center.lng != null) {
+        if (!center || center.lat !== lat || center.lng !== lng || userNearPlace?.length === 0) {
           getKakaoData(center)
         }
       }
@@ -66,38 +65,47 @@ const KakaoMaps = () => {
           console.log('위치 정보 획득 실패 및 재시도 실패')
         }
       },
+      { enableHighAccuracy: true },
     )
   }
 
   const getKakaoData = center => {
-    console.log('재시도 횟수', retryCountRef.current)
-    // if(kakaoPlace?.length === 0 || !kakaoPlace) {
-    //   // console.log(kakaoPlace?.length)
-    //   axios
-    //   .post(
-    //     'http://localhost:3000/api/kakao/nearplace',
-    //     { location: center },
-    //     {
-    //       withCredentials: true,
-    //     },
-    //   )
-    //   .then(res => {
-    //     const data = res.data
-    //     // console.log(data)
-    //     setKakaoPlace(data)
-    //     retryCountRef.current == 0;
-    //   })
-    //   .catch(err => {
-    //     // console.error('error msg:', err)
-    //     if (retryCountRef.current < 3) {
-    //       retryCountRef.current += 1
-    //       console.log(`데이터 로딩 실패 ${retryCountRef.current}회 째 재시도...`)
-    //       setTimeout(() => getKakaoData(center, 1000))
-    //     } else {
-    //       console.log('kakao map 데이터 로딩 실패 및 재시도 실패', err)
-    //     }
-    //   })
-    // }
+    if (!center || center.lat == null || center.lng == null) {
+      console.warn('유효하지 않은 center 값으로 getKakaoData 호출됨:', center)
+      return
+    }
+    if (userNearPlace?.length === 0 || !userNearPlace) {
+      axios
+        .post(
+          'http://localhost:3000/api/kakao/user/nearplace',
+          {
+            location: {
+              lat: center.lat,
+              lng: center.lng,
+            },
+          },
+          {
+            withCredentials: true,
+          },
+        )
+        .then(res => {
+          const data = res.data
+          // console.log(data)
+          setUserNearPlace(data)
+          retryCountRef.current = 0
+        })
+        .catch(err => {
+          // console.error('error msg:', err)
+          if (retryCountRef.current < 3) {
+            retryCountRef.current += 1
+            console.log(`데이터 로딩 실패 ${retryCountRef.current}회 째 재시도...`)
+            setTimeout(() => getKakaoData(center), 1000)
+          } else {
+            console.error('Kakao API 호출 실패:', err.response?.data || err.message)
+            console.log('kakao map 데이터 로딩 실패 및 재시도 실패', err)
+          }
+        })
+    }
   }
   const handleSubmit = e => {
     e.preventDefault()
@@ -120,6 +128,9 @@ const KakaoMaps = () => {
           const data = res.data
           // console.log(data)
           setSearchData(data)
+          setFormData({
+            place: '',
+          })
         })
         .catch(err => {
           console.log(err)
@@ -141,6 +152,9 @@ const KakaoMaps = () => {
           const data = res.data
           // console.log(data)
           setSearchData(data)
+          setFormData({
+            place: '',
+          })
         })
         .catch(err => {
           console.log(err)
@@ -161,6 +175,7 @@ const KakaoMaps = () => {
       {isRoot === true ? (
         <>
           <div className="md:max-w-1/2 mx-auto">
+          <h1 className="text-center text-4xl sm:text-5xl font-bold">오늘 뭐 먹지?</h1>
             <form className="p-3 my-3" onSubmit={handleSubmit} autoComplete="off">
               <fieldset>
                 <legend className="hidden">kakao search</legend>
@@ -172,7 +187,7 @@ const KakaoMaps = () => {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="size-6 mx-auto"
+                      className="sm:size-6 mx-auto size-5"
                     >
                       <path
                         strokeLinecap="round"
@@ -192,12 +207,12 @@ const KakaoMaps = () => {
                         placeholder="검색어를 입력해주세요"
                       />
                     </div>
-                    <div className="flex-1 text-center">
+                    <div className="flex-2 sm:flex-1 text-center">
                       <button
-                        className="button w-fit rounded-3xl px-5 py-2 bg-teal-200 focus:bg-teal-500 text-gray-700"
+                        className="button w-fit px-3 py-2 rounded-3xl sm:px-5 sm:py-2 bg-color-teal-400 focus:bg-teal-500 text-white hover:cursor-pointer"
                         type="submit"
                       >
-                        <span className="max-[426px]:text-sm mouse_pointer">검색</span>
+                        <p className="sm:w-max sm:text-sm text-xs">검색</p>
                       </button>
                     </div>
                   </div>
@@ -205,33 +220,17 @@ const KakaoMaps = () => {
               </fieldset>
             </form>
           </div>
-          <div className="container mx-auto max-w-5xl max-xl:m-3">
+          <div className="container mx-auto max-w-7xl max-xl:m-3">
             <KakaoNearPlace />
           </div>
         </>
       ) : (
         <>
-          <div className="container md:max-w-1/2 md:absolute md:top-px xl:top-px xl:left-2/8 md:left-2/8 mx-auto max-w-5xl max-xl:mx-3">
+          <div className="container sm:absolute sm:max-w-1/3 sm:left-1/3 top-[9px]">
             <form className="px-3 my-3" onSubmit={handleSubmit} autoComplete="off">
               <fieldset>
                 <legend className="hidden">kakao search</legend>
-                <div className="flex items-center mx-auto gap-1 border-1 rounded-3xl px-3 py-1 bg-gray-200">
-                  {/* <div className="max-w-6">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="size-6 mx-auto"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                      />
-                    </svg>
-                  </div> */}
+                <div className="flex items-center mx-auto gap-1 border-1 rounded-3xl px-3 py-1">
                   <div className="flex gap-1 items-center w-full">
                     <div className="flex-5">
                       <input
@@ -244,26 +243,20 @@ const KakaoMaps = () => {
                       />
                     </div>
                     <div className="flex-1 text-center">
-                      {/* <button
-                        className="button mouse_pointer w-full rounded-3xl px-2 py-2 bg-teal-200 focus:bg-teal-500 text-gray-700"
-                        type="submit"
-                      >
-                        <span className="max-[426px]:text-sm">검색</span>
-                      </button> */}
                       <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="size-6 ml-auto"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                      />
-                    </svg>
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="size-6 ml-auto"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                        />
+                      </svg>
                     </div>
                   </div>
                 </div>
