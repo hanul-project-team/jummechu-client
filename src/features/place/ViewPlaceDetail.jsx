@@ -6,9 +6,9 @@ import axios from 'axios'
 import zustandStore from '../../app/zustandStore.js'
 import zustandUser from '../../app/zustandUser.js'
 import { useSelector } from 'react-redux'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import 'swiper/css'
-import PlaceReview from './reviews/PlaceReview.jsx'
+import PlaceReview from './components/reviews/PlaceReview.jsx'
+import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
+import RecommandPlace from './components/RecommandPlace.jsx'
 
 const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
   const [isBookmarked, setIsBookmarked] = useState(defaultBoomarked)
@@ -16,7 +16,7 @@ const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
   const reviewInfo = zustandStore(state => state.reviewInfo)
   const placeDetail = zustandStore(state => state.placeDetail)
   const navigate = useNavigate()
-  const userNearPlace = zustandStore(state => state.userNearPlace)
+
   const setSearchNearData = zustandStore(state => state.setSearchNearData)
   const searchNearData = zustandStore(state => state.searchNearData)
   const lastStoreRef = useRef(placeDetail?._id)
@@ -111,23 +111,6 @@ const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
       }
     }
   }
-  const handleNavigate = snd => {
-    // console.log(snd)
-    try {
-      axios
-        .post('http://localhost:3000/store/save', snd)
-        .then(res => {
-          const place = res.data
-          // console.log(place)
-          navigate(`/place/${place._id}`, { state: place })
-        })
-        .catch(err => {
-          console.log('axios 요청 실패', err)
-        })
-    } catch (err) {
-      console.log('try 실패', err)
-    }
-  }
   const handleTotalRating = data => {
     if (data.length > 0) {
       const result = data.reduce((acc, cur) => acc + cur.rating, 0) / data.length
@@ -140,6 +123,7 @@ const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
   const totalRate = reviewInfo ? handleTotalRating(reviewInfo) : 0
   return (
     <div>
+      <KakaoMaps />
       <div className="container md:max-w-3/5 mx-auto p-3 m-3">
         {/* 타이틀 & 북마크 영역 */}
         <div className="flex items-center justify-between">
@@ -252,39 +236,7 @@ const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
           </div>
         </div>
         {/* 다른 장소 추천 */}
-        {userNearPlace.filter(snd => snd.id !== placeDetail.id).length > 0 && (
-          <div className="max-w-full my-5 min-h-[200px]">
-            <div className="text-start">
-              <p className="font-bold text-lg">다른 장소도 둘러보세요!</p>
-            </div>
-            {userNearPlace && (
-              <Swiper
-                spaceBetween={50}
-                slidesPerView={3}
-                className="border-t-1 border-gray-700 flex"
-              >
-                {userNearPlace
-                  // .filter(snd => snd.id !== placeDetail._id)
-                  .map((snd, i) => {
-                    return (
-                      <SwiperSlide key={i} className="gap-3 p-2 text-center !mr-0">
-                        <div key={i}>
-                          <div className="hover:cursor-pointer" onClick={() => handleNavigate(snd)}>
-                            <img src={Icon} alt="icon" className="w-[100px] h-[100px] mx-auto" />
-                          </div>
-                          <div>
-                            <p className="hover:cursor-pointer" onClick={() => handleNavigate(snd)}>
-                              {snd.place_name}
-                            </p>
-                          </div>
-                        </div>
-                      </SwiperSlide>
-                    )
-                  })}
-              </Swiper>
-            )}
-          </div>
-        )}
+        <RecommandPlace placeDetail={placeDetail} />
       </div>
       <PlaceReview />
     </div>

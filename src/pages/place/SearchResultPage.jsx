@@ -3,6 +3,7 @@ import zustandStore from '../../app/zustandStore.js'
 import axios from 'axios'
 import StarRatingComponent from 'react-star-rating-component'
 import { useNavigate } from 'react-router-dom'
+import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
 import '../../assets/styles/global.css'
 
 const SearchResult = () => {
@@ -14,7 +15,6 @@ const SearchResult = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    
     if (searchData.length === 0) {
       setIsLoading(true)
       return
@@ -42,7 +42,7 @@ const SearchResult = () => {
             setNearPlaceReviews(data)
           })
           .catch(err => {
-            console.error('리뷰 요청 실패',err)
+            console.error('리뷰 요청 실패', err)
           })
           .finally(() => {
             setIsLoading(false)
@@ -55,18 +55,18 @@ const SearchResult = () => {
     // return () => unsub?.()
   }, [searchData])
 
-  if (isLoading || searchData.length === 0) {
-    return (
-      <p className="loading-jump text-center p-3">
-        Loading
-        <span className="jump-dots">
-          <span>.</span>
-          <span>.</span>
-          <span>.</span>
-        </span>
-      </p>
-    )
-  }
+  // if (isLoading || searchData.length === 0) {
+  //   return (
+  //     <p className="loading-jump text-center p-3">
+  //       Loading
+  //       <span className="jump-dots">
+  //         <span>.</span>
+  //         <span>.</span>
+  //         <span>.</span>
+  //       </span>
+  //     </p>
+  //   )
+  // }
   const handleAvgRating = (reviews, place) => {
     if (reviews.length > 0) {
       const matchedReviews = reviews?.filter(review => review.store?.name === place.place_name)
@@ -84,8 +84,7 @@ const SearchResult = () => {
     if (reviews.length > 0) {
       const matchedReviews = reviews?.filter(review => review.store?.name === place.place_name)
       return matchedReviews.length
-    } else 
-    return 0
+    } else return 0
   }
   const handleNavigate = sd => {
     // console.log(sd)
@@ -107,57 +106,74 @@ const SearchResult = () => {
   // console.log(searchData)
   return (
     <div className="container max-w-3/5 mx-auto">
-      <span className="ml-3">{searchData.length} 개의 검색 결과</span>
-      {searchData.map((sd, i) => {
-        return (
-          <div key={i} className="flex gap-2 p-2 my-3">
-            <div className="md:min-w-[200px]">
-              <img
-                src={`https://picsum.photos/200/200?random=${Math.floor(Math.random() * 1000)}`}
-                alt="picsum"
-                className="md:w-[200px] md:h-[200px] sm:w-[150px] sm:h-[150px] hover:cursor-pointer object-cover rounded-lg"
-                onClick={() => handleNavigate(sd)}
-              />
-            </div>
-            <div className="md:max-h-[200px] overflow-y-auto">
-              <span className="hover:cursor-pointer text-2xl" onClick={() => handleNavigate(sd)}>
-                <strong>{sd.place_name}</strong>
-              </span>
-              <p>
-                <strong>주소지</strong>:{sd.address_name}
-              </p>
-              <p>
-                {sd.phone ? (
-                  <>
-                    <strong>연락처: </strong>
-                    <span>{sd.phone}</span>
-                  </>
-                ) : (
-                  '연락처 미공개'
-                )}
-              </p>
-              <div className="flex">
-                <span>
-                  <strong>사용자 평점</strong>:{' '}
-                </span>
-                <span className="flex items-end">
-                  <StarRatingComponent name="rate2" value={1} starCount={1} />
-                  <span>{handleAvgRating(nearPlaceReviews, sd)}</span>&nbsp;
-                </span>
-                <span>&#40;{handleCountReviews(nearPlaceReviews, sd)}&#41;</span>
-              </div>
-              <div>
-                <div className="flex gap-2">
+      <KakaoMaps />
+      {isLoading || searchData.length === 0 ? (
+        <p className="loading-jump text-center p-3">
+          Loading
+          <span className="jump-dots">
+            <span>.</span>
+            <span>.</span>
+            <span>.</span>
+          </span>
+        </p>
+      ) : (
+        <>
+          <span className="ml-3">{searchData.length} 개의 검색 결과</span>
+          {searchData.map((sd, i) => {
+            return (
+              <div key={i} className="flex gap-2 p-2 my-3">
+                <div className="md:min-w-[200px]">
+                  <img
+                    src={`https://picsum.photos/200/200?random=${Math.floor(Math.random() * 1000)}`}
+                    alt="picsum"
+                    className="md:w-[200px] md:h-[200px] sm:w-[150px] sm:h-[150px] hover:cursor-pointer object-cover rounded-lg"
+                    onClick={() => handleNavigate(sd)}
+                  />
+                </div>
+                <div className="md:max-h-[200px] overflow-y-auto">
+                  <span
+                    className="hover:cursor-pointer text-2xl"
+                    onClick={() => handleNavigate(sd)}
+                  >
+                    <strong>{sd.place_name}</strong>
+                  </span>
                   <p>
-                    <strong>태그: </strong>
-                    {sd.summary.keyword}
+                    <strong>주소지</strong>:{sd.address_name}
                   </p>
+                  <p>
+                    {sd.phone ? (
+                      <>
+                        <strong>연락처: </strong>
+                        <span>{sd.phone}</span>
+                      </>
+                    ) : (
+                      '연락처 미공개'
+                    )}
+                  </p>
+                  <div className="flex">
+                    <span>
+                      <strong>사용자 평점</strong>:{' '}
+                    </span>
+                    <span className="flex items-end">
+                      <StarRatingComponent name="rate2" value={1} starCount={1} />
+                      <span>{handleAvgRating(nearPlaceReviews, sd)}</span>&nbsp;
+                    </span>
+                    <span>&#40;{handleCountReviews(nearPlaceReviews, sd)}&#41;</span>
+                  </div>
+                  <div>
+                    <div className="flex gap-2">
+                      <p>
+                        <strong>태그: </strong>
+                        {sd.summary.keyword}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        )
-      })}
+            )
+          })}
+        </>
+      )}
     </div>
   )
 }
