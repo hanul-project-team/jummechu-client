@@ -4,8 +4,8 @@ import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'react-toastify'
-import { findId } from '../../slice/findAccountIdSlice'
-import { findAccountVerifySchema } from '../../schema/findAccountVerifySchema'
+import { find } from '../../slice/findAccountSlice'
+import { verifySchema } from '../../schema/verifySchema'
 import Timer from '../../../../shared/Timer'
 import style from './findAccountVerifyForm.module.css'
 import axios from 'axios'
@@ -25,7 +25,7 @@ const FindAccountVerifyForm = ({ type }) => {
     setFocus,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(findAccountVerifySchema),
+    resolver: zodResolver(verifySchema),
     mode: 'onSubmit',
     reValidateMode: 'onSubmit',
   })
@@ -44,22 +44,32 @@ const FindAccountVerifyForm = ({ type }) => {
   const phoneSubmit = async () => {
     const isValid = await trigger('phone')
     if (isValid) {
-      const phone = getValues('phone')
-      setIsRequested(true)
-      toast.success(<div>인증번호 발송에 성공하였습니다.</div>, { autoClose: 4000 })
-      setTimerKey(prev => prev + 1)
-      setFocus('code')
-      console.log(phone)
+      try {
+        const phone = getValues('phone')
+        // await axios.post(
+        //   'http://localhost:3000/auth/send_code',
+        //   { phone },
+        //   { withCredentials: true },
+        // )
+        setIsRequested(true)
+        toast.success(<div>인증번호 발송에 성공하였습니다.</div>, { autoClose: 4000 })
+        setTimerKey(prev => prev + 1)
+        setFocus('code')
+      } catch (e) {
+        console.log(e)
+      }
     }
   }
   const onSubmit = async data => {
-    const actionMap = {
-      id: findId,
-    }
     try {
-      const response = await axios.post(`http://localhost:3000/auth/find_${type}`, data)
-      const action = actionMap[type]
-      if (action) dispatch(action(response.data))
+      // await axios.post(
+      //   'http://localhost:3000/auth/verify_code',
+      //   { code: data.code },
+      //   { withCredentials: true },
+      // )
+      const submitData = { name: data.name, phone: data.phone }
+      const response = await axios.post('http://localhost:3000/auth/find_account', submitData)
+      dispatch(find(response.data))
       navigate(`/find_account/result?type=${type}`)
     } catch (e) {
       console.log(e)
