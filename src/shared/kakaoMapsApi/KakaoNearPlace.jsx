@@ -33,7 +33,7 @@ const KakaoNearPlace = () => {
       <div>
         <h3 className="text-2xl">가까운 장소</h3>
       </div>
-      <div className="container max-w-full py-2 px-5 shadow-xl/20">
+      <div className="container max-w-full py-2 px-5 shadow-lg/20">
         <Swiper spaceBetween={50} slidesPerView={3}>
           {userNearPlace &&
             userNearPlace.map((unp, i) => (

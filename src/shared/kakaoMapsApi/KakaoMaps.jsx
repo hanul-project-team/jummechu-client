@@ -175,6 +175,7 @@ const KakaoMaps = () => {
       {isRoot === true ? (
         <>
           <div className="md:max-w-1/2 mx-auto">
+          <h1 className="text-center text-4xl sm:text-5xl font-bold">오늘 뭐 먹지?</h1>
             <form className="p-3 my-3" onSubmit={handleSubmit} autoComplete="off">
               <fieldset>
                 <legend className="hidden">kakao search</legend>
@@ -186,7 +187,7 @@ const KakaoMaps = () => {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="size-6 mx-auto"
+                      className="sm:size-6 mx-auto size-5"
                     >
                       <path
                         strokeLinecap="round"
@@ -206,12 +207,12 @@ const KakaoMaps = () => {
                         placeholder="검색어를 입력해주세요"
                       />
                     </div>
-                    <div className="flex-1 text-center">
+                    <div className="flex-2 sm:flex-1 text-center">
                       <button
-                        className="button w-fit rounded-3xl px-5 py-2 bg-teal-200 focus:bg-teal-500 text-gray-700"
+                        className="button w-fit px-3 py-2 rounded-3xl sm:px-5 sm:py-2 bg-color-teal-400 focus:bg-teal-500 text-white hover:cursor-pointer"
                         type="submit"
                       >
-                        <p className="max-[769px]:w-max text-sm max-[769px]:text-xs hover:cursor-pointer">검색</p>
+                        <p className="sm:w-max sm:text-sm text-xs">검색</p>
                       </button>
                     </div>
                   </div>
@@ -225,11 +226,11 @@ const KakaoMaps = () => {
         </>
       ) : (
         <>
-          <div className="container md:max-w-1/2 md:absolute md:top-px xl:top-px xl:left-2/8 md:left-2/8 mx-auto max-w-5xl max-xl:mx-3">
+          <div className="container sm:absolute sm:max-w-1/3 sm:left-1/3 top-[9px]">
             <form className="px-3 my-3" onSubmit={handleSubmit} autoComplete="off">
               <fieldset>
                 <legend className="hidden">kakao search</legend>
-                <div className="flex items-center mx-auto gap-1 border-1 rounded-3xl px-3 py-1 bg-gray-200">
+                <div className="flex items-center mx-auto gap-1 border-1 rounded-3xl px-3 py-1">
                   <div className="flex gap-1 items-center w-full">
                     <div className="flex-5">
                       <input
