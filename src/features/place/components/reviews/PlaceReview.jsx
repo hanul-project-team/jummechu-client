@@ -24,7 +24,7 @@ const PlaceReview = () => {
   const [formData, setFormData] = useState({
     user: '',
     comment: '',
-    rating: 1,
+    rating: 0,
     store: '',
   })
 
@@ -121,7 +121,7 @@ const PlaceReview = () => {
       setFormData({
         user: '',
         comment: '',
-        rating: 1,
+        rating: 0,
         store: '',
       })
       setStarRating(0)
@@ -148,6 +148,14 @@ const PlaceReview = () => {
   }
   const handleSubmit = e => {
     e.preventDefault()
+    if (formData.comment.length < MIN_LENGTH) {
+      setErrorMessage(`최소 ${MIN_LENGTH}자 이상 입력해주세요. (현재 ${formData.comment.length}자)`)
+    } else {
+      setErrorMessage('')
+    }
+    if(formData?.rating < 1) {
+      alert('별점을 정확히 입력해주세요')
+    }
     if (user?.id && placeDetail?._id) {
       const updatedFormData = {
         ...formData,
@@ -166,7 +174,7 @@ const PlaceReview = () => {
               alert('리뷰가 작성되었습니다.')
               setFormData({
                 ...formData,
-                rating: 1,
+                rating: 0,
                 comment: '',
               })
               setShowReviewForm(prev => !prev)
@@ -182,13 +190,6 @@ const PlaceReview = () => {
     }
   }
   const handleChange = e => {
-    if (e.target.value.length === 0) {
-      setErrorMessage('내용을 입력해주세요.')
-    } else if (e.target.value.length < MIN_LENGTH) {
-      setErrorMessage(`최소 ${MIN_LENGTH}자 이상 입력해주세요. (현재 ${e.target.value.length}자)`)
-    } else {
-      setErrorMessage('')
-    }
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -271,7 +272,7 @@ const PlaceReview = () => {
                   rows={5}
                   cols={50}
                   className={`bg-white indent-1 max-h-auto max-w-fit min-w-1/5 resize-none mt-1 block w-full border rounded-md shadow-sm p-2 resize-none
-            ${errorMessage ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}
+            ${errorMessage ? 'border-red-500 focus:ring-red-500' : 'border-green-300 focus:ring-blue-500'}
             focus:border-blue-500 focus:outline-none focus:ring-1`}
                 />
                 {errorMessage && <p className="mt-1 text-sm text-red-600">{errorMessage}</p>}
