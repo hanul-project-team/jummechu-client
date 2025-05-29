@@ -228,10 +228,10 @@ const PlaceReview = () => {
             </p>
             {/* 리뷰 작성 토글 버튼 */}
             <div className="flex gap-3 my-2">
-              <div className="underline font-bold mouse_pointer" onClick={handleSeeAllReviews}>
+              <div className="underline font-bold hover:cursor-pointer" onClick={handleSeeAllReviews}>
                 모든 리뷰
               </div>
-              <div className="flex mouse_pointer" onClick={handleReviewWrite}>
+              <div className="flex hover:cursor-pointer" onClick={handleReviewWrite}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -296,14 +296,14 @@ const PlaceReview = () => {
                 <div>
                   <button
                     type="button"
-                    className="bg-red-400 mouse_pointer px-2 py-1 rounded-xl text-white mr-2"
+                    className="bg-red-400 hover:cursor-pointer px-2 py-1 rounded-xl text-white mr-2"
                     onClick={handleReviewWrite}
                   >
                     취소
                   </button>
                   <button
                     type="submit"
-                    className="mouse_pointer border-1 active:bg-gray-500 active:text-white rounded-xl px-2 py-1"
+                    className="hover:cursor-pointer border-1 active:bg-gray-500 active:text-white rounded-xl px-2 py-1"
                   >
                     작성
                   </button>
@@ -319,31 +319,31 @@ const PlaceReview = () => {
         {reviewInfo.length > 0 && (
           <div className="max-w-4/5 flex gap-3 mx-auto my-3">
             <button
-              className="bg-gray-300 p-2 rounded-3xl mouse_pointer"
+              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
               onClick={() => handleSortChange('recommand')}
             >
               추천순
             </button>
             <button
-              className="bg-gray-300 p-2 rounded-3xl mouse_pointer"
+              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
               onClick={() => handleSortChange('latest')}
             >
               최신순
             </button>
             <button
-              className="bg-gray-300 p-2 rounded-3xl mouse_pointer"
+              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
               onClick={() => handleSortChange('old')}
             >
               오래된순
             </button>
             <button
-              className="bg-gray-300 p-2 rounded-3xl mouse_pointer"
+              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
               onClick={() => handleSortChange('rating-high')}
             >
               별점높은순
             </button>
             <button
-              className="bg-gray-300 p-2 rounded-3xl mouse_pointer"
+              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
               onClick={() => handleSortChange('rating-low')}
             >
               별점낮은순
@@ -384,7 +384,7 @@ const PlaceReview = () => {
           <div className="mx-auto max-w-fit my-2">
             <button
               type="button"
-              className={`${reviewInfo.length <= 5 ? 'hidden' : 'mouse_pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
+              className={`${reviewInfo.length <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
               onClick={handleReviewShowMore}
             >
               {reviewInfo.length - showMore > 5
