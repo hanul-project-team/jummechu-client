@@ -6,11 +6,15 @@ const zustandUser = create(
     (set, get) => ({
       userReviews: [],
       isLoading: true,
-      userBookmark: [],
+      userBookmark: null,
+      isBookmarked: false,
 
       setUserReviews: data => set({ userReviews: data }),
       setIsLoading: value => set({ isLoading: value }),
-      setUserBookmark: data => set({userBookmark: data}),
+      setUserBookmark: updater => set(state => ({
+        userBookmark: typeof updater === 'function' ? updater(state.userBookmark) : updater
+      })),
+      setIsBookmarked: value => set({ isBookmarked: value }),
     }),
     {
       name: 'user-storage',
