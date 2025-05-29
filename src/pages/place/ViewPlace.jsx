@@ -4,27 +4,20 @@ import ViewPlaceDetail from '../../features/place/ViewPlaceDetail.jsx'
 import { useLocation } from 'react-router-dom'
 
 const ViewPlace = () => {
-  const [defaultBookmarked, setdefaultBookmarked] = useState(false)
   const location = useLocation()
   const setPlaceDetail = zustandStore(state => state.setPlaceDetail)
-  
+
   useEffect(() => {
     if (location.state) {
       setPlaceDetail(location.state)
     }
-  }, [location.state, defaultBookmarked])
+  }, [location.state])
 
   useEffect(() => {
     window.scrollTo({ top: 0 })
-  },[location.pathname])
-  // console.log(location.state)
+  }, [location.pathname])
 
-  return (
-    <ViewPlaceDetail
-      // placeInfo={placeInfo}
-      defaultBookmarked={defaultBookmarked}
-    />
-  )
+  return <ViewPlaceDetail />
 }
 
 export default ViewPlace
