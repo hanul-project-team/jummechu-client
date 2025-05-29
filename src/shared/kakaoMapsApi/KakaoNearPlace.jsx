@@ -33,19 +33,19 @@ const KakaoNearPlace = () => {
       <div>
         <h3 className="text-2xl">가까운 장소</h3>
       </div>
-      <div className="container w-full py-2 px-5 shadow-xl/20">
+      <div className="container max-w-full py-2 px-5 shadow-xl/20">
         <Swiper spaceBetween={50} slidesPerView={3}>
           {userNearPlace &&
             userNearPlace.map((unp, i) => (
-              <SwiperSlide key={i} className="md:max-w-full" style={{ margin: '0px' }}>
-                <div onClick={() => handleSaveAndNavigate(unp)} className="mouse_pointer">
+              <SwiperSlide key={i} className="md:max-w-full !mr-0 ml-1" style={{ margin: '0px' }}>
+                <div onClick={() => handleSaveAndNavigate(unp)} className="hover:cursor-pointer">
                   <img
                     src={`https://picsum.photos/200/150?random=${Math.floor(Math.random() * 1000)}`}
                     alt="lorem picture"
                   />
                 </div>
-                <div onClick={() => handleSaveAndNavigate(unp)} className="mouse_pointer">
-                  <p className="font-bold font-sans max-[426px]:text-sm">{unp.place_name}</p>
+                <div onClick={() => handleSaveAndNavigate(unp)} className="hover:cursor-pointer">
+                  <p className="font-bold max-[426px]:text-sm">{unp.place_name}</p>
                 </div>
                 <p className="max-[426px]:text-sm">소재지:{unp.address_name}</p>
               </SwiperSlide>
