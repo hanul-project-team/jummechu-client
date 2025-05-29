@@ -4,11 +4,13 @@ import Icon from '../../assets/images/icon.png'
 import '../../assets/styles/global.css'
 import axios from 'axios'
 import zustandStore from '../../app/zustandStore.js'
+import zustandUser from '../../app/zustandUser.js'
+import { useSelector } from 'react-redux'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import 'swiper/css'
 import PlaceReview from './reviews/PlaceReview.jsx'
 
-const ViewPlaceDetail = ({ defaultBoomarked }) => {
+const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
   const [isBookmarked, setIsBookmarked] = useState(defaultBoomarked)
   const setReviewInfo = zustandStore(state => state.setReviewInfo)
   const reviewInfo = zustandStore(state => state.reviewInfo)
@@ -18,6 +20,10 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
   const setSearchNearData = zustandStore(state => state.setSearchNearData)
   const searchNearData = zustandStore(state => state.searchNearData)
   const lastStoreRef = useRef(placeDetail?._id)
+  const user = useSelector(state => state.auth.user)
+  const userBookmark = zustandUser(state => state.userBookmark)
+  // console.log(user)
+  // console.log(placeDetail)
 
   useEffect(() => {
     if (placeDetail !== null || placeDetail !== undefined) {
@@ -36,7 +42,7 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
             //     lng: placeDetail.longitude,
             //   },
             // }),
-          ]).then(([revRes/* , searchRes */]) => {
+          ]).then(([revRes /* , searchRes */]) => {
             if (revRes.statusText === 'OK' || revRes.status === 200) {
               const data = revRes.data
               // console.log(data)
@@ -59,13 +65,49 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
   }, [isBookmarked, placeDetail])
 
   const handleBookmark = () => {
-    if (isBookmarked === true) {
-      if (confirm('북마크를 해제하시겠습니까?')) {
-        setIsBookmarked(prev => !prev)
+    if (user.role === 'guest') {
+      if (confirm('로그인이 필요한 기능입니다. 로그인 하시겠습니까?')) {
+        navigate('/login')
       }
-    } else {
-      if (confirm('북마크에 추가하시겠습니까?')) {
-        setIsBookmarked(prev => !prev)
+    } else if (user?.role === 'member') {
+      const userId = user?.id
+      const storeId = placeDetail?._id
+      if (isBookmarked === true) {
+        if (confirm('북마크를 해제하시겠습니까?')) {
+          axios
+            .delete(`http://localhost:3000/bookmark/delete/${storeId}`, {
+              withCredentials: true,
+              headers: {
+                user: userId,
+              },
+            })
+            .then(res => {
+              const data = res
+              // console.log(data)
+              setIsBookmarked(prev => !prev)
+            })
+            .catch(err => {
+              console.error('북마크 해제 요청 실패!', err)
+            })
+        }
+      } else {
+        if (confirm('북마크에 추가하시겠습니까?')) {
+          axios
+            .post(`http://localhost:3000/bookmark/regist/${storeId}`, {
+              withCredentials: true,
+              headers: {
+                user: userId,
+              },
+            })
+            .then(res => {
+              const data = res
+              // console.log(data)
+              setIsBookmarked(prev => !prev)
+            })
+            .catch(err => {
+              console.error('북마크 등록 요청 실패!', err)
+            })
+        }
       }
     }
   }
@@ -104,7 +146,7 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
           <h1 className="text-3xl font-bold">{placeDetail.name}</h1>
           {/* 북마크 */}
           <div
-            className="flex border-1 py-2 px-3 rounded-3xl mouse_pointer"
+            className="flex border-1 py-2 px-3 rounded-3xl hover:cursor-pointer"
             onClick={handleBookmark}
           >
             <svg
@@ -213,7 +255,7 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
         {userNearPlace.filter(snd => snd.id !== placeDetail.id).length > 0 && (
           <div className="max-w-full my-5 min-h-[200px]">
             <div className="text-start">
-              <p className="font-bold text-lg font-serif">다른 장소도 둘러보세요!</p>
+              <p className="font-bold text-lg">다른 장소도 둘러보세요!</p>
             </div>
             {userNearPlace && (
               <Swiper
@@ -227,11 +269,11 @@ const ViewPlaceDetail = ({ defaultBoomarked }) => {
                     return (
                       <SwiperSlide key={i} className="gap-3 p-2 text-center !mr-0">
                         <div key={i}>
-                          <div className="mouse_pointer" onClick={() => handleNavigate(snd)}>
+                          <div className="hover:cursor-pointer" onClick={() => handleNavigate(snd)}>
                             <img src={Icon} alt="icon" className="w-[100px] h-[100px] mx-auto" />
                           </div>
                           <div>
-                            <p className="mouse_pointer" onClick={() => handleNavigate(snd)}>
+                            <p className="hover:cursor-pointer" onClick={() => handleNavigate(snd)}>
                               {snd.place_name}
                             </p>
                           </div>
