@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import Icon from '../../../assets/images/icon.png'
+import Icon from '../../assets/images/icon.png'
 import axios from 'axios'
 import 'swiper/css'
 import { Link, useNavigate } from 'react-router-dom'
-import zustandStore from '../../../app/zustandStore.js'
-import '../../../assets/styles/global.css'
+import zustandStore from '../../app/zustandStore.js'
+import '../../assets/styles/global.css'
 
 const HomeRecommand = () => {
   const [tag, setTag] = useState([])
@@ -38,11 +38,7 @@ const HomeRecommand = () => {
         }))
         try {
           // {/*interval 2번*/}
-          if (
-            isFromInterval ||
-            !nearPlaceReviews ||
-            isSamePlaces(lastPlacesRef.current, places)
-          ) {
+          if (isFromInterval || !nearPlaceReviews || isSamePlaces(lastPlacesRef.current, places)) {
             lastPlacesRef.current = places
             axios
               .post('http://localhost:3000/review/readall', {
@@ -148,7 +144,7 @@ const HomeRecommand = () => {
             {/* <span>{countDown > 0 ? `review 최신화까지 ${countDown}초 남음` : `리뷰 정보 갱신 중...`}</span> */}
           </Link>
           {tag.map((t, i) => (
-            <div key={i} className="container shadow-xl/20 max-w-full p-3 my-3 overflow-auto">
+            <div key={i} className="container shadow-lg/20 max-w-full p-3 my-3 overflow-auto">
               <p className="text-lg">&#35; {t}</p>
               <Swiper spaceBetween={50} slidesPerView={3}>
                 {userNearPlace &&
@@ -156,14 +152,17 @@ const HomeRecommand = () => {
                   userNearPlace.map((unp, idx) => {
                     if (!unp.category_name.includes(t)) return null
                     return (
-                      <SwiperSlide key={idx} className='!mr-0 max-w-full'>
+                      <SwiperSlide key={idx} className="!mr-0 max-w-full">
                         <img
                           src={Icon}
                           alt="picsum"
                           className="min-h-[200px] hover:cursor-pointer"
                           onClick={() => handleNavigate(unp)}
                         />
-                        <p className="text-sm hover:cursor-pointer" onClick={() => handleNavigate(unp)}>
+                        <p
+                          className="text-sm hover:cursor-pointer"
+                          onClick={() => handleNavigate(unp)}
+                        >
                           가게명: <strong>{unp.place_name}</strong>
                         </p>
                         <div className="text-sm flex gap-3 items-center">
