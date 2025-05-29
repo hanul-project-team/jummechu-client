@@ -5,12 +5,15 @@
   --color-gray-300: #dbdee3;
   --color-gray-50:  #f8f9fb;
   --color-teal-400: #39D2D7; 
+  --color-red-700:#ED1515;
+  --color-red-50:#FFEEEE;
 }
 html,
 body {
   height: 100%;
   margin: 0;
   padding: 0;
+  color: var(--color-gray-900);
   font-family: 'Pretendard', sans-serif;
 }
 .place-picker-container {
