@@ -5,28 +5,21 @@ import { useNavigate } from 'react-router-dom'
 import Icon from '../../../../assets/images/icon.png'
 import StarRatingComponent from 'react-star-rating-component'
 import ReviewChart from './ReviewChart.jsx'
-import axios from 'axios'
+import ReviewWriteForm from './ReviewWriteForm.jsx'
+import SortDropdown from './sortButton/SortDropdown.jsx'
 
 const PlaceReview = () => {
-  const [showMore, setShowMore] = useState(5)
+  const [showReviewMore, setShowReviewMore] = useState(5)
+  const [showSort, setShowSort] = useState(false)
   const [isUser, setIsUser] = useState(false)
   const [prevResult, setPrevResult] = useState(null)
-  const user = useSelector(state => state.auth.user)
   const [showReviewForm, setShowReviewForm] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-  let count = showMore
-  let MIN_LENGTH = 10
-  const setReviewInfo  = zustandStore(state => state.setReviewInfo)
+  const user = useSelector(state => state.auth.user)
+  let count = showReviewMore
+  const setReviewInfo = zustandStore(state => state.setReviewInfo)
   const reviewInfo = zustandStore(state => state.reviewInfo)
   const placeDetail = zustandStore(state => state.placeDetail)
   const navigate = useNavigate()
-  const [starRating, setStarRating] = useState(0)
-  const [formData, setFormData] = useState({
-    user: '',
-    comment: '',
-    rating: 0,
-    store: '',
-  })
 
   const [currentSort, setCurrentSort] = useState('none')
 
@@ -111,6 +104,30 @@ const PlaceReview = () => {
       return 0
     }
   }
+  const handleReviewshowReviewMore = () => {
+    if (reviewInfo.length - showReviewMore > 5) {
+      setShowReviewMore(prev => (prev += 5))
+      count = count + 5
+    } else if (reviewInfo.length - showReviewMore <= 5 && reviewInfo.length - showReviewMore > 0) {
+      setShowReviewMore(prev => prev + (reviewInfo.length - prev))
+      count = count + showReviewMore
+    } else if (reviewInfo.length - showReviewMore === 0) {
+      setShowReviewMore(5)
+      count = showReviewMore
+    }
+  }
+  const handleSortChange = sort => {
+    if (currentSort !== sort) {
+      setCurrentSort(sort)
+      setShowSort(!showSort)
+    } else if (currentSort == sort) {
+      setCurrentSort('none')
+      setShowSort(!showSort)
+    }
+  }
+  const handleSeeAllReviews = () => {
+    setShowReviewMore(reviewInfo.length)
+  }
   const handleReviewWrite = () => {
     if (isUser === false) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니가?')) {
@@ -118,92 +135,10 @@ const PlaceReview = () => {
       }
     } else {
       setShowReviewForm(prev => !prev)
-      setFormData({
-        user: '',
-        comment: '',
-        rating: 0,
-        store: '',
-      })
-      setStarRating(0)
     }
   }
-  const handleReviewShowMore = () => {
-    if (reviewInfo.length - showMore > 5) {
-      setShowMore(prev => (prev += 5))
-      count = count + 5
-    } else if (reviewInfo.length - showMore <= 5 && reviewInfo.length - showMore > 0) {
-      setShowMore(prev => prev + (reviewInfo.length - prev))
-      count = count + showMore
-    } else if (reviewInfo.length - showMore === 0) {
-      setShowMore(5)
-      count = showMore
-    }
-  }
-  const handleSortChange = sort => {
-    if (currentSort !== sort) {
-      setCurrentSort(sort)
-    } else if (currentSort == sort) {
-      setCurrentSort('none')
-    }
-  }
-  const handleSubmit = e => {
-    e.preventDefault()
-    if (formData.comment.length < MIN_LENGTH) {
-      setErrorMessage(`최소 ${MIN_LENGTH}자 이상 입력해주세요. (현재 ${formData.comment.length}자)`)
-    } else {
-      setErrorMessage('')
-    }
-    if(formData?.rating < 1) {
-      alert('별점을 정확히 입력해주세요')
-    }
-    if (user?.id && placeDetail?._id) {
-      const updatedFormData = {
-        ...formData,
-        user: user.id,
-        store: placeDetail._id,
-      }
-      // console.log(updatedFormData)
-      try {
-        axios
-          .post('http://localhost:3000/review/regist', updatedFormData, {
-            withCredentials: true,
-          })
-          .then(res => {
-            // console.log(res)
-            if (res.status === 201) {
-              alert('리뷰가 작성되었습니다.')
-              setFormData({
-                ...formData,
-                rating: 0,
-                comment: '',
-              })
-              setShowReviewForm(prev => !prev)
-              setReviewInfo(res.data.data)
-            }
-          })
-          .catch(err => {
-            console.log(err)
-          })
-      } catch (err) {
-        console.log(err)
-      }
-    }
-  }
-  const handleChange = e => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
-  }
-  const onStarClick = (nextValue, prevValue, name) => {
-    setStarRating(nextValue)
-    setFormData({
-      ...formData,
-      rating: nextValue,
-    })
-  }
-  const handleSeeAllReviews = () => {
-    setShowMore(reviewInfo.length)
+  const handleSubmitSuccess = () => {
+    setCurrentSort('latest')
   }
   // console.log(reviewTrigger)
   // console.log(reviewInfo)
@@ -229,7 +164,10 @@ const PlaceReview = () => {
             </p>
             {/* 리뷰 작성 토글 버튼 */}
             <div className="flex gap-3 my-2">
-              <div className="underline font-bold hover:cursor-pointer" onClick={handleSeeAllReviews}>
+              <div
+                className="underline font-bold hover:cursor-pointer"
+                onClick={handleSeeAllReviews}
+              >
                 모든 리뷰
               </div>
               <div className="flex hover:cursor-pointer" onClick={handleReviewWrite}>
@@ -257,98 +195,24 @@ const PlaceReview = () => {
         </div>
         {/* 리뷰 작성 폼 */}
         {showReviewForm === true ? (
-          <div className="max-w-3/5 mx-auto">
-            <form onSubmit={handleSubmit} className="w-fit mx-auto p-2 text-center">
-              <div className="text-start my-1 bg-white p-2 w-fit rounded-3xl">
-                <span>작성자:{user.name}</span>
-              </div>
-              {/* 이하 textarea */}
-              <div>
-                <textarea
-                  type="text"
-                  name="comment"
-                  onChange={handleChange}
-                  value={formData.comment}
-                  rows={5}
-                  cols={50}
-                  className={`bg-white indent-1 max-h-auto max-w-fit min-w-1/5 resize-none mt-1 block w-full border rounded-md shadow-sm p-2 resize-none
-            ${errorMessage ? 'border-red-500 focus:ring-red-500' : 'border-green-300 focus:ring-blue-500'}
-            focus:border-blue-500 focus:outline-none focus:ring-1`}
-                />
-                {errorMessage && <p className="mt-1 text-sm text-red-600">{errorMessage}</p>}
-              </div>
-              <div className="flex justify-between my-2">
-                {/* 이하 별점 매기기 */}
-                <div>
-                  <StarRatingComponent
-                    name="rating"
-                    starCount={5}
-                    onStarClick={onStarClick}
-                    value={starRating}
-                    renderStarIcon={(nextValue, prevValue, name) => {
-                      return <span>&#9733;</span>
-                    }}
-                    starColor="#ffb400"
-                    emptyStarColor="gray"
-                    className="text-xl"
-                  />
-                </div>
-                {/* 이하 버튼 */}
-                <div>
-                  <button
-                    type="button"
-                    className="bg-red-400 hover:cursor-pointer px-2 py-1 rounded-xl text-white mr-2"
-                    onClick={handleReviewWrite}
-                  >
-                    취소
-                  </button>
-                  <button
-                    type="submit"
-                    className="hover:cursor-pointer border-1 active:bg-gray-500 active:text-white rounded-xl px-2 py-1"
-                  >
-                    작성
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
+          <ReviewWriteForm
+            handleReviewWrite={handleReviewWrite}
+            user={user}
+            placeDetail={placeDetail}
+            setShowReviewForm={setShowReviewForm}
+            submitSuccess={handleSubmitSuccess}
+          />
         ) : null}
       </div>
       {/* 리뷰 보이는곳 */}
-      <div className="container max-w-3/5 mx-auto">
+      <div className="container sm:max-w-3/5 max-w-5/6 mx-auto">
         {/* 정렬 버튼 */}
         {reviewInfo.length > 0 && (
-          <div className="max-w-4/5 flex gap-3 mx-auto my-3">
-            <button
-              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
-              onClick={() => handleSortChange('recommand')}
-            >
-              추천순
+          <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative">
+            <button className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition" onClick={() => setShowSort(!showSort)}>
+              정렬
             </button>
-            <button
-              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
-              onClick={() => handleSortChange('latest')}
-            >
-              최신순
-            </button>
-            <button
-              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
-              onClick={() => handleSortChange('old')}
-            >
-              오래된순
-            </button>
-            <button
-              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
-              onClick={() => handleSortChange('rating-high')}
-            >
-              별점높은순
-            </button>
-            <button
-              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
-              onClick={() => handleSortChange('rating-low')}
-            >
-              별점낮은순
-            </button>
+            <SortDropdown handleSortChange={handleSortChange} showSort={showSort} />
           </div>
         )}
         {/* 리뷰 영역 */}
@@ -357,7 +221,7 @@ const PlaceReview = () => {
             reviewInfo.slice(0, count).map((rv, i) => (
               <div
                 key={i}
-                className="max-w-4/5 border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto flex items-center"
+                className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto flex items-center"
               >
                 <div className="flex-2">
                   <img src={Icon} alt="icon" className="md:max-h-[60px] sm:max-h-[40px]" />
@@ -370,7 +234,6 @@ const PlaceReview = () => {
                 </div>
                 <div className="flex-4">
                   <p className="indent-2">{rv.comment}</p>
-                  {/* <p className="text-xl">{i + 1}번</p> */}
                 </div>
               </div>
             ))
@@ -386,13 +249,13 @@ const PlaceReview = () => {
             <button
               type="button"
               className={`${reviewInfo.length <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
-              onClick={handleReviewShowMore}
+              onClick={handleReviewshowReviewMore}
             >
-              {reviewInfo.length - showMore > 5
+              {reviewInfo.length - showReviewMore > 5
                 ? '5개 더보기'
-                : reviewInfo.length - showMore <= 5 && reviewInfo.length - showMore > 0
+                : reviewInfo.length - showReviewMore <= 5 && reviewInfo.length - showReviewMore > 0
                   ? reviewInfo.length - count + '개 더보기'
-                  : reviewInfo.length > 5 && showMore - reviewInfo.length === 0 && '접기'}
+                  : reviewInfo.length > 5 && showReviewMore - reviewInfo.length === 0 && '접기'}
             </button>
           </div>
         )}
