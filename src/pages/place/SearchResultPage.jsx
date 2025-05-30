@@ -7,6 +7,7 @@ import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
 import '../../assets/styles/global.css'
 
 const SearchResult = () => {
+  const [tag, setTag] = useState([])
   const searchData = zustandStore(state => state.searchData)
   const isLoading = zustandStore(state => state.isLoading)
   const setIsLoading = zustandStore(state => state.setIsLoading)
@@ -19,19 +20,22 @@ const SearchResult = () => {
       setIsLoading(true)
       return
     }
-    // const unsub = zustandStore.persist.onFinishHydration(() => {
-    //   const data = zustandStore.getState().searchData
-    //   console.log(data)
-    // })
 
     if (searchData && searchData.length > 0) {
       const places = searchData.map(place => ({
         name: place?.place_name,
         address: place?.address_name,
       }))
-
+      const categories = searchData.map(sd => sd.category_name)
+      const visualCategories = categories.reduce((acc, cts) => {
+        const item = cts.split('>')[1].trim()
+        if (!acc.includes(item)) {
+          acc.push(item)
+        }
+        return acc
+      }, [])
+      setTag(visualCategories)
       try {
-        // console.log(places)
         axios
           .post('http://localhost:3000/review/readall', {
             places: places,
@@ -51,22 +55,8 @@ const SearchResult = () => {
         console.error('try 에러', err)
       }
     }
-
-    // return () => unsub?.()
   }, [searchData])
 
-  // if (isLoading || searchData.length === 0) {
-  //   return (
-  //     <p className="loading-jump text-center p-3">
-  //       Loading
-  //       <span className="jump-dots">
-  //         <span>.</span>
-  //         <span>.</span>
-  //         <span>.</span>
-  //       </span>
-  //     </p>
-  //   )
-  // }
   const handleAvgRating = (reviews, place) => {
     if (reviews.length > 0) {
       const matchedReviews = reviews?.filter(review => review.store?.name === place.place_name)
@@ -103,12 +93,25 @@ const SearchResult = () => {
       console.log('try 실패', err)
     }
   }
+  const extractCategory = categories => {
+    const cutCate = categories?.category_name.split('>')[1].trim()
+    return cutCate
+  }
+  const filterKeyword = sd => {
+    const filtered = sd?.summary.keyword
+      .split(',')
+      .map(key => key.trim())
+      .filter(
+        key => key !== sd.place_name && key !== tag.filter(tg => tg === extractCategory(sd))[0],
+      )
+    return filtered
+  }
   // console.log(searchData)
   return (
     <div className="container max-w-3/5 mx-auto">
       <KakaoMaps />
       {isLoading || searchData.length === 0 ? (
-        <p className="loading-jump text-center p-3">
+        <p className="loading-jump text-center p-3 sm:mb-[1000px]">
           Loading
           <span className="jump-dots">
             <span>.</span>
@@ -160,13 +163,20 @@ const SearchResult = () => {
                     </span>
                     <span>&#40;{handleCountReviews(nearPlaceReviews, sd)}&#41;</span>
                   </div>
-                  <div>
-                    <div className="flex gap-2">
-                      <p>
-                        <strong>태그: </strong>
-                        {sd.summary.keyword}
+                  <div className="flex gap-1 py-1">
+                    {tag.length > 0 && (
+                      <p className="border-1 rounded-2xl px-2 py-1 text-white bg-color-teal-400">
+                        {tag.filter(tg => tg === extractCategory(sd))}
                       </p>
-                    </div>
+                    )}
+                    {filterKeyword(sd).map((key, i) => (
+                      <p
+                        key={i}
+                        className="border-1 rounded-2xl px-2 py-1 border-gray-700 bg-color-gray-50"
+                      >
+                        {key}
+                      </p>
+                    ))}
                   </div>
                 </div>
               </div>
