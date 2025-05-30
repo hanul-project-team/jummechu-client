@@ -5,7 +5,7 @@ const MainFooter = () => {
   return (
     <footer className="bg-color-gray-50 pt-16 pb-12">
       <div className="container mx-auto max-w-5xl px-6">
-        <div className="text-color-gray-700 max-w-xl flex flex-wrap items-center gap-2">
+        <div className="text-color-gray-700 max-w-xl flex flex-wrap items-center gap-2 cursor-default">
           <span>광주광역시 서구 경열로</span>
           <span className="w-0.25 h-3 bg-color-gray-700"></span>
           <span>대표: 문승준</span>
@@ -19,11 +19,11 @@ const MainFooter = () => {
           <Link to="#" className="outline-hidden hover:text-color-gray-900 hover:font-bold">
             이용약관
           </Link>
-          <span className="w-0.25 h-3 bg-color-gray-700"></span>
+          <span className="w-0.25 h-3 bg-color-gray-700 cursor-default"></span>
           <Link to="#" className="outline-hidden hover:text-color-gray-900 hover:font-bold">
             개인정보처리방침
           </Link>
-          <span>&copy; 2025 Jummechu All Right Reserved</span>
+          <span className='cursor-default'>&copy; 2025 Jummechu All Right Reserved</span>
         </div>
         <div className="flex mt-6 gap-2">
           <Link
