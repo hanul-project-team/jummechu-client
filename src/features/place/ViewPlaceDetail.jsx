@@ -18,6 +18,7 @@ const ViewPlaceDetail = () => {
   const setSearchNearData = zustandStore(state => state.setSearchNearData)
   const searchNearData = zustandStore(state => state.searchNearData)
   const lastStoreRef = useRef(placeDetail?._id)
+  const lastReviewRef = useRef(reviewInfo)
   const user = useSelector(state => state.auth.user)
   const setUserBookmark = zustandUser(state => state.setUserBookmark)
   const userBookmark = zustandUser(state => state.userBookmark)
@@ -30,7 +31,8 @@ const ViewPlaceDetail = () => {
       if (lastStoreRef.current === storeId) {
         return
       }
-      if (isDifferentStore) {
+      const renewReviewInfo = lastReviewRef.current !== reviewInfo
+      if (isDifferentStore || renewReviewInfo) {
         try {
           Promise.all([
             axios.get(`http://localhost:3000/review/read/${placeDetail._id}`),
