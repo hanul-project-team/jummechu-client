@@ -6,12 +6,11 @@ import zustandStore from '../../../../app/zustandStore'
 const ReviewWriteForm = ({
   user,
   placeDetail,
-  handleReviewWrite,
   setShowReviewForm,
-  submitSuccess,
+  setCurrentSort
 }) => {
   const setReviewInfo = zustandStore(state => state.setReviewInfo)
-  let MIN_LENGTH = 10
+  let MIN_LENGTH = 6
   const [isUser, setIsUser] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [formData, setFormData] = useState({
@@ -61,18 +60,20 @@ const ReviewWriteForm = ({
           .post('http://localhost:3000/review/regist', updatedFormData, {
             withCredentials: true,
           })
-          .then(res => {
-            // console.log(res)
+          .then(/* async */ res => {
+            // const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
             if (res.status === 201) {
               alert('리뷰가 작성되었습니다.')
+              setShowReviewForm(prev => !prev)
+              // await sleep(500)
               setFormData({
                 ...formData,
                 rating: 0,
                 comment: '',
               })
-              setShowReviewForm(prev => !prev)
+              setStarRating(0)
               setReviewInfo(res.data.data)
-              submitSuccess()
+              setCurrentSort('latest')
             }
           })
           .catch(err => {
@@ -89,11 +90,20 @@ const ReviewWriteForm = ({
       [e.target.name]: e.target.value,
     })
   }
-
+  const handleReviewWrite = () => {
+    setShowReviewForm(prev => !prev)
+    setFormData({
+      user: '',
+      comment: '',
+      rating: 0,
+      store: '',
+    })
+    setStarRating(0)
+  }
   return (
     <div className="max-w-3/5 mx-auto">
       <form onSubmit={handleSubmit} className="w-fit mx-auto p-2 text-center">
-        <div className="text-start my-1 bg-white p-2 w-fit rounded-3xl">
+        <div className="text-start my-2 bg-white p-2 w-fit rounded-3xl pointer-events-none">
           <span>작성자:{user.name}</span>
         </div>
         {/* 이하 textarea */}
@@ -106,10 +116,9 @@ const ReviewWriteForm = ({
             rows={5}
             cols={50}
             className={`bg-white indent-1 max-h-auto max-w-fit min-w-1/5 resize-none mt-1 block w-full border rounded-md shadow-sm p-2 resize-none
-            ${errorMessage ? 'border-red-500 focus:ring-red-500' : 'border-green-300 focus:ring-blue-500'}
+            ${errorMessage ? 'border-red-500 focus:ring-red-500' : 'border-color-gray-300 focus:ring-blue-500'}
             focus:border-blue-500 focus:outline-none focus:ring-1`}
           />
-          {errorMessage && <p className="mt-1 text-sm text-red-600">{errorMessage}</p>}
         </div>
         <div className="flex justify-between my-2">
           {/* 이하 별점 매기기 */}
@@ -144,6 +153,7 @@ const ReviewWriteForm = ({
             </button>
           </div>
         </div>
+        {errorMessage && <p className="mt-1 text-sm text-red-600">{errorMessage}</p>}
       </form>
     </div>
   )
