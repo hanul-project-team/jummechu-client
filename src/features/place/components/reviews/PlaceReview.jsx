@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import zustandStore from '../../../../app/zustandStore.js'
 import axios from 'axios'
 import { useSelector } from 'react-redux'
@@ -11,6 +11,7 @@ import SortDropdown from './sortButton/SortDropdown.jsx'
 
 const PlaceReview = () => {
   const [showReviewMore, setShowReviewMore] = useState(5)
+  const [openTabId, setOpenTabId] = useState(null)
   const [showSort, setShowSort] = useState(false)
   const [isUser, setIsUser] = useState(false)
   const [prevResult, setPrevResult] = useState(null)
@@ -23,6 +24,27 @@ const PlaceReview = () => {
   const navigate = useNavigate()
 
   const [currentSort, setCurrentSort] = useState('none')
+
+  const tabRefs = useRef([])
+  useEffect(() => {
+    // const handleClickOutside = e => {
+    //   if (tabRefs.current && !tabRefs.current.contains(e.target)) {
+    //     setOpenTabId(null)
+    //   }
+    // }
+
+    const handleClickOutside = e => {
+      const isOutside = tabRefs.current.every(ref => {
+        return ref && !ref.contains(e.target)
+      })
+      if (isOutside) {
+        setOpenTabId(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   useEffect(() => {
     if (user) {
@@ -60,7 +82,7 @@ const PlaceReview = () => {
   }, [currentSort, isUser, placeDetail])
 
   const handleReviewDate = createdAt => {
-    const diff = new Date() - createdAt
+    const diff = new Date() - new Date(createdAt)
     const day = Math.round(diff / (1000 * 60 * 60 * 24))
     const minutes = Math.round(diff / (1000 * 60))
     if (day / 365 >= 1) {
@@ -158,7 +180,10 @@ const PlaceReview = () => {
           })
       }
     }
-  }  
+  }
+  const handleShowUserTap = rv => {
+    setOpenTabId(prev => (prev === rv._id ? null : rv._id))
+  }
   // console.log(reviewInfo)
   return (
     <div>
@@ -212,13 +237,15 @@ const PlaceReview = () => {
           </div>
         </div>
         {/* 리뷰 작성 폼 */}
-        <div className={`transition transition-all duration-500 ease-in-out ${showReviewForm ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}>
-            <ReviewWriteForm
-              user={user}
-              placeDetail={placeDetail}
-              setShowReviewForm={setShowReviewForm}
-              setCurrentSort={setCurrentSort}
-            />
+        <div
+          className={`transition transition-all duration-500 ease-in-out ${showReviewForm ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}
+        >
+          <ReviewWriteForm
+            user={user}
+            placeDetail={placeDetail}
+            setShowReviewForm={setShowReviewForm}
+            setCurrentSort={setCurrentSort}
+          />
         </div>
       </div>
       {/* 리뷰 보이는곳 */}
@@ -241,29 +268,60 @@ const PlaceReview = () => {
             reviewInfo.slice(0, count).map((rv, i) => (
               <div
                 key={i}
-                className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto flex items-center"
+                className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto flex items-center relative"
               >
                 <div className="flex-2">
-                  <img src={Icon} alt="icon" className="md:max-h-[60px] sm:max-h-[40px]" />
+                  <img src={Icon} alt="icon" className="sm:max-h-[80px] max-h-[40px]" />
                   <p>{rv?.user.name}</p>
                   <div>
-                    <p>작성일: {rv?.createdAt.split('T')[0]}</p>
-                    {handleReviewDate(rv?.createdAt)}
                     <StarRatingComponent name="rating1" starCount={5} value={rv.rating} />
                   </div>
                 </div>
-                <div className="flex-4 relative">
-                  <p className="indent-2">{rv.comment}</p>
-                  {rv && rv?.user._id === user.id && (
-                    <div className="absolute right-0 sm:top-10 top-20">
-                      <button
-                        className="hover:cursor-pointer px-2 py-1 border-1 rounded-2xl bg-red-600 text-white"
-                        onClick={() => handleDeleteMyReview(rv)}
-                      >
-                        삭제
+                <div className="flex-4">
+                  {/* 날짜, 더보기 메뉴 */}
+                  <div
+                    className="text-end absolute right-2 flex items-center gap-3 top-0"
+                    ref={el => (tabRefs.current[i] = el)}
+                  >
+                    <p>{rv?.createdAt.split('T')[0]}</p>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      onClick={() => handleShowUserTap(rv)}
+                      className={`size-8 mt-1 relative sm:p-[2px] active:bg-gray-300 sm:hover:bg-color-gray-300 rounded-3xl`}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+                      />
+                    </svg>
+                    <div
+                      className={`absolute top-10 flex flex-col gap-2 max-w-fit p-3 bg-white transition-all duration-200 ease-in-out z-50 border-1 border-gray-300 rounded-xl ${openTabId === rv._id ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                    >
+                      <button className="hover:cursor-pointer transition ease-in-out sm:text-sm text-xs rounded-2xl active:bg-gray-300 sm:active:bg-gray-500 sm:active:text-white sm:hover:bg-gray-300 p-2">
+                        리뷰 신고하기
                       </button>
+                      {rv?.user._id === user.id && (
+                        <button
+                          className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl sm:bg-red-600 sm:active:bg-red-700 text-white"
+                          onClick={e => {
+                            e.stopPropagation()
+                            handleDeleteMyReview(rv)
+                          }}
+                        >
+                          삭제
+                        </button>
+                      )}
                     </div>
-                  )}
+                  </div>
+                  <div>
+                    <p className="indent-2">{rv.comment}</p>
+                  </div>
+                  <div className="absolute right-2 bottom-0">{handleReviewDate(rv?.createdAt)}</div>
                 </div>
               </div>
             ))
