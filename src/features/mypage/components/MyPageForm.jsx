@@ -1,12 +1,31 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Modal from '../components/UserModal.jsx'
-import PwdChangeModal from '../components/PwdChangeModal.jsx';
+import PwdChangeModal from '../components/PwdChangeModal.jsx'
+import MypagesAuthForm from '../components/MypagesAuthForm.jsx'
 import axios from 'axios'
+import { useSelector } from 'react-redux'
 import '../MyPage.css' // 경로 기준: 현재 컴포넌트 파일 위치 기준
 
 // 와이드 1024 py 6 //
 const MyPageForm = () => {
-  const [active, setActive] = useState('최근기록')
+  const navigate = useNavigate()
+  const location = useLocation()
+  const user = useSelector(state => state.auth.user)
+  const userId = user?.id
+
+  const [active, setActive] = useState(() => {
+    if (location.state?.fromVerification && location.state?.activeTab) {
+      return location.state.activeTab
+    }
+    return '최근기록'
+  })
+
+  const [isAuthenticatedForSettings, setIsAuthenticatedForSettings] = useState(() => {
+    // fromVerification이 true이고, activeTab이 '계정 설정'이라면 인증된 것으로 간주
+    return location.state?.fromVerification && location.state?.activeTab === '계정 설정'
+  })
+
   const [bookmarked, setBookmarked] = useState(() => {
     const savedBookmarks = localStorage.getItem('bookmarkedItems')
     return savedBookmarks ? JSON.parse(savedBookmarks) : []
@@ -23,11 +42,56 @@ const MyPageForm = () => {
   const [userProfileImage, setUserProfileImage] = useState(
     'http://localhost:3000/static/images/defaultProfileImg.jpg',
   )
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
 
-  const [tempNickname, setTempNickname] = useState('');
+  const [tempNickname, setTempNickname] = useState('')
 
   const [isEditing, setIsEditing] = useState(false)
+
+  const [recentStores, setRecentStores] = useState([])
+
+  useEffect(() => {
+    const fetchRecentStores = async () => {
+      // 로그인된 사용자 ID가 없으면 API 호출하지 않음
+      if (!userId) {
+        console.log('사용자 ID가 없어 최근 기록을 불러올 수 없습니다.')
+        setRecentStores([]) // 사용자 ID 없으면 빈 배열로 설정
+        return
+      }
+
+      try {
+        // 백엔드 API 엔드포인트에 userId를 쿼리 파라미터로 전송
+        const response = await axios.get(`http://localhost:3000/recent-history?userId=${userId}`, {
+          withCredentials: true, // 세션 쿠키 등을 함께 전송해야 할 경우
+        })
+        setRecentStores(response.data.recentViewedStores)
+        console.log('최근 본 가게 데이터:', response.data.recentViewedStores)
+      } catch (error) {
+        console.error('최근 기록 불러오기 실패:', error)
+        setRecentStores([]) // 오류 발생 시 빈 배열로 설정
+      }
+    }
+
+    // '최근기록' 탭이 활성화되었을 때만 데이터를 불러옵니다.
+    // 또한, userId가 변경될 때도 다시 불러오도록 의존성 배열에 userId를 추가합니다.
+    if (active === '최근기록') {
+      fetchRecentStores()
+    }
+  }, [active, userId]) // active 탭과 userId가 변경될 때마다 실행
+
+  useEffect(() => {
+    if (location.state) {
+      if (location.state.fromVerification && location.state.activeTab === '계정 설정') {
+        setActive('계정 설정') // '계정 설정' 탭 활성화
+        setIsAuthenticatedForSettings(true) // 인증 상태를 true로 설정
+        // 한 번 사용한 state는 지워주는 것이 좋습니다.
+        navigate(location.pathname, { replace: true, state: {} })
+      } else if (location.state.fromMyPage) {
+        // MyPageForm에서 인증 페이지로 이동했을 때의 처리 (이 경우, isAuthenticatedForSettings는 false 유지)
+        // 여기서는 특별히 할 일이 없습니다.
+      }
+    }
+  }, [location.state, navigate, location.pathname])
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -39,7 +103,7 @@ const MyPageForm = () => {
 
         const callUserNickname = response.data.nickname
         setUserNickname(callUserNickname || '익명 사용자')
-        setTempNickname(callUserNickname || '익명 사용자');
+        setTempNickname(callUserNickname || '익명 사용자')
 
         const callUserEmail = response.data.email
         setUserEmail(callUserEmail)
@@ -108,7 +172,7 @@ const MyPageForm = () => {
 
   const callOpenAi = async keywordsWithThreshold => {
     try {
-      const response = axios.post('http://localhost:3000/api/azure/openai', {
+      const response = await axios.post('http://localhost:3000/api/azure/openai', {
         headers: {
           prompt: `
       다음은 사용자가 최근 본 음식점의 키워드 목록입니다:
@@ -186,7 +250,7 @@ const MyPageForm = () => {
   const mostFrequentKeywords = extractMostFrequentKeywords(example)
 
   useEffect(() => {
-    if (active === '음식점 추천') {
+    if (active === '음식점 추천(AI)') {
       if (openai?.length > 0 || loading) {
         return
       }
@@ -216,7 +280,7 @@ const MyPageForm = () => {
 
   const callDalleImage = async keyword => {
     try {
-      const res = axios
+      const res = await axios
         .post('http://localhost:3000/api/azure/dalle', {
           prompt: `실제 사진처럼 다음 키워드를 가지고 이미지를 그려주세요: ${mostFrequentKeywords}.`,
         })
@@ -235,6 +299,9 @@ const MyPageForm = () => {
   const handleClick = (e, tab) => {
     e.preventDefault()
     setActive(tab)
+    if (tab !== '계정 설정') {
+      setIsAuthenticatedForSettings(false)
+    }
   }
 
   const isBookmarked = item => bookmarked.some(b => b.id === item.id)
@@ -249,19 +316,16 @@ const MyPageForm = () => {
 
   // ★★★ 편집 모드 토글 함수
   const handleEditToggle = () => {
-
     if (!isEditing) {
       // 수정 모드 진입 시, 현재 실제 값을 임시 상태로 복사
-      setTempNickname(userNickname);
-  }
+      setTempNickname(userNickname)
+    }
     setIsEditing(prev => !prev)
   }
 
-  // ★★★ 사용자 정보 저장 함수
+  //사용자 정보 저장 함수
   const handleSaveChanges = async () => {
     try {
-
-
       const response = await axios.put(
         'http://localhost:3000/auth/profile',
         {
@@ -276,7 +340,7 @@ const MyPageForm = () => {
 
       if (response.status === 200) {
         alert('프로필 정보가 성공적으로 업데이트되었습니다.')
-        setUserNickname(tempNickname);
+        setUserNickname(tempNickname)
         setIsEditing(false) // 저장 후 편집 모드 종료
         // 업데이트된 정보로 상태를 다시 설정 (선택 사항, 서버 응답에 따라)
         // setUserNickname(response.data.user.nickname);
@@ -292,7 +356,7 @@ const MyPageForm = () => {
       )
     }
   }
-
+  ///계정 삭제 함수
   const handleDeleteAccount = async () => {
     if (window.confirm('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
       try {
@@ -314,14 +378,14 @@ const MyPageForm = () => {
     }
   }
 
-  const openPasswordModal = () => setIsPasswordModalOpen(true);
-  const closePasswordModal = () => setIsPasswordModalOpen(false);
+  const openPasswordModal = () => setIsPasswordModalOpen(true)
+  const closePasswordModal = () => setIsPasswordModalOpen(false)
 
   const renderContent = () => {
     switch (active) {
       case '최근기록':
         return (
-          <div className="flex justify-center">
+          <div className="flex justify-center ">
             <ul className="flex flex-col gap-9 py-5">
               {example.map(item => (
                 <li key={item.id} className="flex gap-4">
@@ -475,6 +539,23 @@ const MyPageForm = () => {
         )
 
       case '계정 설정':
+        // 인증 상태에 따라 다른 내용 렌더링
+        if (!isAuthenticatedForSettings) {
+          return (
+            // ★★★ 비밀번호 인증 폼을 직접 렌더링 ★★★
+            <MypagesAuthForm
+              onAuthenticated={() => {
+                setIsAuthenticatedForSettings(true) // 인증 성공 시 상태 변경
+                setActive('계정 설정') // 혹시 모를 경우를 대비하여 탭 활성화 재확인
+              }}
+              onCancel={() => {
+                setActive('최근기록') // 취소 시 다른 탭으로 이동 (예: 최근기록)
+                setIsAuthenticatedForSettings(false) // 인증 상태 초기화
+              }}
+            />
+          )
+        }
+        // 인증되었다면 원래 계정 설정 내용을 렌더링
         return (
           <div className="flex justify-center">
             <div className="flex flex-col w-[700px] h-[700px] gap-5 py-5">
@@ -486,7 +567,7 @@ const MyPageForm = () => {
                     style={{ backgroundImage: `url('${userProfileImage}')` }}
                   />
                   <span
-                    className="absolute bottom-0 right-0 bg-white  rounded-full p-2 shadow hover:bg-opacity-100 cursor-pointer"
+                    className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow hover:bg-opacity-100 cursor-pointer"
                     onClick={() => setIsOpen(true)}
                   >
                     <svg
@@ -530,10 +611,9 @@ const MyPageForm = () => {
                   <hr className="py-3" />
                   <div className="py-3 flex justify-between">
                     <p>비밀번호</p>
-                    <button className="text-blue-500 hover:underline"
-                     onClick={openPasswordModal}
-                    
-                    >비밀번호 변경</button>
+                    <button className="text-blue-500 hover:underline" onClick={openPasswordModal}>
+                      비밀번호 변경
+                    </button>
                   </div>
                   <hr className="py-3" />
                 </div>
@@ -551,7 +631,7 @@ const MyPageForm = () => {
                     <p>{userName}</p>
                   )}
                 </div>
-                
+
                 <hr className="py-3" />
                 <div className="py-3 flex justify-between">
                   <p>닉네임</p>
@@ -571,7 +651,7 @@ const MyPageForm = () => {
                   <p>연락처</p>
                   {isEditing ? (
                     <input
-                      type="tel" // 전화번호 타입
+                      type="tel"
                       value={userPhone}
                       onChange={e => setUserPhone(e.target.value)}
                       className="border border-gray-300 rounded px-2 py-1 w-1/2"
@@ -592,14 +672,14 @@ const MyPageForm = () => {
                 {isEditing ? (
                   <button
                     className="mt-4 px-4 py-2 text-white bg-blue-600 rounded cursor-pointer"
-                    onClick={handleSaveChanges} // ★★★ 저장 버튼 핸들러
+                    onClick={handleSaveChanges}
                   >
                     저장
                   </button>
                 ) : (
                   <button
                     className="mt-4 px-4 py-2 text-white bg-blue-600 rounded cursor-pointer"
-                    onClick={handleEditToggle} // ★★★ 수정 버튼 핸들러
+                    onClick={handleEditToggle}
                   >
                     수정
                   </button>
@@ -615,9 +695,9 @@ const MyPageForm = () => {
   }
 
   return (
-    <div className="w-full pb-5">
+    <div className="max-w-5xl mx-auto px-6 pb-5">
       <div className="max-w-5xl mx-auto">
-        <div className="py-3 flex justify-between items-center ">
+        <div className="pb-5 flex justify-between items-center ">
           <div className="flex gap-5 items-center ">
             <div
               className="w-[100px] h-[100px] bg-cover mask-radial-fade"
@@ -627,30 +707,6 @@ const MyPageForm = () => {
               <p className="text-2xl py-2"> "{userNickname}" 님</p>
               <span className="text-2xl">안녕하세요.</span>
             </div>
-          </div>
-          <div className="flex gap-3 items-center ">
-            <p className="cursor-pointer" onClick={() => setIsOpen(true)}>
-              프로필설정
-            </p>
-            <button onClick={() => setIsOpen(true)} className="text-xl cursor-pointer">
-              <svg
-                width="30px"
-                height="30px"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  opacity="0.4"
-                  d="M2 12.8799V11.1199C2 10.0799 2.85 9.21994 3.9 9.21994C5.71 9.21994 6.45 7.93994 5.54 6.36994C5.02 5.46994 5.33 4.29994 6.24 3.77994L7.97 2.78994C8.76 2.31994 9.78 2.59994 10.25 3.38994L10.36 3.57994C11.26 5.14994 12.74 5.14994 13.65 3.57994L13.76 3.38994C14.23 2.59994 15.25 2.31994 16.04 2.78994L17.77 3.77994C18.68 4.29994 18.99 5.46994 18.47 6.36994C17.56 7.93994 18.3 9.21994 20.11 9.21994C21.15 9.21994 22.01 10.0699 22.01 11.1199V12.8799C22.01 13.9199 21.16 14.7799 20.11 14.7799C18.3 14.7799 17.56 16.0599 18.47 17.6299C18.99 18.5399 18.68 19.6999 17.77 20.2199L16.04 21.2099C15.25 21.6799 14.23 21.3999 13.76 20.6099L13.65 20.4199C12.75 18.8499 11.27 18.8499 10.36 20.4199L10.25 20.6099C9.78 21.3999 8.76 21.6799 7.97 21.2099L6.24 20.2199C5.33 19.6999 5.02 18.5299 5.54 17.6299C6.45 16.0599 5.71 14.7799 3.9 14.7799C2.85 14.7799 2 13.9199 2 12.8799Z"
-                  fill="#292D32"
-                />
-                <path
-                  d="M12 15.25C13.7949 15.25 15.25 13.7949 15.25 12C15.25 10.2051 13.7949 8.75 12 8.75C10.2051 8.75 8.75 10.2051 8.75 12C8.75 13.7949 10.2051 15.25 12 15.25Z"
-                  fill="#292D32"
-                />
-              </svg>
-            </button>
           </div>
         </div>
       </div>
@@ -675,13 +731,12 @@ const MyPageForm = () => {
           ))}
         </ul>
       </div>
-      <hr className=" border-gray-500" />
+          <hr className="border-gray-500 " />
 
-      <PwdChangeModal
-                isOpen={isPasswordModalOpen}
-                onClose={closePasswordModal}
-            />
-        <div className='max-w-5xl mx-auto px-6'>{renderContent()}</div>
+      <PwdChangeModal isOpen={isPasswordModalOpen} onClose={closePasswordModal} />
+      <div className="max-w-5xl mx-auto px-6">
+          {renderContent()} {/* 이제 active 탭에 따라 renderContent가 내부적으로 인증을 확인 */}
+      </div>
     </div>
   )
 }

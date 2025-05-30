@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import axios from 'axios'
 
 const PwdChangeModal = ({ isOpen, onClose }) => {
-  const [currentPassword, setCurrentPassword] = useState('')
+  // const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmNewPassword, setConfirmNewPassword] = useState('')
   const [message, setMessage] = useState('')
@@ -25,7 +25,7 @@ const PwdChangeModal = ({ isOpen, onClose }) => {
       const response = await axios.put(
         'http://localhost:3000/auth/change-password',
         {
-          currentPassword,
+          // currentPassword,
           newPassword,
         },
         {
@@ -55,7 +55,7 @@ const PwdChangeModal = ({ isOpen, onClose }) => {
       <div className="bg-white p-6 rounded-lg shadow-xl w-96">
         <h2 className="text-2xl font-bold mb-4">비밀번호 변경</h2>
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+          {/* <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="currentPassword">
               현재 비밀번호
             </label>
@@ -67,7 +67,7 @@ const PwdChangeModal = ({ isOpen, onClose }) => {
               onChange={e => setCurrentPassword(e.target.value)}
               required
             />
-          </div>
+          </div> */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="newPassword">
               새 비밀번호
