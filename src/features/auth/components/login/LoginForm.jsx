@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import axios from 'axios'
-import { Field, Label } from '@headlessui/react'
+import { Field, Label, Transition } from '@headlessui/react'
 import { toast } from 'react-toastify'
 import { loginSchema } from '../../schema/loginSchema'
 import { login } from '../../slice/authSlice'
@@ -24,12 +24,10 @@ const LoginForm = () => {
     reset,
     resetField,
     watch,
-    setError,
     formState: { errors },
   } = useForm({
     defaultValues: { rememberMe: false },
     resolver: zodResolver(loginSchema),
-    
   })
   useEffect(() => {
     setFocus('email')
@@ -53,17 +51,22 @@ const LoginForm = () => {
       navigate('/')
     } catch (e) {
       if (e.response.status === 400) {
-        setError('password', { message: e.response.data.message })
+        toast.error(
+          <div className="Toastify__toast-body cursor-default">
+            잘못된 아이디 또는 비밀번호 입니다
+          </div>,
+          {
+            position: 'top-center',
+          },
+        )
         resetField('password', { keepError: true })
         setFocus('password')
       } else {
         toast.error(
-          <div>
-            서버 오류가 발생했습니다.
-            <br />
-            잠시 후 다시 시도해주세요.
-          </div>,
-          { autoClose: 3000 },
+          <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
+          {
+            position: 'top-center',
+          },
         )
       }
     }
@@ -91,14 +94,16 @@ const LoginForm = () => {
             이메일
           </label>
           <input
-            className="border border-color-gray-300 hover:border-color-gray-700 focus:border-color-gray-900 rounded-md grow py-4 px-3 outline-hidden border-md"
+            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden border-md"
             type="text"
             id="email"
             placeholder="이메일"
             {...register('email')}
           />
           {errors.email && (
-            <span className="text-color-red-700 text-sm">{errors.email.message}</span>
+            <span className="text-xs sm:text-sm text-color-red-700 cursor-default">
+              {errors.email.message}
+            </span>
           )}
         </div>
         <div className="relative flex flex-col gap-1.5">
@@ -106,7 +111,7 @@ const LoginForm = () => {
             비밀번호
           </label>
           <input
-            className="border border-color-gray-300 hover:border-color-gray-700 focus:border-color-gray-900 rounded-md grow py-4 px-3 outline-hidden border-md"
+            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden border-md"
             type={passwordState.visible ? 'text' : 'password'}
             id="password"
             placeholder="비밀번호"
@@ -119,27 +124,31 @@ const LoginForm = () => {
             hasValue={passwordState.hasValue}
             className="absolute top-13 right-3"
           />
+          {errors.password && (
+            <span className="text-xs sm:text-sm text-color-red-700 cursor-default">
+              {errors.password.message}
+            </span>
+          )}
         </div>
-        <div className='flex justify-between'>
+        <div className="flex justify-between">
           <Controller
             name="rememberMe"
             control={control}
             render={({ field }) => (
-              <Field className="flex items-center cursor-pointer select-none gap-1">
+              <Field className="flex items-center relative cursor-pointer select-none">
+                <Label className="w-20 ps-2 peer text-sm cursor-pointer absolute top-0 left-4 ">
+                  로그인 유지
+                </Label>
                 <CustomCheckBox
                   checked={field.value}
                   onChange={field.onChange}
-                  className="w-4 h-4"
+                  className="w-4 h-4 peer-hover:border-color-gray-700"
                 />
-                <Label className='text-sm cursor-pointer'>로그인 유지</Label>
               </Field>
             )}
           />
-          <Link className='text-sm outline-hidden hover:underline'>아이디·비밀번호 찾기</Link>
+          <Link className="text-sm outline-hidden hover:underline">아이디·비밀번호 찾기</Link>
         </div>
-        {errors.password && (
-          <span className="text-color-red-700 text-sm">{errors.password.message}</span>
-        )}
         <button
           type="submit"
           className="cursor-pointer border p-3 bg-color-gray-900 border-color-gray-900 text-white rounded-lg outline-hidden"
