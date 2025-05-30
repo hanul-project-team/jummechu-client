@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import zustandStore from '../../../../app/zustandStore.js'
+import axios from 'axios'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import Icon from '../../../../assets/images/icon.png'
@@ -137,10 +138,27 @@ const PlaceReview = () => {
       setShowReviewForm(prev => !prev)
     }
   }
-  const handleSubmitSuccess = () => {
-    setCurrentSort('latest')
-  }
-  // console.log(reviewTrigger)
+  const handleDeleteMyReview = rv => {
+    const userId = user.id
+    if (userId) {
+      if (confirm('리뷰를 삭제하시겠습니까?')) {
+        axios
+          .delete(`http://localhost:3000/review/delete/${rv._id}`, {
+            withCredentials: true,
+            headers: {
+              user: userId,
+            },
+          })
+          .then(res => {
+            // console.log('리뷰 삭제 정보', res)
+            setReviewInfo(prev => prev.filter(review => review._id !== rv?._id))
+          })
+          .catch(err => {
+            console.error('리뷰 삭제 실패 에러 발생', err)
+          })
+      }
+    }
+  }  
   // console.log(reviewInfo)
   return (
     <div>
@@ -194,22 +212,24 @@ const PlaceReview = () => {
           </div>
         </div>
         {/* 리뷰 작성 폼 */}
-        {showReviewForm === true ? (
-          <ReviewWriteForm
-            handleReviewWrite={handleReviewWrite}
-            user={user}
-            placeDetail={placeDetail}
-            setShowReviewForm={setShowReviewForm}
-            submitSuccess={handleSubmitSuccess}
-          />
-        ) : null}
+        <div className={`transition transition-all duration-500 ease-in-out ${showReviewForm ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}`}>
+            <ReviewWriteForm
+              user={user}
+              placeDetail={placeDetail}
+              setShowReviewForm={setShowReviewForm}
+              setCurrentSort={setCurrentSort}
+            />
+        </div>
       </div>
       {/* 리뷰 보이는곳 */}
       <div className="container sm:max-w-3/5 max-w-5/6 mx-auto">
         {/* 정렬 버튼 */}
         {reviewInfo.length > 0 && (
           <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative">
-            <button className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition" onClick={() => setShowSort(!showSort)}>
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
+              onClick={() => setShowSort(!showSort)}
+            >
               정렬
             </button>
             <SortDropdown handleSortChange={handleSortChange} showSort={showSort} />
@@ -225,15 +245,25 @@ const PlaceReview = () => {
               >
                 <div className="flex-2">
                   <img src={Icon} alt="icon" className="md:max-h-[60px] sm:max-h-[40px]" />
-                  <p>{rv.user.name}</p>
+                  <p>{rv?.user.name}</p>
                   <div>
-                    <p>작성일: {rv.createdAt.split('T')[0]}</p>
-                    {handleReviewDate(rv.createdAt)}
+                    <p>작성일: {rv?.createdAt.split('T')[0]}</p>
+                    {handleReviewDate(rv?.createdAt)}
                     <StarRatingComponent name="rating1" starCount={5} value={rv.rating} />
                   </div>
                 </div>
-                <div className="flex-4">
+                <div className="flex-4 relative">
                   <p className="indent-2">{rv.comment}</p>
+                  {rv && rv?.user._id === user.id && (
+                    <div className="absolute right-0 sm:top-10 top-20">
+                      <button
+                        className="hover:cursor-pointer px-2 py-1 border-1 rounded-2xl bg-red-600 text-white"
+                        onClick={() => handleDeleteMyReview(rv)}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))
