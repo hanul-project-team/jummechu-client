@@ -105,7 +105,7 @@ const LoginForm = () => {
             이메일
           </label>
           <input
-            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden border-md"
+            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
             type="text"
             id="email"
             placeholder="이메일"
@@ -130,7 +130,7 @@ const LoginForm = () => {
             비밀번호
           </label>
           <input
-            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden border-md"
+            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
             type={passwordState.visible ? 'text' : 'password'}
             id="password"
             placeholder="비밀번호"
