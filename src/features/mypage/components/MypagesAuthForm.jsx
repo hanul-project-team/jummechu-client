@@ -11,7 +11,7 @@ const MypagesAuthForm = ({ onAuthenticated, onCancel }) => {
   // const navigate = useNavigate();
 
   // ★★★ 디버깅 로그 추가 시작 ★★★
-  console.log('MypagesAuthForm 컴포넌트 렌더링됨')
+  // console.log('MypagesAuthForm 컴포넌트 렌더링됨')
   // ★★★ 디버깅 로그 추가 끝 ★★★
 
   const handleSubmit = async e => {
@@ -67,7 +67,7 @@ const MypagesAuthForm = ({ onAuthenticated, onCancel }) => {
     // 2. h-full 또는 특정 높이를 주어 부모가 제공하는 공간을 꽉 채우도록 합니다.
     // 3. min-h-screen (화면 전체 높이)을 제거합니다.
     // 4. justify-center와 items-center를 사용하여 내부 요소를 중앙에 정렬합니다.
-    <div className="flex justify-center items-center w-full h-[700px] bg-gray-200 p-6">
+    <div className="flex bg-gray-200 justify-center items-center w-full h-[700px] p-6">
       {' '}
       {/* p-6 추가로 전체 패딩 적용 */}
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
