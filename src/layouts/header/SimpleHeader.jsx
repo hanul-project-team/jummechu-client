@@ -7,7 +7,7 @@ const SimpleHeader = () => {
     <header className='py-10'>
       <div className="container mx-auto max-w-5xl px-6">
         <div className='flex justify-center'>
-            <Link to='/'>
+            <Link to='/' className='outline-hidden'>
               <img src={LogoBig} alt="점메추 로고" />
             </Link>
         </div>

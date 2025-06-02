@@ -162,7 +162,7 @@ const LoginForm = () => {
             name="rememberMe"
             control={control}
             render={({ field }) => (
-              <Field className="flex items-center relative cursor-pointer select-none">
+              <Field className="flex items-center relative select-none">
                 <Label className="w-20 ps-2 peer text-sm cursor-pointer absolute top-0 left-4 ">
                   로그인 유지
                 </Label>

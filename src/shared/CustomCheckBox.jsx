@@ -6,7 +6,7 @@ const CustomCheckBox = ({ checked, onChange, className }) => {
     <Checkbox
       checked={checked}
       onChange={onChange}
-      className={`${className} border bg-white outline-hidden rounded-sm border-color-gray-300 hover:border-color-gray-700 group data-checked:bg-color-gray-900`}
+      className={`${className} cursor-pointer border bg-white outline-hidden rounded-sm border-color-gray-300 hover:border-color-gray-700 group data-checked:bg-color-gray-900`}
     >
       <svg
         className="stroke-white opacity-0 group-data-checked:opacity-100"
