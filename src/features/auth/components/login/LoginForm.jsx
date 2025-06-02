@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import axios from 'axios'
-import { Field, Label, Transition } from '@headlessui/react'
+import { Field, Label } from '@headlessui/react'
 import { toast } from 'react-toastify'
+import { CSSTransition } from 'react-transition-group'
 import { loginSchema } from '../../schema/loginSchema'
 import { login } from '../../slice/authSlice'
 import VisibleBtn from '../../../../shared/VisibleBtn'
@@ -16,6 +17,8 @@ const LoginForm = () => {
     hasValue: false,
     visible: false,
   })
+  const [showEmailError, setShowEmailError] = useState(false)
+  const [showPasswordError, setShowPasswordError] = useState(false)
   const {
     register,
     handleSubmit,
@@ -29,9 +32,17 @@ const LoginForm = () => {
     defaultValues: { rememberMe: false },
     resolver: zodResolver(loginSchema),
   })
+  const emailErrorRef = useRef(null)
+  const passwordErrorRef = useRef(null)
   useEffect(() => {
     setFocus('email')
   }, [setFocus])
+  useEffect(() => {
+    setShowEmailError(!!errors.email)
+  }, [errors.email])
+  useEffect(() => {
+    setShowPasswordError(!!errors.password)
+  }, [errors.password])
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const passwordValue = watch('password')
@@ -100,11 +111,19 @@ const LoginForm = () => {
             placeholder="이메일"
             {...register('email')}
           />
-          {errors.email && (
-            <span className="text-xs sm:text-sm text-color-red-700 cursor-default">
-              {errors.email.message}
+          <CSSTransition
+            nodeRef={emailErrorRef}
+            timeout={300}
+            in={showEmailError}
+            classNames="fade"
+          >
+            <span
+              ref={emailErrorRef}
+              className="text-xs sm:text-sm text-color-red-700 cursor-default"
+            >
+              {errors.email?.message}
             </span>
-          )}
+          </CSSTransition>
         </div>
         <div className="relative flex flex-col gap-1.5">
           <label htmlFor="password" className="font-semibold">
@@ -124,11 +143,19 @@ const LoginForm = () => {
             hasValue={passwordState.hasValue}
             className="absolute top-13 right-3"
           />
-          {errors.password && (
-            <span className="text-xs sm:text-sm text-color-red-700 cursor-default">
-              {errors.password.message}
+          <CSSTransition
+            nodeRef={passwordErrorRef}
+            timeout={300}
+            in={showPasswordError}
+            classNames="fade"
+          >
+            <span
+              ref={passwordErrorRef}
+              className="text-xs sm:text-sm text-color-red-700 cursor-default"
+            >
+              {errors.password?.message}
             </span>
-          )}
+          </CSSTransition>
         </div>
         <div className="flex justify-between">
           <Controller
@@ -147,7 +174,7 @@ const LoginForm = () => {
               </Field>
             )}
           />
-          <Link className="text-sm outline-hidden hover:underline">아이디·비밀번호 찾기</Link>
+          <Link to='/find_account' className="text-sm outline-hidden hover:underline">아이디·비밀번호 찾기</Link>
         </div>
         <button
           type="submit"
