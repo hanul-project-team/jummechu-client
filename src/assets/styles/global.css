@@ -5,12 +5,16 @@
   --color-gray-300: #dbdee3;
   --color-gray-50:  #f8f9fb;
   --color-teal-400: #39D2D7; 
+  --color-red-700:#ED1515;
+  --color-red-500: #ff4040;
+  --color-red-50:#FFEEEE;
 }
 html,
 body {
   height: 100%;
   margin: 0;
   padding: 0;
+  color: var(--color-gray-900);
   font-family: 'Pretendard', sans-serif;
 }
 .place-picker-container {
@@ -45,8 +49,3 @@ gmp-map {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
 }
-.custom-toast-container .Toastify__toast {
-    border-radius: 0.25rem;
-    box-shadow: none;
-    width: 21.875rem;
-  }
