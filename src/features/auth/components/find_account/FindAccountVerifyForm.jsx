@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef, createRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'react-toastify'
+import { CSSTransition } from 'react-transition-group'
 import { find } from '../../slice/findAccountSlice'
 import { verifySchema } from '../../schema/verifySchema'
 import Timer from '../../../../shared/Timer'
-import style from './findAccountVerifyForm.module.css'
 import axios from 'axios'
 
 const FindAccountVerifyForm = ({ type }) => {
@@ -15,6 +15,10 @@ const FindAccountVerifyForm = ({ type }) => {
   const [isCode, setIsCode] = useState(false)
   const [isRequested, setIsRequested] = useState(false)
   const [timerKey, setTimerKey] = useState(0)
+  const [showError, setShowError] = useState({
+    name: false,
+    phone: false,
+  })
   const {
     register,
     handleSubmit,
@@ -26,13 +30,18 @@ const FindAccountVerifyForm = ({ type }) => {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(verifySchema),
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit',
   })
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const phoneValue = watch('phone')
   const codeValue = watch('code')
+  const errorRefs = useRef({
+    name: createRef(null),
+    phone: createRef(null),
+  })
+  useEffect(() => {
+    setFocus('name')
+  },[setFocus])
   useEffect(() => {
     const isValid = /^01[016789][0-9]{8}$/.test(phoneValue)
     setIsPhone(!!isValid)
@@ -41,6 +50,13 @@ const FindAccountVerifyForm = ({ type }) => {
     const isValid = /^\d{6}$/.test(codeValue)
     setIsCode(!!isValid)
   }, [codeValue])
+  useEffect(() => {
+    setShowError(prev => ({
+      ...prev,
+      name: !!errors.name,
+      phone: !!errors.phone,
+    }))
+  }, [errors.name, errors.phone])
   const phoneSubmit = async () => {
     const isValid = await trigger('phone')
     if (isValid) {
@@ -52,11 +68,16 @@ const FindAccountVerifyForm = ({ type }) => {
         //   { withCredentials: true },
         // )
         setIsRequested(true)
-        toast.success(<div>인증번호 발송에 성공하였습니다.</div>, { autoClose: 4000 })
-        setTimerKey(prev => prev + 1)
+        resetField('code')
         setFocus('code')
-      } catch (e) {
-        console.log(e)
+        setTimerKey(prev => prev + 1)
+      } catch {
+        toast.error(
+          <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
+          {
+            position: 'top-center',
+          },
+        )
       }
     }
   }
@@ -72,7 +93,23 @@ const FindAccountVerifyForm = ({ type }) => {
       dispatch(find(response.data))
       navigate(`/find_account/result?type=${type}`)
     } catch (e) {
-      console.log(e)
+      if (e.response.status === 400) {
+        toast.error(
+          <div className="Toastify__toast-body cursor-default">인증코드가 일치하지 않습니다</div>,
+          {
+            position: 'top-center',
+          },
+        )
+        resetField('code')
+        setFocus('code')
+      } else {
+        toast.error(
+          <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
+          {
+            position: 'top-center',
+          },
+        )
+      }
     }
   }
   const onIsValid = errors => {
@@ -89,23 +126,41 @@ const FindAccountVerifyForm = ({ type }) => {
     resetField('code')
   }
   return (
-    <form
-      className={style.findAccountVerifyForm}
-      autoComplete="off"
-      onSubmit={handleSubmit(onSubmit, onIsValid)}
-    >
+    <form autoComplete="off" onSubmit={handleSubmit(onSubmit, onIsValid)}>
       <fieldset className="flex flex-col gap-3">
         <legend className="hidden">sms 인증 폼</legend>
-        <div className={`${style.findAccountVerifyFormField} flex flex-col`}>
-          <label htmlFor="name">이름</label>
-          <input type="text" placeholder="이름" {...register('name')} />
-          {errors.name && <span className={style.errorSpan}>{errors.name.message}</span>}
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="name" className="font-semibold">
+            이름
+          </label>
+          <input
+            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
+            type="text"
+            id="name"
+            placeholder="이름"
+            {...register('name')}
+          />
+          <CSSTransition
+            nodeRef={errorRefs.current.name}
+            timeout={300}
+            in={showError.name}
+            classNames="fade"
+          >
+            <span
+              ref={errorRefs.current.name}
+              className="text-xs sm:text-sm text-color-red-700 cursor-default"
+            >
+              {errors.name?.message}
+            </span>
+          </CSSTransition>
         </div>
-        <div className={`${style.findAccountVerifyFormField} flex flex-col`}>
-          <label htmlFor="phone">전화번호</label>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="phone" className="font-semibold">
+            전화번호
+          </label>
           <div className="flex gap-3">
             <input
-              className={`${style.noSpinner} grow`}
+              className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
               type="text"
               id="phone"
               placeholder="'-'제외 숫자만 입력해주세요"
@@ -120,7 +175,7 @@ const FindAccountVerifyForm = ({ type }) => {
                 type="button"
                 onClick={phoneSubmit}
                 disabled={!isPhone}
-                className={style.getCodeBtn}
+                className="bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
               >
                 인증하기
               </button>
@@ -130,23 +185,35 @@ const FindAccountVerifyForm = ({ type }) => {
                 type="button"
                 onClick={phoneSubmit}
                 disabled={!isPhone}
-                className={style.resendBtn}
+                className="bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
               >
                 재전송하기
               </button>
             )}
           </div>
-          {errors.phone && <span className={style.errorSpan}>{errors.phone.message}</span>}
+          <CSSTransition
+            nodeRef={errorRefs.current.phone}
+            timeout={300}
+            in={showError.phone}
+            classNames="fade"
+          >
+            <span
+              ref={errorRefs.current.phone}
+              className="text-xs sm:text-sm text-color-red-700 cursor-default"
+            >
+              {errors.phone?.message}
+            </span>
+          </CSSTransition>
         </div>
-        <div className={`${style.findAccountVerifyFormField} flex flex-col`}>
+        <div className="flex flex-col gap-1.5">
           {isRequested && (
-            <label htmlFor="phone">
+            <label htmlFor="code" className="font-semibold">
               <Timer key={timerKey} duration={180} onExpire={onExpire} />
             </label>
           )}
           <div className="flex gap-3">
             <input
-              className={`${style.noSpinner} grow`}
+              className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
               type="text"
               id="code"
               placeholder="인증번호 6자리"
@@ -156,7 +223,11 @@ const FindAccountVerifyForm = ({ type }) => {
                 e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 6)
               }}
             />
-            <button type="submit" disabled={!isCode} className={style.submitBtn}>
+            <button
+              type="submit"
+              disabled={!isCode}
+              className="border border-color-gray-900 p-3 bg-color-gray-900 text-white rounded-lg outline-hidden disabled:border-color-gray-700 disabled:bg-color-gray-700 cursor-pointer disabled:cursor-default min-w-24"
+            >
               확인
             </button>
           </div>
