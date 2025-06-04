@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import StarRatingComponent from 'react-star-rating-component'
 import zustandStore from '../../../../app/zustandStore'
+import Rating from 'react-rating'
+import StarGray from '../../../../assets/images/star-gray.png'
+import StarYellow from '../../../../assets/images/star-yellow.png'
+import { toast } from 'react-toastify'
 
-const ReviewWriteForm = ({
-  user,
-  placeDetail,
-  setShowReviewForm,
-  setCurrentSort
-}) => {
+const ReviewWriteForm = ({ user, placeDetail, setShowReviewForm, setCurrentSort }) => {
   const setReviewInfo = zustandStore(state => state.setReviewInfo)
   let MIN_LENGTH = 6
-  const [isUser, setIsUser] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [formData, setFormData] = useState({
     user: '',
@@ -21,19 +18,11 @@ const ReviewWriteForm = ({
   })
   const [starRating, setStarRating] = useState(0)
 
-  useEffect(() => {
-    if (user) {
-      setIsUser(true)
-    } else {
-      setIsUser(false)
-    }
-  }, [])
-
-  const onStarClick = (nextValue, prevValue, name) => {
-    setStarRating(nextValue)
+  const handleRatingChange = rate => {
+    setStarRating(rate)
     setFormData({
       ...formData,
-      rating: nextValue,
+      rating: rate,
     })
   }
   const handleSubmit = e => {
@@ -55,15 +44,22 @@ const ReviewWriteForm = ({
         store: placeDetail._id,
       }
       // console.log(updatedFormData)
-      try {
-        axios
-          .post('http://localhost:3000/review/regist', updatedFormData, {
-            withCredentials: true,
-          })
-          .then(/* async */ res => {
+      axios
+        .post('http://localhost:3000/review/regist', updatedFormData, {
+          withCredentials: true,
+        })
+        .then(
+          /* async */ res => {
             // const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
             if (res.status === 201) {
-              alert('리뷰가 작성되었습니다.')
+              toast.success(
+                <div className="Toastify__toast-body cursor-default">
+                  리뷰가 등록되었습니다.
+                </div>,
+                {
+                  position: 'top-center',
+                },
+              )
               setShowReviewForm(prev => !prev)
               // await sleep(500)
               setFormData({
@@ -75,13 +71,11 @@ const ReviewWriteForm = ({
               setReviewInfo(res.data.data)
               setCurrentSort('latest')
             }
-          })
-          .catch(err => {
-            console.log(err)
-          })
-      } catch (err) {
-        console.log(err)
-      }
+          },
+        )
+        .catch(err => {
+          console.log(err)
+        })
     }
   }
   const handleChange = e => {
@@ -123,17 +117,14 @@ const ReviewWriteForm = ({
         <div className="flex justify-between my-2">
           {/* 이하 별점 매기기 */}
           <div>
-            <StarRatingComponent
+            <Rating
               name="rating"
-              starCount={5}
-              onStarClick={onStarClick}
-              value={starRating}
-              renderStarIcon={(nextValue, prevValue, name) => {
-                return <span>&#9733;</span>
-              }}
-              starColor="#ffb400"
-              emptyStarColor="gray"
-              className="text-xl"
+              start={0}
+              stop={5}
+              emptySymbol={<img src={StarGray} alt="star-gray" className="w-6 h-6" />}
+              fullSymbol={<img src={StarYellow} alt="star-yellow" className="w-6 h-6" />}
+              onChange={handleRatingChange}
+              initialRating={formData.rating}
             />
           </div>
           {/* 이하 버튼 */}
