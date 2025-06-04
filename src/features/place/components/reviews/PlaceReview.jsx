@@ -23,12 +23,28 @@ const PlaceReview = () => {
   const reviewInfo = zustandStore(state => state.reviewInfo)
   const placeDetail = zustandStore(state => state.placeDetail)
   const navigate = useNavigate()
-  const location = useLocation();
+  const location = useLocation()
   const returnUrl = location.pathname + location?.search
   const [currentSort, setCurrentSort] = useState('none')
 
   const tabRefs = useRef([])
+  const dropdownRef = useRef(null)
 
+  useEffect(() => {
+    const handleClickOutside = e => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowSort(false)
+      }
+    }
+    if (showSort) {
+      document.addEventListener('mousedown', handleClickOutside)
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showSort])
   useEffect(() => {
     const handleClickOutside = e => {
       const isOutside = tabRefs.current.every(ref => {
@@ -142,7 +158,7 @@ const PlaceReview = () => {
   const handleReviewWrite = () => {
     if (user.name?.length === 0) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니가?')) {
-        navigate('/login', {state: {returnUrl}})
+        navigate('/login', { state: { returnUrl } })
       }
     } else {
       setShowReviewForm(prev => !prev)
@@ -246,7 +262,7 @@ const PlaceReview = () => {
       <div className="container sm:max-w-3/5 max-w-5/6 mx-auto">
         {/* 정렬 버튼 */}
         {reviewInfo.length > 0 && (
-          <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative">
+          <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative" ref={dropdownRef}>
             <button
               className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
               onClick={() => setShowSort(!showSort)}
