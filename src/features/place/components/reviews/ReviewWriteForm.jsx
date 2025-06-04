@@ -27,10 +27,10 @@ const ReviewWriteForm = ({ user, placeDetail, setShowReviewForm, setCurrentSort 
   const handleSubmit = e => {
     e.preventDefault()
     if (formData.comment.length < MIN_LENGTH) {
+      setErrorText(`최소 ${MIN_LENGTH}자 이상 입력해주세요. (현재 ${formData.comment.length}자)`)
       if(errorText.length > 0) {
         setErrorRating('')
       }
-      setErrorText(`최소 ${MIN_LENGTH}자 이상 입력해주세요. (현재 ${formData.comment.length}자)`)
       return
     } else {
       setErrorText('')
