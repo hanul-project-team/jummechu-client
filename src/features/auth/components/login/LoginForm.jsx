@@ -12,7 +12,7 @@ import { login } from '../../slice/authSlice'
 import VisibleBtn from '../../../../shared/VisibleBtn'
 import CustomCheckBox from '../../../../shared/CustomCheckBox'
 
-const LoginForm = () => {
+const LoginForm = ({returnUrl}) => {
   const [passwordState, setPasswordState] = useState({
     hasValue: false,
     visible: false,
@@ -59,7 +59,11 @@ const LoginForm = () => {
       })
       reset()
       dispatch(login(response.data))
-      navigate('/')
+      if(returnUrl) {
+        navigate(`${returnUrl}`)
+      } else {
+        navigate('/')
+      }
     } catch (e) {
       if (e.response.status === 400) {
         toast.error(
