@@ -187,6 +187,9 @@
 
   /* data-checked */
   .data-checked\:bg-color-gray-900[data-checked] {background-color: var(--color-gray-900);}
+  
+  /* data-selected */
+  .data-selected\:text-color-gray-900[data-selected] {color: var(--color-gray-900);}
 
   /* peer-hover */
   .peer:hover ~ .peer-hover\:border-color-gray-700 {border-color: var(--color-gray-700);}
