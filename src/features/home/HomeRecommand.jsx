@@ -5,7 +5,6 @@ import axios from 'axios'
 import 'swiper/css'
 import { Link, useNavigate } from 'react-router-dom'
 import zustandStore from '../../app/zustandStore.js'
-import '../../assets/styles/global.css'
 
 const HomeRecommand = () => {
   const [tag, setTag] = useState([])
@@ -113,17 +112,25 @@ const HomeRecommand = () => {
     return sorted1.every((val, idx) => val === sorted2[idx])
   }
   const handleAvgRating = (reviews, place) => {
-    const matchedReviews = reviews?.filter(review => review.store?.name === place.place_name)
-    const avgRating =
-      matchedReviews?.length > 0
-        ? matchedReviews.reduce((acc, cur) => acc + cur.rating, 0) / matchedReviews.length
-        : null
-    const rounded = Math.round(avgRating * 10) / 10
-    return rounded
+    if (reviews.length > 0) {
+      const matchedReviews = reviews.filter(review => review.store?.name === place.place_name)
+      const avgRating =
+        matchedReviews?.length > 0
+          ? matchedReviews.reduce((acc, cur) => acc + cur.rating, 0) / matchedReviews.length
+          : null
+      const rounded = Math.round(avgRating * 10) / 10
+      return rounded
+    } else {
+      return 0
+    }
   }
   const handleCountReviews = (reviews, place) => {
-    const matchedReviews = reviews.filter(review => review.store?.name === place.place_name)
-    return matchedReviews.length
+    if (reviews.length > 0) {
+      const matchedReviews = reviews.filter(review => review.store?.name === place.place_name)
+      return matchedReviews.length
+    } else {
+      return 0
+    }
   }
 
   return (
@@ -166,45 +173,25 @@ const HomeRecommand = () => {
                           가게명: <strong>{unp.place_name}</strong>
                         </p>
                         <div className="text-sm flex gap-3 items-center">
-                          <span>
-                            {handleAvgRating(nearPlaceReviews, unp) === 0 ? (
-                              <div className="flex items-center">
-                                <span>0</span>
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth={1.5}
-                                  stroke="currentColor"
-                                  className="size-4"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
-                                  />
-                                </svg>
-                              </div>
-                            ) : (
-                              <div className="flex items-center">
-                                {handleAvgRating(nearPlaceReviews, unp)}
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth={1.5}
-                                  stroke="currentColor"
-                                  className="size-4"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
-                                  />
-                                </svg>
-                              </div>
-                            )}
-                          </span>
+                          {
+                            <div className="flex items-center">
+                              {handleAvgRating(nearPlaceReviews, unp)}
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={1.5}
+                                stroke="currentColor"
+                                className="size-4"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
+                                />
+                              </svg>
+                            </div>
+                          }
                           <span>리뷰수&#40;{handleCountReviews(nearPlaceReviews, unp)}&#41;</span>
                         </div>
                       </SwiperSlide>
