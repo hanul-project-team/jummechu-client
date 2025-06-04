@@ -17,6 +17,12 @@ const RegistPage = () => {
       navigate('/regist/type')
     }
   }, [step, navigate])
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('role')
+      localStorage.removeItem('termsAgreement')
+    }
+  },[])
   const nextStep = () => {
     if( step === 'type') navigate('/regist/terms')
     else if (step === 'terms') navigate('/regist/details')
