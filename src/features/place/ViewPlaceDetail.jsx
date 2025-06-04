@@ -10,20 +10,19 @@ import PlaceReview from './components/reviews/PlaceReview.jsx'
 import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
 import RecommandPlace from './components/RecommandPlace.jsx'
 
-const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
-  const [isBookmarked, setIsBookmarked] = useState(defaultBoomarked)
+const ViewPlaceDetail = () => {
   const setReviewInfo = zustandStore(state => state.setReviewInfo)
   const reviewInfo = zustandStore(state => state.reviewInfo)
   const placeDetail = zustandStore(state => state.placeDetail)
   const navigate = useNavigate()
-
   const setSearchNearData = zustandStore(state => state.setSearchNearData)
   const searchNearData = zustandStore(state => state.searchNearData)
   const lastStoreRef = useRef(placeDetail?._id)
+  const lastReviewRef = useRef(reviewInfo)
   const user = useSelector(state => state.auth.user)
+  const setUserBookmark = zustandUser(state => state.setUserBookmark)
   const userBookmark = zustandUser(state => state.userBookmark)
-  // console.log(user)
-  // console.log(placeDetail)
+  const isBookmarked = zustandUser(state => state.isBookmarked)
 
   useEffect(() => {
     if (placeDetail !== null || placeDetail !== undefined) {
@@ -32,7 +31,8 @@ const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
       if (lastStoreRef.current === storeId) {
         return
       }
-      if (isDifferentStore) {
+      const renewReviewInfo = lastReviewRef.current !== reviewInfo
+      if (isDifferentStore || renewReviewInfo) {
         try {
           Promise.all([
             axios.get(`http://localhost:3000/review/read/${placeDetail._id}`),
@@ -62,14 +62,14 @@ const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
         }
       }
     }
-  }, [isBookmarked, placeDetail])
+  }, [isBookmarked, placeDetail, userBookmark])
 
   const handleBookmark = () => {
-    if (user.role === 'guest') {
+    if (!user.role) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 하시겠습니까?')) {
         navigate('/login')
       }
-    } else if (user?.role === 'member') {
+    } else {
       const userId = user?.id
       const storeId = placeDetail?._id
       if (isBookmarked === true) {
@@ -82,9 +82,9 @@ const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
               },
             })
             .then(res => {
-              const data = res
+              const data = res.data
               // console.log(data)
-              setIsBookmarked(prev => !prev)
+              setUserBookmark(prev => prev.filter(ubm => ubm?.store._id !== placeDetail._id))
             })
             .catch(err => {
               console.error('북마크 해제 요청 실패!', err)
@@ -100,9 +100,9 @@ const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
               },
             })
             .then(res => {
-              const data = res
+              const data = res.data
               // console.log(data)
-              setIsBookmarked(prev => !prev)
+              setUserBookmark(prev => [...prev, data])
             })
             .catch(err => {
               console.error('북마크 등록 요청 실패!', err)
@@ -154,19 +154,6 @@ const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
         <div>
           <img src={Icon} alt="place_image" className="w-full h-[300px]" />
         </div>
-        {/* 별점 */}
-        <div className="flex items-center">
-          <div className="relative w-fit text-2xl leading-none my-2">
-            <div className="text-gray-300">★★★★★</div>
-            <div
-              className="absolute top-0 left-0 overflow-hidden text-yellow-400"
-              style={{ width: `${(totalRate / 5) * 100 + '%'}` }}
-            >
-              ★★★★★
-            </div>
-          </div>
-          <p className="ml-1 pt-1 text-xl text-gray-700 leading-tight">{totalRate}</p>
-        </div>
         {/* 주소지 */}
         <div className="flex gap-2 relative my-2">
           <svg
@@ -188,7 +175,6 @@ const ViewPlaceDetail = ({ defaultBoomarked = false }) => {
               d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
             />
           </svg>
-          {/* 지도pin 아이콘 */}
           <p>{placeDetail.address}</p>
         </div>
         {/* 전화 */}

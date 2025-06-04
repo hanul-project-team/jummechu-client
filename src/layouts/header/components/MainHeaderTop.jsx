@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link, NavLink } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { logout } from '../../../features/auth/slice/authSlice'
+import zustandStore from '../../../app/zustandStore.js'
+import zustandUser from '../../../app/zustandUser.js'
 import axios from 'axios'
 import Logo from '../../../assets/images/logo.png'
 
@@ -31,7 +33,10 @@ const MainHeaderTop = () => {
       if (confirm('로그아웃 하시겠습니까?')) {
         axios.get('http://localhost:3000/auth/logout', { withCredentials: true })
         dispatch(logout())
+        zustandStore.persist.clearStorage()
+        zustandUser.persist.clearStorage()
         localStorage.removeItem('place-storage')
+        localStorage.removeItem('user-storage')
         navigate('/')
       }
     } catch {

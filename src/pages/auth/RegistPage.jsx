@@ -17,27 +17,35 @@ const RegistPage = () => {
       navigate('/regist/type')
     }
   }, [step, navigate])
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('role')
+      localStorage.removeItem('termsAgreement')
+    }
+  },[])
   const nextStep = () => {
-    if (step === 'type') navigate('/regist/terms')
+    if( step === 'type') navigate('/regist/terms')
     else if (step === 'terms') navigate('/regist/details')
   }
 
   return (
-    <main className="container mx-auto flex justify-center ">
-      <section className={`${!(step === 'type') && 'max-w-96'} w-full flex flex-col`}>
+    <main className="container mx-auto max-w-5xl flex justify-center px-6 ">
+      <section className={`${!(step === 'type') && 'max-w-sm'} w-full flex flex-col`}>
         {step === 'type' && (
-          <div className="flex flex-col gap-3">
-            <h2 className="text-center text-2xl mb-10">
-              맛집을 찾으시나요, 운영하시나요? <br />
-              지금 선택해보세요
-            </h2>
+          <div className="flex flex-col gap-10">
+            <div className="flex flex-col items-center gap-2 cursor-default">
+              <h2 className="font-semibold max-w-52 leading-tight sm:max-w-fit text-center text-2xl">
+                맛집을 찾으시나요? 운영하시나요?
+              </h2>
+              <p className="text-sm text-color-gray-800">원하는 유형으로 지금 시작해보세요</p>
+            </div>
             <RegistTypeForm nextStep={nextStep} />
             <RegistAction />
           </div>
         )}
         {step === 'terms' && (
           <div className="flex flex-col gap-10">
-            <h2 className="text-center text-2xl">
+            <h2 className="text-center text-2xl font-semibold cursor-default">
               서비스 이용을 위해 <br /> 약관에 동의해주세요
             </h2>
             <TermsForm nextStep={nextStep} />
@@ -45,7 +53,7 @@ const RegistPage = () => {
         )}
         {step === 'details' && (
           <div className="flex flex-col gap-10">
-            <h2 className="text-center text-2xl">회원 정보를 입력해주세요</h2>
+            <h2 className="text-center text-2xl font-semibold cursor-default">회원 정보를 입력해주세요</h2>
             <RegistDetailsForm />
           </div>
         )}

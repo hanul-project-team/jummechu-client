@@ -22,11 +22,12 @@ const zustandStore = create(
       },
       setPlaceDetail: data => set({ placeDetail: data }),
       setReviewInfo: data => {
-        if (!data || data.length === 0) {
-          set({ reviewInfo: [] })
-        } else {
-          set({ reviewInfo: data ?? [] })
-        }
+        set(state => ({
+          reviewInfo:
+            typeof data === 'function'
+              ? data(state.reviewInfo)
+              : (data ?? []),
+        }))
       },
       clearSearchData: () => set({ searchData: [] }),
       setCenter: data => set({ center: data }),
