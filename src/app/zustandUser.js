@@ -9,11 +9,15 @@ const zustandUser = create(
       userBookmark: null,
       isBookmarked: false,
 
-      setUserReviews: data => set({ userReviews: data }),
+      setUserReviews: updater =>
+        set(state => ({
+          userReviews: typeof updater === 'function' ? updater(state.userReviews) : updater,
+        })),
       setIsLoading: value => set({ isLoading: value }),
-      setUserBookmark: updater => set(state => ({
-        userBookmark: typeof updater === 'function' ? updater(state.userBookmark) : updater
-      })),
+      setUserBookmark: updater =>
+        set(state => ({
+          userBookmark: typeof updater === 'function' ? updater(state.userBookmark) : updater,
+        })),
       setIsBookmarked: value => set({ isBookmarked: value }),
     }),
     {
