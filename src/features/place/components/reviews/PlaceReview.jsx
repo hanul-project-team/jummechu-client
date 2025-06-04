@@ -4,7 +4,9 @@ import axios from 'axios'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import Icon from '../../../../assets/images/icon.png'
-import StarRatingComponent from 'react-star-rating-component'
+import StarYellow from '../../../../assets/images/star-yellow.png'
+import StarGray from '../../../../assets/images/star-gray.png'
+import Rating from 'react-rating'
 import ReviewChart from './ReviewChart.jsx'
 import ReviewWriteForm from './ReviewWriteForm.jsx'
 import SortDropdown from './sortButton/SortDropdown.jsx'
@@ -26,13 +28,8 @@ const PlaceReview = () => {
   const [currentSort, setCurrentSort] = useState('none')
 
   const tabRefs = useRef([])
-  useEffect(() => {
-    // const handleClickOutside = e => {
-    //   if (tabRefs.current && !tabRefs.current.contains(e.target)) {
-    //     setOpenTabId(null)
-    //   }
-    // }
 
+  useEffect(() => {
     const handleClickOutside = e => {
       const isOutside = tabRefs.current.every(ref => {
         return ref && !ref.contains(e.target)
@@ -47,7 +44,7 @@ const PlaceReview = () => {
   }, [])
 
   useEffect(() => {
-    if (user) {
+    if (user.name.length > 0) {
       setIsUser(true)
     } else {
       setIsUser(false)
@@ -148,9 +145,9 @@ const PlaceReview = () => {
       setShowSort(!showSort)
     }
   }
-  const handleSeeAllReviews = () => {
-    setShowReviewMore(reviewInfo.length)
-  }
+  // const handleSeeAllReviews = () => {
+  //   setShowReviewMore(reviewInfo.length)
+  // }
   const handleReviewWrite = () => {
     if (isUser === false) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니가?')) {
@@ -196,23 +193,29 @@ const PlaceReview = () => {
         <div className="flex justify-between max-w-3/5 mx-auto items-center">
           <div>
             <p className="font-bold text-3xl">{handleTotalRating(reviewInfo)}</p>
-            <StarRatingComponent
-              name="rating1"
-              starCount={5}
-              value={handleTotalRating(reviewInfo)}
-            />
+            <div className="flex items-center">
+              <div className="relative w-fit text-2xl leading-none my-2">
+                <div className="text-color-gray-700">★★★★★</div>
+                <div
+                  className="absolute top-0 left-0 overflow-hidden text-yellow-400"
+                  style={{ width: `${(handleTotalRating(reviewInfo) / 5) * 100 + '%'}` }}
+                >
+                  ★★★★★
+                </div>
+              </div>
+            </div>
             {handleratingText(reviewInfo)}
             <p>
               총 <strong>{reviewInfo.length}</strong>분의 고객님이 리뷰를 남기셨습니다.
             </p>
             {/* 리뷰 작성 토글 버튼 */}
             <div className="flex gap-3 my-2">
-              <div
+              {/* <div
                 className="underline font-bold hover:cursor-pointer"
                 onClick={handleSeeAllReviews}
               >
                 모든 리뷰
-              </div>
+              </div> */}
               <div className="flex hover:cursor-pointer" onClick={handleReviewWrite}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -274,7 +277,13 @@ const PlaceReview = () => {
                   <img src={Icon} alt="icon" className="sm:max-h-[80px] max-h-[40px]" />
                   <p>{rv?.user.name}</p>
                   <div>
-                    <StarRatingComponent name="rating1" starCount={5} value={rv.rating} />
+                    {/* <StarRatingComponent name="rating1" starCount={5} value={rv.rating} /> */}
+                    <Rating
+                      initialRating={rv.rating}
+                      emptySymbol={<img src={StarGray} alt="gray-star" className="w-6 h-6" />}
+                      fullSymbol={<img src={StarYellow} alt="yellow-star" className="w-6 h-6" />}
+                      readonly={true}
+                    />
                   </div>
                 </div>
                 <div className="flex-4">
@@ -321,7 +330,9 @@ const PlaceReview = () => {
                   <div>
                     <p className="indent-2">{rv.comment}</p>
                   </div>
-                  <div className="absolute right-2 bottom-0">{handleReviewDate(rv?.createdAt)}</div>
+                  <div className="absolute right-2 bottom-0 pb-1">
+                    {handleReviewDate(rv?.createdAt)}
+                  </div>
                 </div>
               </div>
             ))
