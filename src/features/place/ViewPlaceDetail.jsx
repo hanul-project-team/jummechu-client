@@ -63,7 +63,7 @@ const ViewPlaceDetail = () => {
       }
     }
   }, [isBookmarked, placeDetail, userBookmark])
-  
+
   const handleBookmark = () => {
     if (!user.role) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 하시겠습니까?')) {
@@ -153,19 +153,6 @@ const ViewPlaceDetail = () => {
         </div>
         <div>
           <img src={Icon} alt="place_image" className="w-full h-[300px]" />
-        </div>
-        {/* 별점 */}
-        <div className="flex items-center">
-          <div className="relative w-fit text-2xl leading-none my-2">
-            <div className="text-gray-300">★★★★★</div>
-            <div
-              className="absolute top-0 left-0 overflow-hidden text-yellow-400"
-              style={{ width: `${(totalRate / 5) * 100 + '%'}` }}
-            >
-              ★★★★★
-            </div>
-          </div>
-          <p className="ml-1 pt-1 text-xl text-gray-700 leading-tight">{totalRate}</p>
         </div>
         {/* 주소지 */}
         <div className="flex gap-2 relative my-2">
