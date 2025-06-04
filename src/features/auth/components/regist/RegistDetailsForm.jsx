@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, createRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { registScheam } from '../../schema/registSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import { CSSTransition } from 'react-transition-group'
 import VisibleBtn from '../../../../shared/VisibleBtn'
 import Timer from '../../../../shared/Timer'
 
@@ -21,6 +22,13 @@ const RegistDetailsForm = () => {
   const [passwordCheckState, setPasswordCheckState] = useState({
     hasValue: false,
     visible: false,
+  })
+  const [showError, setShowError] = useState({
+    email: false,
+    password: false,
+    passwordCheck: false,
+    name: false,
+    phone: false,
   })
   const {
     register,
@@ -40,6 +48,13 @@ const RegistDetailsForm = () => {
   const codeValue = watch('code')
   const passwordValue = watch('password')
   const passwordCheckValue = watch('passwordCheck')
+  const errorRefs = useRef({
+    email: createRef(null),
+    password: createRef(null),
+    passwordCheck: createRef(null),
+    name: createRef(null),
+    phone: createRef(null),
+  })
   useEffect(() => {
     const isValid = /^01[016789][0-9]{8}$/.test(phoneValue)
     setIsPhone(!!isValid)
@@ -60,6 +75,16 @@ const RegistDetailsForm = () => {
       hasValue: !!passwordCheckValue,
     }))
   }, [passwordCheckValue])
+  useEffect(() => {
+    setShowError(prev => ({
+      ...prev,
+      email: !!errors.email,
+      password: !!errors.password,
+      passwordCheck: !!errors.passwordCheck,
+      name: !!errors.name,
+      phone: !!errors.phone,
+    }))
+  }, [errors.email, errors.password, errors.passwordCheck, errors.name, errors.phone])
   const phoneSubmit = async () => {
     const isValid = await trigger('phone')
     if (isValid) {
@@ -176,11 +201,19 @@ const RegistDetailsForm = () => {
             placeholder="이메일"
             {...register('email')}
           />
-          {errors.email && (
-            <span className="text-xs sm:text-sm text-color-red-700 cursor-default">
-              {errors.email.message}
+          <CSSTransition
+            nodeRef={errorRefs.current.email}
+            timeout={300}
+            in={showError.email}
+            classNames="fade"
+          >
+            <span
+              ref={errorRefs.current.email}
+              className="text-xs sm:text-sm text-color-red-700 cursor-default"
+            >
+              {errors.email?.message}
             </span>
-          )}
+          </CSSTransition>
         </div>
         <div className="relative flex flex-col">
           <div className="flex justify-between items-center">
@@ -205,11 +238,19 @@ const RegistDetailsForm = () => {
             hasValue={passwordState.hasValue}
             className="absolute top-11 right-3 "
           />
-          {errors.password && (
-            <span className="text-xs sm:text-sm text-color-red-700 cursor-default">
-              {errors.password.message}
+          <CSSTransition
+            nodeRef={errorRefs.current.password}
+            timeout={300}
+            in={showError.password}
+            classNames="fade"
+          >
+            <span
+              ref={errorRefs.current.password}
+              className="text-xs sm:text-sm text-color-red-700 cursor-default"
+            >
+              {errors.password?.message}
             </span>
-          )}
+          </CSSTransition>
         </div>
         <div className="relative flex flex-col">
           <input
@@ -226,11 +267,19 @@ const RegistDetailsForm = () => {
             hasValue={passwordCheckState.hasValue}
             className="absolute top-5 right-3 "
           />
-          {errors.passwordCheck && (
-            <span className="text-xs sm:text-sm text-color-red-700 cursor-default">
-              {errors.passwordCheck.message}
+          <CSSTransition
+            nodeRef={errorRefs.current.passwordCheck}
+            timeout={300}
+            in={showError.passwordCheck}
+            classNames="fade"
+          >
+            <span
+              ref={errorRefs.current.passwordCheck}
+              className="text-xs sm:text-sm text-color-red-700 cursor-default"
+            >
+              {errors.passwordCheck?.message}
             </span>
-          )}
+          </CSSTransition>
         </div>
         <div className="flex flex-col">
           <label htmlFor="name" className="font-semibold">
@@ -243,11 +292,19 @@ const RegistDetailsForm = () => {
             placeholder="이름"
             {...register('name')}
           />
-          {errors.name && (
-            <span className="text-xs sm:text-sm text-color-red-700 cursor-default">
-              {errors.name.message}
+          <CSSTransition
+            nodeRef={errorRefs.current.name}
+            timeout={300}
+            in={showError.name}
+            classNames="fade"
+          >
+            <span
+              ref={errorRefs.current.name}
+              className="text-xs sm:text-sm text-color-red-700 cursor-default"
+            >
+              {errors.name?.message}
             </span>
-          )}
+          </CSSTransition>
         </div>
         <div className="flex flex-col">
           <label htmlFor="phone" className="font-semibold">
@@ -286,11 +343,19 @@ const RegistDetailsForm = () => {
               </button>
             )}
           </div>
-          {errors.phone && (
-            <span className="text-xs sm:text-sm text-color-red-700 cursor-default">
-              {errors.phone.message}
+          <CSSTransition
+            nodeRef={errorRefs.current.phone}
+            timeout={300}
+            in={showError.phone}
+            classNames="fade"
+          >
+            <span
+              ref={errorRefs.current.phone}
+              className="text-xs sm:text-sm text-color-red-700 cursor-default"
+            >
+              {errors.phone?.message}
             </span>
-          )}
+          </CSSTransition>
         </div>
         {isRequested && !isSMSAuthenticated && (
           <div className="flex flex-col">
