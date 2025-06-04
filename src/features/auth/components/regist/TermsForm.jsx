@@ -6,7 +6,6 @@ import CustomCheckBox from '../../../../shared/CustomCheckBox'
 import serviceMd from '../../../../assets/terms/service.md?raw'
 import privacyMd from '../../../../assets/terms/privacy.md?raw'
 import businessMd from '../../../../assets/terms/business.md?raw'
-import style from './termsForm.module.css'
 
 const TermsForm = ({ nextStep }) => {
   const [checked, setChecked] = useState(false)
@@ -53,50 +52,66 @@ const TermsForm = ({ nextStep }) => {
     nextStep()
   }
   return (
-    <form className={style.termsForm} autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+    <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
       <fieldset className="flex flex-col gap-3">
         <legend className="hidden">이용약관 동의 폼</legend>
-        <Field className="flex items-center cursor-pointer select-none gap-1">
-          <CustomCheckBox checked={checked} onChange={handleAgreement} className="w-6 h-6" />
-          <Label>
+        <Field className="relative flex items-center select-none">
+          <Label className="absolute peer left-6 ps-2 cursor-pointer">
             <span>전체 동의합니다</span>
           </Label>
+          <CustomCheckBox
+            checked={checked}
+            onChange={handleAgreement}
+            className="w-6 h-6 peer-hover:border-color-gray-700"
+          />
         </Field>
         <div className="flex">
-          <span className={`${style.horizontalBar} grow-1`}></span>
+          <span className="grow-1 h-0.25 bg-color-gray-300"></span>
         </div>
         <Controller
           name="service"
           control={control}
           render={({ field }) => (
-            <Field className="flex items-center cursor-pointer select-none gap-1">
-              <CustomCheckBox checked={field.value} onChange={field.onChange} className="w-6 h-6" />
-              <Label className="flex items-center gap-1">
+            <Field className="relative flex items-center select-none gap-2">
+              <Label className="peer flex items-center gap-1 absolute left-6 ps-2 cursor-pointer">
                 <span>&#91;필수&#93;</span>서비스 이용약관 예시
               </Label>
+              <CustomCheckBox
+                checked={field.value}
+                onChange={field.onChange}
+                className="w-6 h-6 peer-hover:border-color-gray-700"
+              />
             </Field>
           )}
         />
-        <div className={`${style.termBox}`}>
-          <div className={`${style.termBoxInner} flex flex-col gap-3`}>
-            <Markdown>{serviceMd}</Markdown>
+        <div className="border border-color-gray-300 rounded-lg p-2">
+          <div className="h-40 overflow-y-scroll custom-scrollbar outline-hidden pt-2 ps-4 cursor-default">
+            <div className="flex flex-col gap-3 text-sm text-color-gray-700 outline-hidden pe-2 ">
+              <Markdown>{serviceMd}</Markdown>
+            </div>
           </div>
         </div>
         <Controller
           name="privacy"
           control={control}
           render={({ field }) => (
-            <Field className="flex items-center cursor-pointer select-none gap-1">
-              <CustomCheckBox checked={field.value} onChange={field.onChange} className="w-6 h-6" />
-              <Label className="flex items-center gap-1">
+            <Field className="relative flex items-center select-none gap-2">
+              <Label className="peer flex items-center gap-1 absolute left-6 ps-2 cursor-pointer">
                 <span>&#91;필수&#93;</span>개인정보 수집 및 이용약관 예시
               </Label>
+              <CustomCheckBox
+                checked={field.value}
+                onChange={field.onChange}
+                className="w-6 h-6 peer-hover:border-color-gray-700"
+              />
             </Field>
           )}
         />
-        <div className={`${style.termBox}`}>
-          <div className={`${style.termBoxInner} flex flex-col gap-3`}>
-            <Markdown>{privacyMd}</Markdown>
+        <div className="border border-color-gray-300 rounded-lg p-2">
+          <div className="h-40 overflow-y-scroll custom-scrollbar outline-hidden pt-2 ps-4 cursor-default">
+            <div className="flex flex-col gap-3 text-sm text-color-gray-700 outline-hidden pe-2 ">
+              <Markdown>{privacyMd}</Markdown>
+            </div>
           </div>
         </div>
         {role === 'business' && (
@@ -105,27 +120,32 @@ const TermsForm = ({ nextStep }) => {
               name="business"
               control={control}
               render={({ field }) => (
-                <Field className="flex items-center cursor-pointer select-none gap-1">
+                <Field className="relative flex items-center select-none gap-1">
+                  <Label className="peer flex items-center gap-1 absolute left-6 ps-2 cursor-pointer">
+                    <span>&#91;필수&#93;</span>입점 파트너 이용 약관 예시
+                  </Label>
                   <CustomCheckBox
                     checked={field.value}
                     onChange={field.onChange}
-                    className="w-6 h-6"
+                    className="w-6 h-6 peer-hover:border-color-gray-700"
                   />
-                  <Label className="flex items-center gap-1">
-                    <span>&#91;필수&#93;</span>입점 파트너 이용 약관 예시
-                  </Label>
                 </Field>
               )}
             />
-
-            <div className={`${style.termBox}`}>
-              <div className={`${style.termBoxInner} flex flex-col gap-3`}>
-                <Markdown>{businessMd}</Markdown>
+            <div className="border border-color-gray-300 rounded-lg p-2">
+              <div className="h-40 overflow-y-scroll custom-scrollbar outline-hidden pt-2 ps-4 cursor-default">
+                <div className="flex flex-col gap-3 text-sm text-color-gray-700 outline-hidden pe-2 ">
+                  <Markdown>{businessMd}</Markdown>
+                </div>
               </div>
             </div>
           </>
         )}
-        <button type="submit" disabled={disabled}>
+        <button
+          type="submit"
+          className="border border-color-gray-900 p-3 bg-color-gray-900 text-white rounded-lg outline-hidden disabled:border-color-gray-700 disabled:bg-color-gray-700 cursor-pointer disabled:cursor-default"
+          disabled={disabled}
+        >
           다음
         </button>
       </fieldset>

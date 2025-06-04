@@ -7,7 +7,6 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import VisibleBtn from '../../../../shared/VisibleBtn'
 import Timer from '../../../../shared/Timer'
-import style from './registDetailsForm.module.css'
 
 const RegistDetailsForm = () => {
   const [isPhone, setIsPhone] = useState(false)
@@ -32,12 +31,9 @@ const RegistDetailsForm = () => {
     getValues,
     resetField,
     reset,
-    setError,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(registScheam),
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit',
   })
   const navigate = useNavigate()
   const phoneValue = watch('phone')
@@ -85,10 +81,24 @@ const RegistDetailsForm = () => {
         //   { code },
         //   { withCredentials: true },
         // )
-        toast.success('인증에 성공하였습니다', { autoClose: 3000 })
+        toast.success(
+          <div className="Toastify__toast-body cursor-default">인증에 성공하였습니다</div>,
+          {
+            position: 'top-center',
+          },
+        )
         setIsSMSAuthenticated(true)
       } catch (e) {
-        console.log(e)
+        if (e.response.status === 400) {
+          toast.error(
+            <div className="Toastify__toast-body cursor-default">인증코드가 일치하지 않습니다</div>,
+            {
+              position: 'top-center',
+            },
+          )
+          resetField('code')
+          setFocus('code')
+        }
       }
     }
   }
@@ -99,31 +109,32 @@ const RegistDetailsForm = () => {
     const submitData = { ...role, termsAgreement, ...rest }
     try {
       await axios.post('http://localhost:3000/auth/regist', submitData)
+      toast.success(
+        <div className="Toastify__toast-body cursor-default">회원가입에 성공하였습니다</div>,
+        {
+          position: 'top-center',
+        },
+      )
       reset()
       localStorage.removeItem('role')
       localStorage.removeItem('termsAgreement')
       navigate('/login')
-      toast.success(
-        <div>
-          회원가입이 완료되었습니다.
-          <br />
-          로그인해주세요.
-        </div>,
-        { autoClose: 3000 },
-      )
     } catch (e) {
       if (e.response.status === 400) {
-        setError('email', { message: e.response.data.message })
-        resetField('email', { keepError: true })
+        toast.error(
+          <div className="Toastify__toast-body cursor-default">사용 중인 이메일입니다</div>,
+          {
+            position: 'top-center',
+          },
+        )
+        resetField('email')
         setFocus('email')
       } else {
         toast.error(
-          <div>
-            서버 오류가 발생했습니다.
-            <br />
-            잠시 후 다시 시도해주세요.
-          </div>,
-          { autoClose: 3000 },
+          <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
+          {
+            position: 'top-center',
+          },
         )
       }
     }
@@ -151,35 +162,37 @@ const RegistDetailsForm = () => {
     setIsRequested(false)
   }
   return (
-    <form
-      className={style.registForm}
-      autoComplete="off"
-      onSubmit={handleSubmit(onSubmit, onIsvalid)}
-    >
+    <form autoComplete="off" onSubmit={handleSubmit(onSubmit, onIsvalid)}>
       <fieldset className="flex flex-col gap-3">
         <legend className="hidden">상세정보 입력 폼</legend>
-        <div className={`${style.registFormField} flex flex-col`}>
-          <label htmlFor="email">
-            이메일<span className={style.requiredSpan}>*</span>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="email" className="font-semibold">
+            이메일<span className="ps-0.5 text-color-red-500">*</span>
           </label>
           <input
-            className="grow"
+            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
             type="text"
             id="email"
             placeholder="이메일"
             {...register('email')}
           />
-          {errors.email && <span className={style.errorSpan}>{errors.email.message}</span>}
+          {errors.email && (
+            <span className="text-xs sm:text-sm text-color-red-700 cursor-default">
+              {errors.email.message}
+            </span>
+          )}
         </div>
-        <div className={`${style.registFormField} flex flex-col`}>
+        <div className="relative flex flex-col">
           <div className="flex justify-between items-center">
-            <label htmlFor="password">
-              비밀번호<span className={style.requiredSpan}>*</span>
+            <label htmlFor="password" className="font-semibold">
+              비밀번호<span className="ps-0.5 text-color-red-500">*</span>
             </label>
-            <span className={style.hintSpan}>영문/숫자/특수문자(~!@#^*_=+-) 포함 8자 이상</span>
+            <span className="text-color-gray-700 text-xs cursor-default">
+              영문/숫자/특수문자(~!@#^*_=+-) 포함 8자 이상
+            </span>
           </div>
           <input
-            className="grow"
+            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
             type={passwordState.visible ? 'text' : 'password'}
             id="password"
             placeholder="비밀번호"
@@ -192,11 +205,15 @@ const RegistDetailsForm = () => {
             hasValue={passwordState.hasValue}
             className="absolute top-11 right-3 "
           />
-          {errors.password && <span className={style.errorSpan}>{errors.password.message}</span>}
+          {errors.password && (
+            <span className="text-xs sm:text-sm text-color-red-700 cursor-default">
+              {errors.password.message}
+            </span>
+          )}
         </div>
-        <div className={`${style.registFormField} flex flex-col`}>
+        <div className="relative flex flex-col">
           <input
-            className="grow"
+            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
             type={passwordCheckState.visible ? 'text' : 'password'}
             id="passwordCheck"
             placeholder="비밀번호 확인"
@@ -210,23 +227,35 @@ const RegistDetailsForm = () => {
             className="absolute top-5 right-3 "
           />
           {errors.passwordCheck && (
-            <span className={style.errorSpan}>{errors.passwordCheck.message}</span>
+            <span className="text-xs sm:text-sm text-color-red-700 cursor-default">
+              {errors.passwordCheck.message}
+            </span>
           )}
         </div>
-        <div className={`${style.registFormField} flex flex-col`}>
-          <label htmlFor="name">
-            이름<span className={style.requiredSpan}>*</span>
+        <div className="flex flex-col">
+          <label htmlFor="name" className="font-semibold">
+            이름<span className="ps-0.5 text-color-red-500">*</span>
           </label>
-          <input className="grow" type="text" id="name" placeholder="이름" {...register('name')} />
-          {errors.name && <span className={style.errorSpan}>{errors.name.message}</span>}
+          <input
+            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
+            type="text"
+            id="name"
+            placeholder="이름"
+            {...register('name')}
+          />
+          {errors.name && (
+            <span className="text-xs sm:text-sm text-color-red-700 cursor-default">
+              {errors.name.message}
+            </span>
+          )}
         </div>
-        <div className={`${style.registFormField} flex flex-col`}>
-          <label htmlFor="phone">
-            전화번호<span className={style.requiredSpan}>*</span>
+        <div className="flex flex-col">
+          <label htmlFor="phone" className="font-semibold">
+            전화번호<span className="ps-0.5 text-color-red-500">*</span>
           </label>
           <div className="flex gap-3">
             <input
-              className={`${style.noSpinner} grow`}
+              className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
               type="text"
               id="phone"
               placeholder="'-'제외 숫자만 입력해주세요"
@@ -241,7 +270,7 @@ const RegistDetailsForm = () => {
                 type="button"
                 onClick={phoneSubmit}
                 disabled={!isPhone}
-                className={style.getCodeBtn}
+                className="bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
               >
                 인증하기
               </button>
@@ -251,22 +280,26 @@ const RegistDetailsForm = () => {
                 type="button"
                 onClick={phoneSubmit}
                 disabled={!isPhone}
-                className={style.resendBtn}
+                className="bg-color-gray-900 rounded-lg text-white min-w-24 cursor-pointer"
               >
                 재전송하기
               </button>
             )}
           </div>
-          {errors.phone && <span className={style.errorSpan}>{errors.phone.message}</span>}
+          {errors.phone && (
+            <span className="text-xs sm:text-sm text-color-red-700 cursor-default">
+              {errors.phone.message}
+            </span>
+          )}
         </div>
         {isRequested && !isSMSAuthenticated && (
-          <div className={`${style.registFormField} flex flex-col`}>
-            <label htmlFor="phone">
+          <div className="flex flex-col">
+            <label htmlFor="phone" className="font-semibold">
               <Timer key={timerKey} duration={180} onExpire={onExpire} />
             </label>
             <div className="flex gap-3">
               <input
-                className={`${style.noSpinner} grow`}
+                className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
                 type="text"
                 id="code"
                 placeholder="인증번호 6자리"
@@ -280,14 +313,18 @@ const RegistDetailsForm = () => {
                 type="button"
                 onClick={codeSubmit}
                 disabled={!isCode}
-                className={style.sendCodeBtn}
+                className="bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
               >
                 확인
               </button>
             </div>
           </div>
         )}
-        <button type="submit" disabled={!isSMSAuthenticated} className={style.registBtn}>
+        <button
+          type="submit"
+          disabled={!isSMSAuthenticated}
+          className="border border-color-gray-900 p-3 bg-color-gray-900 text-white rounded-lg outline-hidden disabled:border-color-gray-700 disabled:bg-color-gray-700 cursor-pointer disabled:cursor-default"
+        >
           가입하기
         </button>
       </fieldset>
