@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import zustandStore from '../../../../app/zustandStore.js'
 import axios from 'axios'
 import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Icon from '../../../../assets/images/icon.png'
 import StarYellow from '../../../../assets/images/star-yellow.png'
 import StarGray from '../../../../assets/images/star-gray.png'
@@ -15,7 +15,6 @@ const PlaceReview = () => {
   const [showReviewMore, setShowReviewMore] = useState(5)
   const [openTabId, setOpenTabId] = useState(null)
   const [showSort, setShowSort] = useState(false)
-  const [isUser, setIsUser] = useState(false)
   const [prevResult, setPrevResult] = useState(null)
   const [showReviewForm, setShowReviewForm] = useState(false)
   const user = useSelector(state => state.auth.user)
@@ -24,7 +23,8 @@ const PlaceReview = () => {
   const reviewInfo = zustandStore(state => state.reviewInfo)
   const placeDetail = zustandStore(state => state.placeDetail)
   const navigate = useNavigate()
-
+  const location = useLocation();
+  const returnUrl = location.pathname + location?.search
   const [currentSort, setCurrentSort] = useState('none')
 
   const tabRefs = useRef([])
@@ -44,12 +44,6 @@ const PlaceReview = () => {
   }, [])
 
   useEffect(() => {
-    if (user.name.length > 0) {
-      setIsUser(true)
-    } else {
-      setIsUser(false)
-    }
-
     let sorted = [...reviewInfo]
     // console.log(sorted)
     switch (currentSort) {
@@ -76,7 +70,7 @@ const PlaceReview = () => {
     if (typeof result == 'number' && prevResult !== result) {
       setPrevResult(result)
     }
-  }, [currentSort, isUser, placeDetail])
+  }, [currentSort, placeDetail])
 
   const handleReviewDate = createdAt => {
     const diff = new Date() - new Date(createdAt)
@@ -145,13 +139,10 @@ const PlaceReview = () => {
       setShowSort(!showSort)
     }
   }
-  // const handleSeeAllReviews = () => {
-  //   setShowReviewMore(reviewInfo.length)
-  // }
   const handleReviewWrite = () => {
-    if (isUser === false) {
+    if (user.name?.length === 0) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니가?')) {
-        navigate('/login')
+        navigate('/login', {state: {returnUrl}})
       }
     } else {
       setShowReviewForm(prev => !prev)
