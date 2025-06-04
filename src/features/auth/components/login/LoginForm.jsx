@@ -1,22 +1,24 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import axios from 'axios'
 import { Field, Label } from '@headlessui/react'
 import { toast } from 'react-toastify'
+import { CSSTransition } from 'react-transition-group'
 import { loginSchema } from '../../schema/loginSchema'
 import { login } from '../../slice/authSlice'
 import VisibleBtn from '../../../../shared/VisibleBtn'
 import CustomCheckBox from '../../../../shared/CustomCheckBox'
-import style from './loginForm.module.css'
 
 const LoginForm = () => {
   const [passwordState, setPasswordState] = useState({
     hasValue: false,
     visible: false,
   })
+  const [showEmailError, setShowEmailError] = useState(false)
+  const [showPasswordError, setShowPasswordError] = useState(false)
   const {
     register,
     handleSubmit,
@@ -25,14 +27,22 @@ const LoginForm = () => {
     reset,
     resetField,
     watch,
-    setError,
     formState: { errors },
   } = useForm({
     defaultValues: { rememberMe: false },
     resolver: zodResolver(loginSchema),
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit',
   })
+  const emailErrorRef = useRef(null)
+  const passwordErrorRef = useRef(null)
+  useEffect(() => {
+    setFocus('email')
+  }, [setFocus])
+  useEffect(() => {
+    setShowEmailError(!!errors.email)
+  }, [errors.email])
+  useEffect(() => {
+    setShowPasswordError(!!errors.password)
+  }, [errors.password])
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const passwordValue = watch('password')
@@ -52,17 +62,22 @@ const LoginForm = () => {
       navigate('/')
     } catch (e) {
       if (e.response.status === 400) {
-        setError('password', { message: e.response.data.message })
+        toast.error(
+          <div className="Toastify__toast-body cursor-default">
+            잘못된 아이디 또는 비밀번호 입니다
+          </div>,
+          {
+            position: 'top-center',
+          },
+        )
         resetField('password', { keepError: true })
         setFocus('password')
       } else {
         toast.error(
-          <div>
-            서버 오류가 발생했습니다.
-            <br />
-            잠시 후 다시 시도해주세요.
-          </div>,
-          { autoClose: 3000 },
+          <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
+          {
+            position: 'top-center',
+          },
         )
       }
     }
@@ -82,47 +97,91 @@ const LoginForm = () => {
     }))
   }
   return (
-    <form
-      className={style.loginForm}
-      autoComplete="off"
-      onSubmit={handleSubmit(onSubmit, onIsvalid)}
-    >
+    <form autoComplete="off" onSubmit={handleSubmit(onSubmit, onIsvalid)}>
       <fieldset className="flex flex-col gap-3">
         <legend className="hidden">로그인 폼</legend>
-        <div className={`${style.loginFormField} flex flex-col`}>
-          <input className="grow" type="text" id="email" placeholder="" {...register('email')} />
-          <label htmlFor="email">이메일</label>
-          {errors.email && <span className={style.errorSpan}>{errors.email.message}</span>}
-        </div>
-        <div className={`${style.loginFormField} flex flex-col`}>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="email" className="font-semibold">
+            이메일
+          </label>
           <input
-            className="grow"
+            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
+            type="text"
+            id="email"
+            placeholder="이메일"
+            {...register('email')}
+          />
+          <CSSTransition
+            nodeRef={emailErrorRef}
+            timeout={300}
+            in={showEmailError}
+            classNames="fade"
+          >
+            <span
+              ref={emailErrorRef}
+              className="text-xs sm:text-sm text-color-red-700 cursor-default"
+            >
+              {errors.email?.message}
+            </span>
+          </CSSTransition>
+        </div>
+        <div className="relative flex flex-col gap-1.5">
+          <label htmlFor="password" className="font-semibold">
+            비밀번호
+          </label>
+          <input
+            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
             type={passwordState.visible ? 'text' : 'password'}
             id="password"
-            placeholder=""
+            placeholder="비밀번호"
             {...register('password')}
           />
-          <label htmlFor="password">비밀번호</label>
           <VisibleBtn
             changeVisible={changeVisible}
             setter={setPasswordState}
             visible={passwordState.visible}
             hasValue={passwordState.hasValue}
-            className="absolute top-5 right-3 "
+            className="absolute top-13 right-3"
           />
+          <CSSTransition
+            nodeRef={passwordErrorRef}
+            timeout={300}
+            in={showPasswordError}
+            classNames="fade"
+          >
+            <span
+              ref={passwordErrorRef}
+              className="text-xs sm:text-sm text-color-red-700 cursor-default"
+            >
+              {errors.password?.message}
+            </span>
+          </CSSTransition>
         </div>
-        <Controller
-          name="rememberMe"
-          control={control}
-          render={({ field }) => (
-            <Field className="flex items-center cursor-pointer select-none gap-1">
-              <CustomCheckBox checked={field.value} onChange={field.onChange} className="w-4 h-4" />
-              <Label>로그인 유지</Label>
-            </Field>
-          )}
-        />
-        {errors.password && <span className={style.errorSpan}>{errors.password.message}</span>}
-        <button type="submit">로그인</button>
+        <div className="flex justify-between">
+          <Controller
+            name="rememberMe"
+            control={control}
+            render={({ field }) => (
+              <Field className="flex items-center relative select-none">
+                <Label className="w-20 ps-2 peer text-sm cursor-pointer absolute top-0 left-4 ">
+                  로그인 유지
+                </Label>
+                <CustomCheckBox
+                  checked={field.value}
+                  onChange={field.onChange}
+                  className="w-4 h-4 peer-hover:border-color-gray-700"
+                />
+              </Field>
+            )}
+          />
+          <Link to='/find_account' className="text-sm outline-hidden hover:underline">아이디·비밀번호 찾기</Link>
+        </div>
+        <button
+          type="submit"
+          className="cursor-pointer border p-3 bg-color-gray-900 border-color-gray-900 text-white rounded-lg outline-hidden"
+        >
+          로그인
+        </button>
       </fieldset>
     </form>
   )

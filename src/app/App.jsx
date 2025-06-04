@@ -5,10 +5,11 @@ import { restoreLogin } from '../features/auth/slice/authSlice'
 import Mainlayout from '../layouts/Mainlayout'
 import HomeSearch from '../pages/home/HomeSearch.jsx'
 import SearchResultPage from '../pages/place/SearchResultPage.jsx'
-import RegistPage from '../pages/auth/RegistPage'
-import LoginPage from '../pages/auth/LoginPage'
 import ViewPlace from '../pages/place/ViewPlace.jsx'
 import MyPages from '../pages/mypage/MyPage.jsx'
+import Simplelayout from '../layouts/Simplelayout.jsx'
+import RegistPage from '../pages/auth/RegistPage'
+import LoginPage from '../pages/auth/LoginPage'
 import FindAccountPage from '../pages/auth/FindAccountPage'
 import FindAccountResultPage from '../pages/auth/FindAccountResultPage'
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage.jsx'
@@ -25,6 +26,8 @@ const App = () => {
         <Route path="search/:query" element={<SearchResultPage />}></Route>
         <Route path="place/:id" element={<ViewPlace />}></Route>
         <Route path="mypage" element={<MyPages />}></Route>
+      </Route>
+      <Route element={<Simplelayout />}>
         <Route path="login" element={<LoginPage />} />
         <Route path="regist/:step" element={<RegistPage />} />
         <Route path="find_account" element={<FindAccountPage />} />
@@ -36,3 +39,5 @@ const App = () => {
 }
 
 export default App
+
+
