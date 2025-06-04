@@ -118,7 +118,7 @@ const HomeRecommand = () => {
       matchedReviews?.length > 0
         ? matchedReviews.reduce((acc, cur) => acc + cur.rating, 0) / matchedReviews.length
         : null
-    const rounded = Math.floor(avgRating * 10) / 10
+    const rounded = Math.round(avgRating * 10) / 10
     return rounded
   }
   const handleCountReviews = (reviews, place) => {
