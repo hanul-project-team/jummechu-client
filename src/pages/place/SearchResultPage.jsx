@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import zustandStore from '../../app/zustandStore.js'
 import axios from 'axios'
-import StarRatingComponent from 'react-star-rating-component'
+import Rating from 'react-rating'
+import StarYellow from '../../assets/images/star-yellow.png'
 import { useNavigate } from 'react-router-dom'
 import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
 import '../../assets/styles/global.css'
@@ -104,6 +105,7 @@ const SearchResult = () => {
       .filter(
         key => key !== sd.place_name && key !== tag.filter(tg => tg === extractCategory(sd))[0],
       )
+      .filter(key => !key.includes('>'))
     return filtered
   }
   // console.log(searchData)
@@ -153,13 +155,19 @@ const SearchResult = () => {
                       '연락처 미공개'
                     )}
                   </p>
-                  <div className="flex">
-                    <span>
+                  <div className="flex items-center">
+                    <p>
                       <strong>사용자 평점</strong>:{' '}
-                    </span>
-                    <span className="flex items-end">
-                      <StarRatingComponent name="rate2" value={1} starCount={1} />
-                      <span>{handleAvgRating(nearPlaceReviews, sd)}</span>&nbsp;
+                    </p>
+                    <span className="flex">
+                      <Rating
+                        initialRating={1}
+                        fullSymbol={<img src={StarYellow} className="w-4 h-4" />}
+                        emptySymbol={<img src={StarYellow} className="w-4 h-4" />}
+                        stop={1}
+                        readonly
+                      />
+                      <p>{handleAvgRating(nearPlaceReviews, sd)}</p>&nbsp;
                     </span>
                     <span>&#40;{handleCountReviews(nearPlaceReviews, sd)}&#41;</span>
                   </div>
