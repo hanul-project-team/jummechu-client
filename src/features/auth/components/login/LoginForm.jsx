@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, createRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from 'react-router-dom'
@@ -12,13 +12,15 @@ import { login } from '../../slice/authSlice'
 import VisibleBtn from '../../../../shared/VisibleBtn'
 import CustomCheckBox from '../../../../shared/CustomCheckBox'
 
-const LoginForm = ({returnUrl}) => {
+const LoginForm = ({ returnUrl }) => {
   const [passwordState, setPasswordState] = useState({
     hasValue: false,
     visible: false,
   })
-  const [showEmailError, setShowEmailError] = useState(false)
-  const [showPasswordError, setShowPasswordError] = useState(false)
+  const [showError, setShowError] = useState({
+    email: false,
+    password: false,
+  })
   const {
     register,
     handleSubmit,
@@ -32,17 +34,21 @@ const LoginForm = ({returnUrl}) => {
     defaultValues: { rememberMe: false },
     resolver: zodResolver(loginSchema),
   })
-  const emailErrorRef = useRef(null)
-  const passwordErrorRef = useRef(null)
+  const errorRefs = useRef({
+    email: createRef(null),
+    password: createRef(null),
+  })
   useEffect(() => {
     setFocus('email')
   }, [setFocus])
   useEffect(() => {
-    setShowEmailError(!!errors.email)
-  }, [errors.email])
-  useEffect(() => {
-    setShowPasswordError(!!errors.password)
-  }, [errors.password])
+    setShowError(prev => ({
+      ...prev,
+      email: !!errors.email,
+      password: !!errors.password,
+    }))
+  }, [errors.email, errors.password])
+
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const passwordValue = watch('password')
@@ -59,7 +65,7 @@ const LoginForm = ({returnUrl}) => {
       })
       reset()
       dispatch(login(response.data))
-      if(returnUrl) {
+      if (returnUrl) {
         navigate(`${returnUrl}`)
       } else {
         navigate('/')
@@ -116,13 +122,13 @@ const LoginForm = ({returnUrl}) => {
             {...register('email')}
           />
           <CSSTransition
-            nodeRef={emailErrorRef}
+            nodeRef={errorRefs.current.email}
             timeout={300}
-            in={showEmailError}
+            in={showError.email}
             classNames="fade"
           >
             <span
-              ref={emailErrorRef}
+              ref={errorRefs.current.email}
               className="text-xs sm:text-sm text-color-red-700 cursor-default"
             >
               {errors.email?.message}
@@ -148,13 +154,13 @@ const LoginForm = ({returnUrl}) => {
             className="absolute top-13 right-3"
           />
           <CSSTransition
-            nodeRef={passwordErrorRef}
+            nodeRef={errorRefs.current.password}
             timeout={300}
-            in={showPasswordError}
+            in={showError.password}
             classNames="fade"
           >
             <span
-              ref={passwordErrorRef}
+              ref={errorRefs.current.password}
               className="text-xs sm:text-sm text-color-red-700 cursor-default"
             >
               {errors.password?.message}
@@ -178,7 +184,9 @@ const LoginForm = ({returnUrl}) => {
               </Field>
             )}
           />
-          <Link to='/find_account' className="text-sm outline-hidden hover:underline">아이디·비밀번호 찾기</Link>
+          <Link to="/find_account" className="text-sm outline-hidden hover:underline">
+            아이디·비밀번호 찾기
+          </Link>
         </div>
         <button
           type="submit"
