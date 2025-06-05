@@ -11,12 +11,35 @@ const ReviewWriteForm = ({ user, placeDetail, setShowReviewForm, setCurrentSort 
   let MIN_LENGTH = 6
   const [errorText, setErrorText] = useState('')
   const [errorRating, setErrorRating] = useState('')
+  const [isRequested, setIsRequested] = useState(false)
   const [formData, setFormData] = useState({
     user: '',
     comment: '',
     rating: 0,
     store: '',
   })
+  useEffect(() => {
+    if (isRequested === true) {
+      if (formData.comment.length < MIN_LENGTH) {
+        setErrorText(`최소 ${MIN_LENGTH}자 이상 입력해주세요. (현재 ${formData.comment.length}자)`)
+        if (errorText.length > 0) {
+          setErrorRating('')
+        }
+        return
+      } else {
+        setErrorText('')
+      }
+      if (formData?.rating === 0) {
+        if (formData.comment.length > MIN_LENGTH) {
+          setErrorText('')
+        }
+        setErrorRating('별점을 입력해주세요')
+        return
+      } else {
+        setErrorRating('')
+      }
+    }
+  }, [errorText.length, formData.comment.length, MIN_LENGTH, formData?.rating, isRequested])
 
   const handleRatingChange = rate => {
     setFormData({
@@ -26,24 +49,7 @@ const ReviewWriteForm = ({ user, placeDetail, setShowReviewForm, setCurrentSort 
   }
   const handleSubmit = e => {
     e.preventDefault()
-    if (formData.comment.length < MIN_LENGTH) {
-      setErrorText(`최소 ${MIN_LENGTH}자 이상 입력해주세요. (현재 ${formData.comment.length}자)`)
-      if(errorText.length > 0) {
-        setErrorRating('')
-      }
-      return
-    } else {
-      setErrorText('')
-    }
-    if (formData?.rating === 0) {
-      if(formData.comment.length > MIN_LENGTH) {
-        setErrorText('')
-      }
-      setErrorRating('별점을 입력해주세요')
-      return
-    } else {
-      setErrorRating('')
-    }
+    setIsRequested(true)
     if (user?.id && placeDetail?._id) {
       const updatedFormData = {
         ...formData,
@@ -77,6 +83,7 @@ const ReviewWriteForm = ({ user, placeDetail, setShowReviewForm, setCurrentSort 
                 setCurrentSort('latest')
               }
             },
+            setIsRequested(false)
           )
           .catch(err => {
             toast.error(
@@ -106,6 +113,7 @@ const ReviewWriteForm = ({ user, placeDetail, setShowReviewForm, setCurrentSort 
     })
     setErrorRating('')
     setErrorText('')
+    setIsRequested(false)
   }
   return (
     <div className="max-w-3/5 mx-auto">
