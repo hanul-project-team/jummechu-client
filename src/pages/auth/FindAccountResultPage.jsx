@@ -8,19 +8,19 @@ import NoAccountFound from '../../features/auth/components/find_account/NoAccoun
 const FindAccountResultPage = () => {
   const [searchParams, _setSearchParams] = useSearchParams()
   const type = searchParams.get('type')
+  const userFound = useSelector(state => state.findAccount.userFound)
   const dispatch = useDispatch()
   useEffect(() => {
     return () => {
       dispatch(reset())
     }
   }, [dispatch])
-  const userFound = useSelector(state => state.findAccount.userFound)
   return (
-    <main className="container mx-auto flex justify-center ">
+    <main className="container mx-auto max-w-5xl flex justify-center px-6 ">
       <section className="flex flex-col max-w-sm w-full">
         {userFound && (
-          <div className="flex flex-col items-center gap-6">
-            <div className="flex flex-col items-center w-full gap-3">
+          <div className="flex flex-col items-center gap-10">
+            <div className="flex flex-col items-center w-full gap-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="56"
@@ -46,19 +46,21 @@ const FindAccountResultPage = () => {
                   strokeLinejoin="round"
                 ></path>
               </svg>
-              <div className="text-center w-full">
+              <div className="text-center cursor-default flex flex-col gap-2">
                 {type === 'id' && (
                   <>
-                    <h2 className="font-bold text-xl">가입된 아이디를 찾았어요</h2>
-                    <p className="text-sm">가입된 정보가 맞다면 아래 계정으로 로그인하세요</p>
+                    <h2 className="font-semibold text-xl">가입된 아이디를 찾았어요</h2>
+                    <p className="text-sm text-color-gray-700">
+                      가입된 정보가 맞다면 아래 계정으로 로그인하세요
+                    </p>
                   </>
                 )}
                 {type === 'password' && (
                   <>
-                    <h2 className="font-bold text-xl">가입된 계정을 확인했어요</h2>
-                    <p className="text-sm">
+                    <h2 className="font-semibold text-xl">가입된 계정을 확인했어요</h2>
+                    <p className="text-sm text-color-gray-700">
                       아래 이메일로 비밀번호를 재설정 할 수 있는 <br />
-                      링크를 보내드렸어요
+                      링크를 보내드릴게요
                     </p>
                   </>
                 )}
@@ -68,8 +70,8 @@ const FindAccountResultPage = () => {
           </div>
         )}
         {!userFound && (
-          <div className="flex flex-col items-center gap-6">
-            <div className="flex flex-col items-center w-full gap-3">
+          <div className="flex flex-col items-center gap-10">
+            <div className="flex flex-col items-center w-full gap-4">
               <svg
                 width="56"
                 height="56"
@@ -89,9 +91,11 @@ const FindAccountResultPage = () => {
                   fill="#FF4040"
                 ></path>
               </svg>
-              <div className="text-center w-full">
-                <h2 className="font-bold text-xl">가입된 정보가 없어요</h2>
-                <p className="text-sm">회원가입하고 새로운 맛집을 추천 받아 보세요</p>
+              <div className="text-center cursor-default flex flex-col gap-2">
+                <h2 className="font-semibold text-xl">가입된 정보가 없어요</h2>
+                <p className="text-sm text-color-gray-700">
+                  회원가입하고 새로운 맛집을 추천 받아 보세요
+                </p>
               </div>
             </div>
             <NoAccountFound />
