@@ -326,7 +326,7 @@ const PlaceReview = () => {
                       />
                     </svg>
                     <div
-                      className={`absolute top-10 flex flex-col gap-2 max-w-fit p-3 bg-white transition-all duration-200 ease-in-out z-50 border-1 border-gray-300 rounded-xl ${openTabId === rv._id ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                      className={`absolute top-10 right-[-2.5rem] flex flex-col gap-2 max-w-fit p-3 bg-white transition-all duration-200 ease-in-out z-50 border-1 border-gray-300 rounded-xl ${openTabId === rv._id ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
                     >
                       <button className="hover:cursor-pointer transition ease-in-out sm:text-sm text-xs rounded-2xl active:bg-gray-300 sm:active:bg-gray-500 sm:active:text-white sm:hover:bg-gray-300 p-2">
                         리뷰 신고하기
