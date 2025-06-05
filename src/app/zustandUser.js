@@ -49,6 +49,15 @@ const zustandUser = create(
           userBookmark: typeof updater === 'function' ? updater(state.userBookmark) : updater,
         })),
       setIsBookmarked: value => set({ isBookmarked: value }),
+      reset: () => {
+        set({
+          userReviews: [],
+          isLoading: true,
+          userBookmark: null,
+          isBookmarked: false,
+        })
+        localStorage.removeItem('user-storage')
+      },
     }),
     {
       name: 'user-storage',
