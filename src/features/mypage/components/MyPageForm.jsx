@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import Modal from '../components/UserModal.jsx'
 import PwdChangeModal from '../components/PwdChangeModal.jsx'
@@ -14,7 +14,7 @@ const MyPageForm = () => {
   const location = useLocation()
   const user = useSelector(state => state.auth.user)
   const userId = user?.id
-
+  const wrapperRefs = useRef({})
   // console.log('Redux에서 가져온 전체 user 객체:', user);
   // console.log('추출된 userId:', userId);
 
@@ -53,15 +53,14 @@ const MyPageForm = () => {
   const [isEditing, setIsEditing] = useState(false)
 
   const [recentStores, setRecentStores] = useState([])
-  const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false);
-
+  const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false)
 
   const handlePasswordChangeSuccess = () => {
-    alert('비밀번호가 성공적으로 변경되었습니다! 다시 로그인 해주세요.'); // 사용자에게 알림
+    alert('비밀번호가 성공적으로 변경되었습니다! 다시 로그인 해주세요.') // 사용자에게 알림
 
     // ★★★ 가장 중요한 부분: 기존 토큰 및 인증 상태 제거 ★★★
     // 1. 로컬 스토리지에서 JWT 토큰 삭제 (혹은 쿠키)
-    localStorage.removeItem('accessToken'); // 'accessToken'은 예시. 실제 토큰 저장 키에 맞게 수정
+    localStorage.removeItem('accessToken') // 'accessToken'은 예시. 실제 토큰 저장 키에 맞게 수정
     // localStorage.removeItem('refreshToken'); // Refresh Token도 있다면 함께 삭제
 
     // 2. Redux (또는 다른 전역 상태 관리)에서 사용자 인증 정보 초기화
@@ -69,10 +68,8 @@ const MyPageForm = () => {
     //    예: dispatch(logoutUser()); // 인증 상태를 '로그아웃'으로 변경하는 Redux 액션 디스패치
 
     // 3. 로그인 페이지로 리다이렉트 (강제 이동)
-    navigate('/login');
-  };
-
-
+    navigate('/login')
+  }
 
   useEffect(() => {
     const fetchRecentStores = async () => {
@@ -523,7 +520,11 @@ const MyPageForm = () => {
           </div>
         )
       case '리뷰':
-        return <MyPageFormReviews user={user} />
+        return (
+          <div ref={wrapperRefs}>
+            <MyPageFormReviews user={user} currentTab="리뷰" wrappers={wrapperRefs} />
+          </div>
+        )
 
       case '음식점 추천(AI)':
         return (
@@ -631,7 +632,10 @@ const MyPageForm = () => {
                   <hr className="py-3" />
                   <div className="py-3 flex justify-between">
                     <p>비밀번호</p>
-                    <button className="text-blue-500 hover:underline" onClick={() => setShowPasswordChangeModal(true)}>
+                    <button
+                      className="text-blue-500 hover:underline"
+                      onClick={() => setShowPasswordChangeModal(true)}
+                    >
                       비밀번호 변경
                     </button>
                   </div>
@@ -751,17 +755,17 @@ const MyPageForm = () => {
           ))}
         </ul>
       </div>
-          {/* <hr className="border-gray-500 hr-line !important" /> */}
+      {/* <hr className="border-gray-500 hr-line !important" /> */}
 
-          {showPasswordChangeModal && ( // 이 조건이 핵심입니다!
-      <PwdChangeModal
-        onClose={() => setShowPasswordChangeModal(false)}
-        onPasswordChangeSuccess={handlePasswordChangeSuccess}
-      />
-    )}
+      {showPasswordChangeModal && ( // 이 조건이 핵심입니다!
+        <PwdChangeModal
+          onClose={() => setShowPasswordChangeModal(false)}
+          onPasswordChangeSuccess={handlePasswordChangeSuccess}
+        />
+      )}
 
       <div className="max-w-5xl mx-auto px-6">
-          {renderContent()} {/* 이제 active 탭에 따라 renderContent가 내부적으로 인증을 확인 */}
+        {renderContent()} {/* 이제 active 탭에 따라 renderContent가 내부적으로 인증을 확인 */}
       </div>
     </div>
   )
