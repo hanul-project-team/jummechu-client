@@ -174,7 +174,7 @@ const HomeRecommand = () => {
                         </p>
                         <div className="text-sm flex gap-3 items-center">
                           {
-                            <div className="flex items-center">
+                            <div className="flex items-center cursor-default">
                               {handleAvgRating(nearPlaceReviews, unp)}
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -192,7 +192,7 @@ const HomeRecommand = () => {
                               </svg>
                             </div>
                           }
-                          <span>리뷰수&#40;{handleCountReviews(nearPlaceReviews, unp)}&#41;</span>
+                          <span className='cursor-default'>리뷰수&#40;{handleCountReviews(nearPlaceReviews, unp)}&#41;</span>
                         </div>
                       </SwiperSlide>
                     )
