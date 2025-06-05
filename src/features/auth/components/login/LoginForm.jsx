@@ -182,7 +182,7 @@ const LoginForm = ({returnUrl}) => {
         </div>
         <button
           type="submit"
-          className="cursor-pointer border p-3 bg-color-gray-900 border-color-gray-900 text-white rounded-lg outline-hidden"
+          className="font-semibold cursor-pointer border p-3 bg-color-gray-900 border-color-gray-900 text-white rounded-lg outline-hidden"
         >
           로그인
         </button>

@@ -56,6 +56,9 @@ const RegistDetailsForm = () => {
     phone: createRef(null),
   })
   useEffect(() => {
+    setFocus('email')
+  },[setFocus])
+  useEffect(() => {
     const isValid = /^01[016789][0-9]{8}$/.test(phoneValue)
     setIsPhone(!!isValid)
   }, [phoneValue])
@@ -347,7 +350,7 @@ const RegistDetailsForm = () => {
                 type="button"
                 onClick={phoneSubmit}
                 disabled={!isPhone}
-                className="bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
+                className="font-semibold bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
               >
                 인증하기
               </button>
@@ -357,7 +360,7 @@ const RegistDetailsForm = () => {
                 type="button"
                 onClick={phoneSubmit}
                 disabled={!isPhone}
-                className="bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
+                className="font-semibold bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
               >
                 재전송하기
               </button>
@@ -398,7 +401,7 @@ const RegistDetailsForm = () => {
                 type="button"
                 onClick={codeSubmit}
                 disabled={!isCode}
-                className="bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
+                className="font-semibold bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
               >
                 확인
               </button>
@@ -408,7 +411,7 @@ const RegistDetailsForm = () => {
         <button
           type="submit"
           disabled={!isSMSAuthenticated}
-          className="border border-color-gray-900 p-3 bg-color-gray-900 text-white rounded-lg outline-hidden disabled:border-color-gray-700 disabled:bg-color-gray-700 cursor-pointer disabled:cursor-default"
+          className="font-semibold border border-color-gray-900 p-3 bg-color-gray-900 text-white rounded-lg outline-hidden disabled:border-color-gray-700 disabled:bg-color-gray-700 cursor-pointer disabled:cursor-default"
         >
           가입하기
         </button>
