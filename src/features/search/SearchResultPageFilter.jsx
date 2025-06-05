@@ -1,7 +1,6 @@
 import React from 'react'
 
 const SearchResultPageFilter = ({ search }) => {
-  console.log(search)
   return (
     <>
       <p className="text-end pointer-events-none select-none">필터</p>
