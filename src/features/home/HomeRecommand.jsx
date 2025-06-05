@@ -112,7 +112,7 @@ const HomeRecommand = () => {
     return sorted1.every((val, idx) => val === sorted2[idx])
   }
   const handleAvgRating = (reviews, place) => {
-    if (reviews.length > 0) {
+    if (reviews?.length > 0) {
       const matchedReviews = reviews.filter(review => review.store?.name === place.place_name)
       const avgRating =
         matchedReviews?.length > 0
@@ -125,7 +125,7 @@ const HomeRecommand = () => {
     }
   }
   const handleCountReviews = (reviews, place) => {
-    if (reviews.length > 0) {
+    if (reviews?.length > 0) {
       const matchedReviews = reviews.filter(review => review.store?.name === place.place_name)
       return matchedReviews.length
     } else {
