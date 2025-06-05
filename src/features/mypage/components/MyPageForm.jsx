@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import Modal from '../components/UserModal.jsx'
 import PwdChangeModal from '../components/PwdChangeModal.jsx'
 import MypagesAuthForm from '../components/MypagesAuthForm.jsx'
+import MyPageFormReviews from './MyPageFormReviews.jsx'
 import axios from 'axios'
 import { useSelector } from 'react-redux'
 import '../MyPage.css' // 경로 기준: 현재 컴포넌트 파일 위치 기준
@@ -14,8 +15,8 @@ const MyPageForm = () => {
   const user = useSelector(state => state.auth.user)
   const userId = user?.id
 
-  console.log('Redux에서 가져온 전체 user 객체:', user);
-  console.log('추출된 userId:', userId);
+  // console.log('Redux에서 가져온 전체 user 객체:', user);
+  // console.log('추출된 userId:', userId);
 
   const [active, setActive] = useState(() => {
     if (location.state?.fromVerification && location.state?.activeTab) {
@@ -75,32 +76,28 @@ const MyPageForm = () => {
 
   useEffect(() => {
     const fetchRecentStores = async () => {
-      // 로그인된 사용자 ID가 없으면 API 호출하지 않음
       if (!userId) {
-        console.log('사용자 ID가 없어 최근 기록을 불러올 수 없습니다.')
-        setRecentStores([]) // 사용자 ID 없으면 빈 배열로 설정
+        // console.log('사용자 ID가 없어 최근 기록을 불러올 수 없습니다.')
+        setRecentStores([])
         return
       }
 
       try {
-        // 백엔드 API 엔드포인트에 userId를 쿼리 파라미터로 전송
-        const response = await axios.get(`http://localhost:3000/auth/recent-history?userId=${userId}`, {
-          withCredentials: true, // 세션 쿠키 등을 함께 전송해야 할 경우
-        })
-        setRecentStores(response.data.recentViewedStores)
-        console.log('최근 본 가게 데이터:', response.data.recentViewedStores)
+        // const response = await axios.get(`http://localhost:3000/auth/recent-history?userId=${userId}`, {
+        //   withCredentials: true, // 세션 쿠키 등을 함께 전송해야 할 경우
+        // })
+        // setRecentStores(response.data.recentViewedStores)
+        // console.log('최근 본 가게 데이터:', response.data.recentViewedStores)
       } catch (error) {
-        console.error('최근 기록 불러오기 실패:', error)
-        setRecentStores([]) // 오류 발생 시 빈 배열로 설정
+        // console.error('최근 기록 불러오기 실패:', error)
+        setRecentStores([])
       }
     }
 
-    // '최근기록' 탭이 활성화되었을 때만 데이터를 불러옵니다.
-    // 또한, userId가 변경될 때도 다시 불러오도록 의존성 배열에 userId를 추가합니다.
     if (active === '최근기록') {
       fetchRecentStores()
     }
-  }, [active, userId]) // active 탭과 userId가 변경될 때마다 실행
+  }, [active, userId])
 
   useEffect(() => {
     if (location.state) {
@@ -526,7 +523,7 @@ const MyPageForm = () => {
           </div>
         )
       case '리뷰':
-        return <p> 작성한 리뷰가 없습니다. </p>
+        return <MyPageFormReviews user={user} />
 
       case '음식점 추천(AI)':
         return (
