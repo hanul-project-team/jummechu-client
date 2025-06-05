@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
-import zustandUser from '../../../app/zustandUser'
 import Icon from '../../../assets/images/icon.png'
 import StarGray from '../../../assets/images/star-gray.png'
 import StarYellow from '../../../assets/images/star-yellow.png'
@@ -8,57 +7,55 @@ import { toast } from 'react-toastify'
 import Rating from 'react-rating'
 import SortDropdown from '../../../features/place/components/reviews/sortButton/SortDropdown.jsx'
 
-const MyPageFormReviews = ({ user }) => {
+const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   const [showReviewMore, setShowReviewMore] = useState(5)
   let count = showReviewMore
   const [openTabId, setOpenTabId] = useState(null)
   const [showSort, setShowSort] = useState(false)
-  const [currentSort, setCurrentSort] = useState('latest')
-  const userReviews = zustandUser(state => state.userReviews)
-  const setUserReviews = zustandUser(state => state.setUserReviews)
+  const [myReviews, setMyReviews] = useState([])
+  const [sortedReviews, setSortedReviews] = useState([])
+  const [currentSort, setCurrentSort] = useState('none')
 
   const userReviewRef = useRef(null)
-  const tabRefs = useRef([])
   const dropdownRef = useRef(null)
-  
   // 리뷰 정보 불러오기
   useEffect(() => {
-    if (userReviewRef.current !== userReviews) {
-      axios
-        .get(`http://localhost:3000/review/read/user/${user.id}`, {
-          withCredentials: true,
-        })
-        .then(res => {
-          const data = res.data
-          if (data.length < 1 && userReviewRef.current) {
-            setUserReviews([])
-            userReviewRef.current = []
-            return
-          } else {
-            const sorted = data.sort((a, b) => a.createdAt - b.createdAt)
-            // console.log(sorted)
-            setUserReviews(sorted)
-            userReviewRef.current = sorted
-          }
-        })
-        .catch(err => {
-          toast.error(
-            <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
-            {
-              position: 'top-center',
-            },
-          )
-          console.log(err)
-        })
+    if (currentTab === '리뷰' && myReviews !== userReviewRef.current) {
+      initialFetchFromDB()
     }
-  }, [])
+  }, [currentTab])
+  const initialFetchFromDB = () => {
+    axios
+      .get(`http://localhost:3000/review/read/user/${user.id}`, {
+        withCredentials: true,
+      })
+      .then(res => {
+        const data = res.data
+        if (data.length < 1 && userReviewRef.current) {
+          setMyReviews([])
+          userReviewRef.current = []
+          return
+        } else {
+          const sorted = data.sort((a, b) => a.createdAt - b.createdAt)
+          setMyReviews(sorted)
+          userReviewRef.current = sorted
+          return
+        }
+      })
+      .catch(err => {
+        toast.error(<div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>, {
+          position: 'top-center',
+        })
+        console.log(err)
+      })
+  }
   // 리뷰 드랍다운 메뉴 바깥클릭 시 접기
   useEffect(() => {
     const handleClickOutside = e => {
-      const isOutside = tabRefs.current.every(ref => {
-        return ref && !ref.contains(e.target)
+      const isOutside = Object.values(wrappers.current || {}).some(ref => {
+        return ref instanceof HTMLElement && ref.contains(e.target)
       })
-      if (isOutside) {
+      if (!isOutside) {
         setOpenTabId(null)
       }
     }
@@ -68,7 +65,7 @@ const MyPageFormReviews = ({ user }) => {
   }, [])
   // 리뷰 정렬 기능
   useEffect(() => {
-    let sorted = [...userReviews]
+    let sorted = [...myReviews]
     switch (currentSort) {
       case 'none':
       default:
@@ -87,7 +84,7 @@ const MyPageFormReviews = ({ user }) => {
         sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
         break
     }
-    setUserReviews(sorted)
+    setSortedReviews(sorted)
 
     const handleClickOutside = e => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -102,7 +99,7 @@ const MyPageFormReviews = ({ user }) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [currentSort, showSort])
+  }, [currentSort, showSort, myReviews])
 
   const handleShowUserTap = rv => {
     setOpenTabId(prev => (prev === rv._id ? null : rv._id))
@@ -120,8 +117,18 @@ const MyPageFormReviews = ({ user }) => {
           })
           .then(res => {
             if (res.status === 200) {
-            //   console.log('리뷰 삭제 정보', res)
-              setUserReviews(prev => [prev.filter(review => review._id !== rv._id)])
+              //   console.log('리뷰 삭제 정보', res)
+              setSortedReviews(prev => {
+                const updated = prev.filter(review => review._id !== rv._id)
+                if (updated?.length <= 5) {
+                  setShowReviewMore(5)
+                  count = 5
+                } else {
+                  setShowReviewMore(5)
+                  count = 5
+                }
+                return updated
+              })
             }
           })
           .catch(err => {
@@ -163,24 +170,26 @@ const MyPageFormReviews = ({ user }) => {
     }
   }
   const handleReviewshowReviewMore = () => {
-    if (userReviews.length - showReviewMore > 5) {
-      setShowReviewMore(prev => (prev += 5))
-      count = count + 5
-    } else if (
-      userReviews.length - showReviewMore <= 5 &&
-      userReviews.length - showReviewMore > 0
-    ) {
-      setShowReviewMore(prev => prev + (userReviews.length - prev))
-      count = count + showReviewMore
-    } else if (userReviews.length - showReviewMore === 0) {
-      setShowReviewMore(5)
-      count = showReviewMore
+    if (sortedReviews?.length > 5) {
+      if (sortedReviews?.length - showReviewMore > 5) {
+        setShowReviewMore(prev => (prev += 5))
+        count = count + 5
+      } else if (
+        sortedReviews?.length - showReviewMore <= 5 &&
+        sortedReviews?.length - showReviewMore > 0
+      ) {
+        setShowReviewMore(sortedReviews?.length)
+        count = sortedReviews?.length
+      } else if (sortedReviews?.length === showReviewMore) {
+        setShowReviewMore(5)
+        count = 5
+      }
     }
   }
   return (
     <div>
       {/* 정렬 버튼 */}
-      {userReviews.length > 0 && (
+      {sortedReviews?.length > 0 && (
         <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative" ref={dropdownRef}>
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
@@ -192,15 +201,15 @@ const MyPageFormReviews = ({ user }) => {
         </div>
       )}
       {/* 리뷰 영역 */}
-      {userReviews.length > 0 ? (
-        userReviews.slice(0, count).map((rv, i) => (
+      {sortedReviews?.length > 0 ? (
+        sortedReviews.slice(0, count).map((rv, i) => (
           <div
             key={i}
             className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto flex items-center relative"
           >
             <div className="flex-2">
               <img src={Icon} alt="icon" className="sm:max-h-[80px] max-h-[40px]" />
-              <p>{rv?.user.name}</p>
+              <p>{rv?.user?.name}</p>
               <div>
                 <Rating
                   initialRating={rv.rating}
@@ -214,12 +223,18 @@ const MyPageFormReviews = ({ user }) => {
               {/* 날짜, 더보기 메뉴 */}
               <div
                 className="text-end absolute right-2 flex items-center gap-3 top-0"
-                ref={el => (tabRefs.current[i] = el)}
+                ref={el => {
+                  if (el) {
+                    wrappers.current[rv._id] = el
+                  } else if(wrappers.current) {
+                    delete wrappers.current[rv._id]
+                  }
+                }}
               >
                 <p>
-                  <strong>{rv?.store.name}</strong>
+                  <strong>{rv?.store?.name}</strong>
                 </p>
-                <p>{rv?.createdAt.split('T')[0]}</p>
+                <p>{rv?.createdAt?.split('T')[0]}</p>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -238,7 +253,7 @@ const MyPageFormReviews = ({ user }) => {
                 <div
                   className={`absolute right-[-1.5rem] top-10 max-w-fit p-3 bg-white transition-all duration-200 ease-in-out z-50 border-1 border-gray-300 rounded-xl ${openTabId === rv._id ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
                 >
-                  {rv?.user._id === user.id && (
+                  {rv?.user?._id === user.id && (
                     <button
                       className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl bg-color-red-700 sm:bg-red-600 sm:hover:bg-red-400 text-white"
                       onClick={e => {
@@ -252,7 +267,7 @@ const MyPageFormReviews = ({ user }) => {
                 </div>
               </div>
               <div>
-                <p className="indent-2">{rv.comment}</p>
+                <p className="indent-2">{rv?.comment}</p>
               </div>
               <div className="absolute right-2 bottom-0 pb-1">
                 {handleReviewDate(rv?.createdAt)}
@@ -262,22 +277,29 @@ const MyPageFormReviews = ({ user }) => {
         ))
       ) : (
         <div className="text-center p-2">
-          <p>리뷰 정보가 존재하지 않습니다. 첫 리뷰를 작성해보세요!</p>
+          <p className="loading-jump text-center p-3 sm:mb-[1000px]">
+            Loading
+            <span className="jump-dots">
+              <span>.</span>
+              <span>.</span>
+              <span>.</span>
+            </span>
+          </p>
         </div>
       )}
       {/* 더보기 버튼 */}
-      {userReviews.length > 0 && (
+      {sortedReviews?.length > 0 && (
         <div className="mx-auto max-w-fit my-2">
           <button
             type="button"
-            className={`${userReviews.length <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
+            className={`${sortedReviews?.length <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
             onClick={handleReviewshowReviewMore}
           >
-            {userReviews.length - showReviewMore > 5
+            {sortedReviews?.length > 5 && sortedReviews?.length - count > 5
               ? '5개 더보기'
-              : userReviews.length - showReviewMore <= 5 && userReviews.length - showReviewMore > 0
-                ? userReviews.length - count + '개 더보기'
-                : userReviews.length > 5 && showReviewMore - userReviews.length === 0 && '접기'}
+              : sortedReviews?.length - count <= 5 && sortedReviews?.length - count > 0
+                ? sortedReviews?.length - count + '개 더보기'
+                : sortedReviews?.length > 5 && count - sortedReviews?.length === 0 && '접기'}
           </button>
         </div>
       )}
