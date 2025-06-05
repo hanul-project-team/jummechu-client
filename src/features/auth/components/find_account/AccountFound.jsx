@@ -44,12 +44,14 @@ const AccountFound = ({ type }) => {
           <>
             <Link
               to="/find_account?type=password"
+              replace
               className="outline-hidden font-semibold grow border border-color-gray-900 rounded-lg p-3 text-center text-white bg-color-gray-900"
             >
               비밀번호 찾기
             </Link>
             <Link
               to="/login"
+              replace
               className="outline-hidden font-semibold grow border border-color-gray-300 rounded-lg p-3 text-center "
             >
               로그인 하기

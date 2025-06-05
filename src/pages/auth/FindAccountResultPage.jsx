@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { reset } from '../../features/auth/slice/findAccountSlice'
+import { toast } from 'react-toastify'
 import AccountFound from '../../features/auth/components/find_account/AccountFound'
 import NoAccountFound from '../../features/auth/components/find_account/NoAccountFound'
 
@@ -9,12 +10,23 @@ const FindAccountResultPage = () => {
   const [searchParams, _setSearchParams] = useSearchParams()
   const type = searchParams.get('type')
   const userFound = useSelector(state => state.findAccount.userFound)
+  const navigate = useNavigate()
   const dispatch = useDispatch()
+  useEffect(() => {
+    if (userFound === undefined) {
+      toast.error(<div className="Toastify__toast-body cursor-default">잘못된 접근입니다</div>, {
+        position: 'top-center',
+      })
+      navigate('/find_account?type=id')
+    }
+  }, [userFound, navigate])
   useEffect(() => {
     return () => {
       dispatch(reset())
     }
   }, [dispatch])
+
+  if (userFound === undefined) return null
   return (
     <main className="container mx-auto max-w-5xl flex justify-center px-6 ">
       <section className="flex flex-col max-w-sm w-full">

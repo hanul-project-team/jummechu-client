@@ -5,6 +5,7 @@ import LoginAction from '../../features/auth/components/login/LoginAction'
 
 const LoginPage = () => {
   const location = useLocation()
+
   const returnUrl = location.state?.returnUrl
   return (
     <main className="container mx-auto max-w-5xl flex justify-center px-6 ">
