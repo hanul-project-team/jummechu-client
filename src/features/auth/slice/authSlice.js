@@ -20,7 +20,7 @@ const initialState = {
     id:'',
     name: '',
     profileImage: '',
-    role: 'guest',
+    role: '',
   },
   error: '',
 }
@@ -36,10 +36,7 @@ const authSlice = createSlice({
     },
     logout: state => {
       state.isAuthenticated = false
-      state.user.id = ''
-      state.user.name = ''
-      state.user.profileImage = ''
-      state.user.role = 'guest'
+      state.user = initialState.user
     },
   },
   extraReducers: build => {
