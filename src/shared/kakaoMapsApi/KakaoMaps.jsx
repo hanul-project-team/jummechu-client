@@ -32,6 +32,7 @@ const KakaoMaps = () => {
     try {
       if (isRoot && center && center.lat != null && center.lng != null) {
         if (!center || center.lat !== lat || center.lng !== lng || userNearPlace?.length === 0) {
+          // console.log(center)
           getKakaoData(center)
         }
       }
@@ -53,7 +54,6 @@ const KakaoMaps = () => {
         if (!center || center.lat !== latitude || center.lng !== longitude) {
           setCenter({ lat: latitude, lng: longitude })
         }
-        // console.log(center)
       },
       err => {
         console.error('error msg:', err)

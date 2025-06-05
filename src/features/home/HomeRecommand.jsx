@@ -46,7 +46,7 @@ const HomeRecommand = () => {
               })
               .then(res => {
                 const data = res.data
-                // console.log(data)
+                // console.log(data) 
                 setNearPlaceReviews(data)
                 setIsLoading(false)
                 setCountDown(60)
@@ -125,7 +125,7 @@ const HomeRecommand = () => {
     const matchedReviews = reviews.filter(review => review.store?.name === place.place_name)
     return matchedReviews.length
   }
-
+  
   return (
     <div className="max-xl:m-3">
       {isLoading === true ? (
