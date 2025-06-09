@@ -165,7 +165,7 @@ const PlaceReview = () => {
     }
   }
   const handleReviewWrite = () => {
-    if (user.name?.length === 0) {
+    if (user.name?.length === 0 || user.role?.length === 0) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니가?')) {
         navigate('/login', { state: { returnUrl } })
       }
