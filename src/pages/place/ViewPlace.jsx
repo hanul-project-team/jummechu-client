@@ -10,42 +10,43 @@ import { useSelector } from 'react-redux';
 const ViewPlace = () => {
   const location = useLocation();
   const setPlaceDetail = zustandStore(state => state.setPlaceDetail);
-  const placeDetail = zustandStore(state => state.placeDetail); // 현재 Zustand에 저장된 placeDetail
+  const placeDetail = zustandStore(state => state.placeDetail); // Zustand에서 현재 placeDetail 상태 가져오기
 
   const { id: storeId } = useParams(); // URL에서 가게 ID 가져오기
 
   const user = useSelector(state => state.auth.user);
-  const userId = user?.id; // Redux에서 사용자 ID 가져오기
+  const userId = user?.id; // Redux 스토어에서 사용자 ID 가져오기
 
-  // --- 1. placeDetail 데이터 로딩 및 동기화 useEffect ---
-  // 이 useEffect는 URL의 storeId가 변경되거나, placeDetail이 아직 로드되지 않았을 때 실행됩니다.
+  // --- 1. placeDetail 데이터 로딩 useEffect ---
+  // 이 useEffect는 URL의 storeId가 변경될 때마다 실행되어 올바른 placeDetail을 보장합니다.
   useEffect(() => {
-    const fetchPlaceDetail = async () => {
-      // URL의 storeId가 없으면 아무것도 하지 않습니다.
+    const fetchAndSetPlaceDetail = async () => {
+      // URL의 storeId가 없으면 아무것도 하지 않고 Zustand를 초기화합니다.
       if (!storeId) {
-        console.log('ViewPlace: URL에서 storeId를 찾을 수 없습니다.');
+        console.log('ViewPlace: URL에서 storeId를 찾을 수 없습니다. placeDetail을 null로 설정.');
+        setPlaceDetail(null);
         return;
       }
 
-      // 이미 placeDetail이 로드되었고, 현재 URL의 storeId와 일치하면 다시 불러오지 않습니다.
-      // (성능 최적화: 불필요한 API 호출 방지)
-      if (placeDetail && placeDetail._id === storeId) {
-        console.log('ViewPlace: placeDetail이 이미 로드되었고 URL storeId와 일치합니다. API 호출을 건너뜜.');
-        return;
+      // 1-1. Zustand의 placeDetail이 이미 현재 URL의 storeId와 일치하고 유효하면 API 호출을 건너뜁니다.
+      // placeDetail이 객체이고, 배열이 아니며, _id가 storeId와 일치하고 name 필드가 유효한지 확인합니다.
+      if (placeDetail && typeof placeDetail === 'object' && !Array.isArray(placeDetail) && placeDetail._id === storeId && placeDetail.name && String(placeDetail.name).trim() !== '') {
+          console.log('ViewPlace: placeDetail이 이미 Zustand에 로드되었고 URL storeId와 일치하며 유효합니다. API 호출을 건너뜜.');
+          return;
       }
 
-      // location.state에 데이터가 있고, URL의 storeId와 일치하면 먼저 사용합니다.
-      // (초기 로딩 시 더 빠른 렌더링을 위해)
-      if (location.state && location.state._id === storeId) {
-        setPlaceDetail(location.state);
-        console.log('ViewPlace: location.state에서 placeDetail을 설정했습니다:', location.state);
-        return;
+      // 1-2. location.state에 데이터가 있고, URL의 storeId와 일치하며 유효한 객체 형태일 경우 먼저 사용합니다.
+      // placeDetail이 아직 설정되지 않았거나, 현재 storeId와 일치하지 않을 때만 location.state를 확인합니다.
+      if (location.state && typeof location.state === 'object' && !Array.isArray(location.state) && location.state._id === storeId && location.state.name && String(location.state.name).trim() !== '') {
+          setPlaceDetail(location.state);
+          console.log('ViewPlace: location.state에서 placeDetail을 설정했습니다:', location.state);
+          return; // location.state에서 성공적으로 설정했으면 다음 API 호출 방지
       }
 
-      // 위 조건들이 모두 해당되지 않으면, 백엔드에서 직접 상세 정보를 불러옵니다.
+      // 1-3. 위의 조건들이 모두 해당되지 않으면, 백엔드에서 직접 상세 정보를 불러옵니다.
       try {
         console.log(`ViewPlace: 백엔드에서 placeDetail (ID: ${storeId})을 불러오는 중...`);
-        // 가정: /api/places/:id 엔드포인트가 상세 정보를 반환합니다. (아래 백엔드 수정 필요)
+        // /api/places/:id 엔드포인트에서 상세 정보를 반환한다고 가정합니다.
         const response = await axios.get(`http://localhost:3000/api/places/${storeId}`);
         
         if (response.data.success && response.data.place) {
@@ -54,8 +55,6 @@ const ViewPlace = () => {
         } else {
           console.error('ViewPlace: 백엔드에서 placeDetail을 찾을 수 없습니다. 응답:', response.data);
           setPlaceDetail(null); // 찾지 못했음을 나타내기 위해 null로 설정
-          // 필요하다면 에러 페이지로 리다이렉트하거나 사용자에게 메시지 표시
-          // navigate('/error-page');
         }
       } catch (error) {
         console.error('ViewPlace: placeDetail 로드 중 오류 발생:', error.response?.data || error.message);
@@ -63,8 +62,8 @@ const ViewPlace = () => {
       }
     };
 
-    fetchPlaceDetail();
-  }, [storeId, location.state, placeDetail, setPlaceDetail]); // storeId, location.state, placeDetail 상태 변경 시 실행
+    fetchAndSetPlaceDetail();
+  }, [storeId, location.state, setPlaceDetail, placeDetail]); // placeDetail을 의존성에 추가하여 Zustand 상태 변경 시에도 반응
 
   // --- 2. 페이지 상단으로 스크롤 ---
   useEffect(() => {
@@ -72,37 +71,56 @@ const ViewPlace = () => {
   }, [location.pathname]);
 
   // --- 3. 최근 본 가게 기록 추가 useEffect ---
+  // 이 이펙트는 userId, storeId, 그리고 placeDetail이 Zustand에 유효하게 로드되었을 때만 실행됩니다.
   useEffect(() => {
     const addRecentViewToHistory = async () => {
-      // API 호출을 위한 필수 정보가 아직 로드되지 않았거나 유효하지 않으면 건너뜠니다.
-      // placeDetail.name이 필수이므로 이 조건에 포함시킵니다.
-      if (!userId || !storeId || !placeDetail || !placeDetail.name) {
-        console.log('ViewPlace: 최근 기록 추가를 위한 필수 정보 (userId, storeId, placeDetail.name)가 아직 로드되지 않았거나 유효하지 않아 백엔드 호출을 건너뜀.');
-        console.log('ViewPlace Debug Info (Skipped): userId:', userId, 'storeId:', storeId, 'placeDetail:', placeDetail);
+      // userId, storeId, 그리고 placeDetail이 유효하고 현재 페이지의 가게 정보와 일치할 때만 API 호출
+      // placeDetail이 아직 null이거나 유효하지 않은 객체 형태이거나, URL의 storeId와 _id가 일치하지 않으면 건너뜁니다.
+      if (!userId || !storeId || !placeDetail || typeof placeDetail !== 'object' || Array.isArray(placeDetail) || placeDetail._id !== storeId || !placeDetail.name || String(placeDetail.name).trim() === '') {
+        console.log('ViewPlace: 최근 기록 추가를 위한 필수 정보 (userId, storeId, placeDetail 객체, placeDetail.name)가 아직 로드되지 않았거나 유효하지 않아 백엔드 호출을 건너뜁니다.');
+        console.log('ViewPlace Debug Info (Skipped History Add): userId:', userId, 'storeId:', storeId, 'placeDetail:', placeDetail);
         return;
-      }
-
-      // 만약 URL의 storeId와 현재 placeDetail의 _id가 일치하지 않는다면,
-      // 잘못된 데이터를 보낼 수 있으므로 이 경우도 건너뜁니다.
-      if (placeDetail._id !== storeId) {
-          console.log('ViewPlace: placeDetail의 _id와 URL의 storeId가 일치하지 않아 최근 기록 추가를 건너뜁니다.');
-          return;
       }
 
       try {
         console.log('ViewPlace: addRecentView API 호출 시도 중 (백엔드 DB 저장)...');
         console.log('ViewPlace: 전송할 userId:', userId);
         console.log('ViewPlace: 전송할 storeId:', storeId);
-        console.log('ViewPlace: 전송할 keywords (placeDetail에서):', placeDetail.keywords);
-        console.log('ViewPlace: 전송할 name (placeDetail에서, 최종 확인):', placeDetail.name);
+        
+        // placeDetail에서 keywords를 직접 전송하기 전에 유효성 검사 및 전처리 강화
+        let processedKeywords = [];
+        if (placeDetail.keywords) {
+          if (Array.isArray(placeDetail.keywords)) {
+            // 배열 안에 있는 각 요소가 쉼표 포함 문자열일 수 있으므로 다시 분리
+            placeDetail.keywords.forEach(k => {
+              const trimmedK = String(k).trim();
+              if (trimmedK.includes(',')) {
+                // 쉼표가 있다면 쉼표로 분리하여 추가
+                processedKeywords.push(...trimmedK.split(',').map(s => s.trim()));
+              } else if (trimmedK !== '') {
+                // 쉼표가 없다면 바로 추가
+                processedKeywords.push(trimmedK);
+              }
+            });
+          } else if (typeof placeDetail.keywords === 'string' && placeDetail.keywords.trim() !== '') {
+            // 단일 문자열이라면 쉼표로 분리
+            processedKeywords = placeDetail.keywords.split(',').map(k => k.trim());
+          }
+        }
+        // 최종적으로 빈 문자열 키워드 제거
+        processedKeywords = processedKeywords.filter(k => k !== '');
 
+        console.log('ViewPlace: 전송할 keywords (처리 후):', processedKeywords); 
+        console.log('ViewPlace: 전송할 name (placeDetail에서):', placeDetail.name);
+
+        // 백엔드의 recentHistory.js addRecentView 함수가 'name'을 받으므로 'storeName' 대신 'name'으로 전송
         const response = await axios.post('http://localhost:3000/auth/recent-history', {
           userId: userId,
           storeId: storeId,
-          keywords: placeDetail.keywords || [], // keywords가 없으면 빈 배열 전송
-          name: placeDetail.name, // placeDetail에서 가져온 이름 사용
+          name: placeDetail.name, // 백엔드에서 'name'으로 받으므로 'name'으로 보냅니다.
+          keywords: processedKeywords, 
         }, {
-          withCredentials: true // 세션 쿠키 등 인증 정보를 함께 전송
+          withCredentials: true
         });
         console.log('ViewPlace: 최근 기록 백엔드에 추가 성공:', response.data);
       } catch (err) {
@@ -110,19 +128,22 @@ const ViewPlace = () => {
       }
     };
 
-    // placeDetail이 유효하게 로드될 때마다 addRecentViewToHistory를 호출합니다.
+    // placeDetail이 변경될 때마다 이펙트를 실행합니다.
+    // 이는 placeDetail이 `fetchAndSetPlaceDetail`에 의해 설정된 후에 `addRecentViewToHistory`가 호출되도록 보장합니다.
     addRecentViewToHistory();
-  }, [userId, storeId, placeDetail]); // userId, storeId, placeDetail 상태 변경 시 실행
+  }, [userId, storeId, placeDetail]); // placeDetail을 의존성 배열에 추가
 
-  // placeDetail이 로드되지 않았다면 로딩 메시지를 표시하거나 null을 반환
-  if (!placeDetail) {
+  // placeDetail이 유효하게 로드되지 않았다면 로딩 메시지를 표시합니다.
+  // 이 부분은 `ViewPlaceDetail` 컴포넌트가 유효한 `placeDetail`을 받을 수 있도록 보장합니다.
+  if (!placeDetail || typeof placeDetail !== 'object' || Array.isArray(placeDetail) || placeDetail._id !== storeId) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p>가게 정보를 불러오는 중이거나, 가게를 찾을 수 없습니다...</p>
+        <p>가게 정보를 불러오는 중이거나, 유효한 가게 정보를 찾을 수 없습니다...</p>
       </div>
     );
   }
 
+  // placeDetail이 성공적으로 로드되면 ViewPlaceDetail을 렌더링합니다.
   return <ViewPlaceDetail />;
 };
 

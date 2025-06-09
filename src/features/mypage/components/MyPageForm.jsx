@@ -1,277 +1,324 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
-import Modal from '../components/UserModal.jsx'
-import PwdChangeModal from '../components/PwdChangeModal.jsx'
-import MypagesAuthForm from '../components/MypagesAuthForm.jsx'
-import MyPageFormReviews from './MyPageFormReviews.jsx'
-import axios from 'axios'
-import { useSelector } from 'react-redux'
-import '../MyPage.css'
+// src/pages/mypage/MyPageForm.jsx
+
+import React, { useState, useEffect, useRef } from 'react'; // useRef import 추가
+import { useNavigate, useLocation } from 'react-router-dom';
+import Modal from '../components/UserModal.jsx';
+import PwdChangeModal from '../components/PwdChangeModal.jsx';
+import MypagesAuthForm from '../components/MypagesAuthForm.jsx';
+import MyPageFormReviews from './MyPageFormReviews.jsx'; // MyPageFormReviews 임포트 추가
+import axios from 'axios';
+import { useSelector } from 'react-redux';
+import '../MyPage.css';
 
 const MyPageForm = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const user = useSelector(state => state.auth.user)
-  const userId = user?.id
-  const wrapperRefs = useRef({})
-  // console.log('Redux에서 가져온 전체 user 객체:', user);
-  // console.log('추출된 userId:', userId);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const user = useSelector(state => state.auth.user);
+  const userId = user?.id;
+  const wrapperRefs = useRef({}); // useRef 훅 선언 추가
+
+  console.log('Redux에서 가져온 전체 user 객체:', user);
+  console.log('추출된 userId:', userId);
 
   const [active, setActive] = useState(() => {
     if (location.state?.fromVerification && location.state?.activeTab) {
-      return location.state.activeTab
+      return location.state.activeTab;
     }
-    return '최근기록'
-  })
+    return '최근기록';
+  });
 
   const [isAuthenticatedForSettings, setIsAuthenticatedForSettings] = useState(() => {
-    return location.state?.fromVerification && location.state?.activeTab === '계정 설정'
-  })
+    return location.state?.fromVerification && location.state?.activeTab === '계정 설정';
+  });
 
-  const [bookmarkedStoreIds, setBookmarkedStoreIds] = useState(new Set())
-  const [bookmarkedStoresForDisplay, setBookmarkedStoresForDisplay] = useState([])
+  const [bookmarkedStoreIds, setBookmarkedStoreIds] = useState(new Set());
+  const [bookmarkedStoresForDisplay, setBookmarkedStoresForDisplay] = useState([]);
 
-  const tabs = ['최근기록', '찜', '리뷰', '음식점 추천(AI)', '계정 설정']
-  const [isopen, setIsOpen] = useState(false)
-  const [openai, setOpenAi] = useState([]) // AI 추천 음식점 목록
-  const [dalleImage, setDalleImage] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [userNickname, setUserNickname] = useState('로딩중')
-  const [userEmail, setUserEmail] = useState('')
-  const [userPhone, setUserPhone] = useState('') // ★★★ 수정: useState('')으로 초기화 ★★★
-  const [userName, setUserName] = useState('')
+  const tabs = ['최근기록', '찜', '리뷰', '음식점 추천(AI)', '계정 설정'];
+  const [isopen, setIsOpen] = useState(false);
+  const [openai, setOpenAi] = useState([]); // AI 추천 음식점 목록
+  const [dalleImage, setDalleImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [userNickname, setUserNickname] = useState('로딩중');
+  const [userEmail, setUserEmail] = useState('');
+  const [userPhone, setUserPhone] = useState(''); 
+  const [userName, setUserName] = useState('');
   const [userProfileImage, setUserProfileImage] = useState(
     'http://localhost:3000/static/images/defaultProfileImg.jpg',
-  )
+  );
 
   // AI에 의해 변경된 키워드를 저장
-  // ★★★ aiModifiedKeywords를 이제 단일 키워드 (문자열)로 관리합니다. ★★★
-  const [aiModifiedKeywords, setAiModifiedKeywords] = useState('')
+  const [aiModifiedKeywords, setAiModifiedKeywords] = useState(''); 
 
-  const [tempNickname, setTempNickname] = useState('')
-  const [isEditing, setIsEditing] = useState(false)
-  const [recentStores, setRecentStores] = useState([])
-  const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false)
+  const [tempNickname, setTempNickname] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [recentStores, setRecentStores] = useState([]);
+  const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false);
+
+  const isBookmarked = (item) => {
+    return bookmarkedStoreIds.has(item._id);
+  };
+
+  const toggleBookmark = async (item) => {
+    if (!userId) {
+      alert('로그인 후 찜 기능을 이용할 수 있습니다.');
+      return;
+    }
+    const storeId = item._id;
+    try {
+      if (isBookmarked(item)) {
+        await axios.delete(`http://localhost:3000/auth/delete/${storeId}`, {
+          headers: { user: userId },
+          withCredentials: true,
+        });
+        setBookmarkedStoreIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(storeId);
+          return newSet;
+        });
+        alert('찜이 해제되었습니다.');
+      } else {
+        // ★★★ axios.post 인자 전달 방식 수정: data는 빈 객체로, headers는 config 객체로 전달 ★★★
+        await axios.post(`http://localhost:3000/auth/regist/${storeId}`, 
+          {}, // body는 빈 객체로 보냄 (필요한 경우 여기에 데이터를 추가)
+          { headers: { user: userId }, withCredentials: true } // headers는 config 객체에 포함
+        );
+        setBookmarkedStoreIds(prev => new Set(prev).add(storeId));
+        alert('찜 목록에 추가되었습니다.');
+      }
+      fetchBookmarks(); 
+    } catch (error) {
+      console.error('찜 토글 실패:', error.response?.data || error.message);
+      alert('찜 기능 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  useEffect(() => {
+    const fetchBookmarks = async () => {
+      if (!userId) {
+        setBookmarkedStoreIds(new Set());
+        setBookmarkedStoresForDisplay([]);
+        return;
+      }
+      try {
+        const response = await axios.get(`http://localhost:3000/auth/read/${userId}`, {
+          withCredentials: true
+        });
+        const fetchedStores = response.data || [];
+        setBookmarkedStoresForDisplay(fetchedStores);
+        const ids = new Set(fetchedStores.map(store => store._id));
+        setBookmarkedStoreIds(ids);
+      } catch (error) {
+        console.error('찜 목록 불러오기 실패:', error.response?.data || error.message);
+        setBookmarkedStoreIds(new Set());
+        setBookmarkedStoresForDisplay([]);
+      }
+    };
+    
+    if (active === '찜') {
+      fetchBookmarks();
+    }
+  }, [active, userId]);
+
 
   const handlePasswordChangeSuccess = () => {
-    alert('비밀번호가 성공적으로 변경되었습니다! 다시 로그인 해주세요.') // 사용자에게 알림
-
-    // ★★★ 가장 중요한 부분: 기존 토큰 및 인증 상태 제거 ★★★
-    // 1. 로컬 스토리지에서 JWT 토큰 삭제 (혹은 쿠키)
-    localStorage.removeItem('accessToken') // 'accessToken'은 예시. 실제 토큰 저장 키에 맞게 수정
-    // localStorage.removeItem('refreshToken'); // Refresh Token도 있다면 함께 삭제
-
-    // 2. Redux (또는 다른 전역 상태 관리)에서 사용자 인증 정보 초기화
-    //    이 부분은 프로젝트의 Redux 설정에 따라 달라집니다.
-    //    예: dispatch(logoutUser()); // 인증 상태를 '로그아웃'으로 변경하는 Redux 액션 디스패치
-
-    // 3. 로그인 페이지로 리다이렉트 (강제 이동)
-    navigate('/login')
-  }
+    alert('비밀번호가 성공적으로 변경되었습니다! 다시 로그인 해주세요.');
+    localStorage.removeItem('accessToken');
+    navigate('/login');
+  };
 
   useEffect(() => {
     const fetchRecentStores = async () => {
       if (!userId) {
-        // console.log('사용자 ID가 없어 최근 기록을 불러올 수 없습니다.')
-        setRecentStores([])
-        return
+        console.log('사용자 ID가 없어 최근 기록을 불러올 수 없습니다.');
+        setRecentStores([]);
+        return;
       }
 
       try {
-        // const response = await axios.get(`http://localhost:3000/auth/recent-history?userId=${userId}`, {
-        //   withCredentials: true, // 세션 쿠키 등을 함께 전송해야 할 경우
-        // })
-        // setRecentStores(response.data.recentViewedStores)
-        // console.log('최근 본 가게 데이터:', response.data.recentViewedStores)
+        const response = await axios.get(
+          `http://localhost:3000/auth/recent-history?userId=${userId}`,
+          { withCredentials: true }
+        );
+        setRecentStores(response.data.recentViewedStores);
+        console.log('최근 본 가게 데이터:', response.data.recentViewedStores);
       } catch (error) {
-        // console.error('최근 기록 불러오기 실패:', error)
-        setRecentStores([])
+        console.error('최근 기록 불러오기 실패:', error);
+        setRecentStores([]);
       }
-    }
+    };
 
-    if (active === '최근기록') {
-      fetchRecentStores()
+    // ★★★ '최근기록' 탭과 '음식점 추천(AI)' 탭 모두에서 최근 기록을 불러오도록 수정 ★★★
+    if (active === '최근기록' || active === '음식점 추천(AI)') {
+      fetchRecentStores();
     }
-  }, [active, userId])
+  }, [active, userId]);
 
   useEffect(() => {
     if (location.state) {
       if (location.state.fromVerification && location.state.activeTab === '계정 설정') {
-        setActive('계정 설정')
-        setIsAuthenticatedForSettings(true)
-        navigate(location.pathname, { replace: true, state: {} })
+        setActive('계정 설정');
+        setIsAuthenticatedForSettings(true);
+        navigate(location.pathname, { replace: true, state: {} });
       } else if (location.state.fromMyPage) {
         // ...
       }
     }
-  }, [location.state, navigate, location.pathname])
+  }, [location.state, navigate, location.pathname]);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         const response = await axios.get('http://localhost:3000/auth/myprofile', {
           withCredentials: true,
-        })
-        const backendBaseUrl = 'http://localhost:3000'
+        });
+        const backendBaseUrl = 'http://localhost:3000';
 
-        const callUserNickname = response.data.nickname
-        setUserNickname(callUserNickname || '익명 사용자')
-        setTempNickname(callUserNickname || '익명 사용자')
+        const callUserNickname = response.data.nickname;
+        setUserNickname(callUserNickname || '익명 사용자');
+        setTempNickname(callUserNickname || '익명 사용자');
 
-        const callUserEmail = response.data.email
-        setUserEmail(callUserEmail)
+        const callUserEmail = response.data.email;
+        setUserEmail(callUserEmail);
 
-        const callUserPhone = response.data.phone
-        setUserPhone(callUserPhone)
+        const callUserPhone = response.data.phone;
+        setUserPhone(callUserPhone);
 
-        const callUserName = response.data.name
-        setUserName(callUserName)
+        const callUserName = response.data.name;
+        setUserName(callUserName);
 
-        const callUserImage = response.data.profileImage
+        const callUserImage = response.data.profileImage;
         setUserProfileImage(
           callUserImage
             ? `${backendBaseUrl}${callUserImage}`
             : 'http://localhost:3000/static/images/defaultProfileImg.jpg',
-        )
+        );
       } catch (error) {
-        console.error('사용자 프로필 정보를 불러오는데 실패했습니다:', error)
-        setUserProfileImage('http://localhost:3000/static/images/defaultProfileImg.jpg')
+        console.error('사용자 프로필 정보를 불러오는데 실패했습니다:', error);
+        setUserProfileImage('http://localhost:3000/static/images/defaultProfileImg.jpg');
       }
-    }
-    fetchUserProfile()
-  }, [])
+    };
+    fetchUserProfile();
+  }, []);
 
-  const callOpenAi = async prompt => {
+  const callOpenAi = async (prompt) => {
     try {
+      // ★★★ 수정: prompt를 headers가 아닌 request body로 전달 ★★★
       const response = await axios.post('http://localhost:3000/api/azure/openai', {
-        headers: {
-          prompt: prompt, // 받은 prompt를 그대로 전달
-        },
-      })
-      return response
+        prompt: prompt, // 받은 prompt를 request body로 직접 전달
+      });
+      return response;
     } catch (error) {
-      console.error('OpenAI 호출 실패:', error)
-      return { data: null } // 오류 발생 시 빈 데이터 반환
+      console.error('OpenAI 호출 실패:', error);
+      return { data: null }; // 오류 발생 시 빈 데이터 반환
     }
-  }
+  };
 
   const extractMostFrequentKeywords = data => {
-    const allKeywords = {}
+    const allKeywords = {};
     data.forEach(item => {
       const keywordsArray = Array.isArray(item.keyword)
         ? item.keyword
-        : item.keyword
-          ? item.keyword.split(',').map(k => k.trim())
-          : []
+        : item.keyword ? item.keyword.split(',').map(k => k.trim()) : [];
 
       keywordsArray.forEach(keyword => {
-        if (keyword) {
-          allKeywords[keyword] = (allKeywords[keyword] || 0) + 1
+        if (keyword) { // 빈 문자열 키워드 방지
+          allKeywords[keyword] = (allKeywords[keyword] || 0) + 1;
         }
-      })
-    })
+      });
+    });
 
-    let maxCount = 0
+    let maxCount = 0;
     for (const keyword in allKeywords) {
       if (allKeywords[keyword] > maxCount) {
-        maxCount = allKeywords[keyword]
+        maxCount = allKeywords[keyword];
       }
     }
 
-    if (maxCount === 0) return '' // ★★★ 키워드가 없으면 빈 문자열 반환 ★★★
+    // ★★★ 수정: 키워드가 없으면 빈 문자열 반환 (단일 키워드 반환 목적) ★★★
+    if (maxCount === 0) return ''; 
 
-    // ★★★ 가장 빈번한 키워드 중 하나만 반환하도록 수정 ★★★
-    const mostFrequent = Object.keys(allKeywords).filter(
-      keyword => allKeywords[keyword] === maxCount,
-    )
-    return mostFrequent.length > 0 ? mostFrequent[0] : '' // 첫 번째 가장 빈번한 키워드 반환
-  }
+    const mostFrequent = Object.keys(allKeywords).filter(keyword => allKeywords[keyword] === maxCount);
+    // ★★★ 수정: 단일 키워드를 반환하도록 변경 (빈 배열일 경우에도 대비) ★★★
+    return mostFrequent.length > 0 ? mostFrequent[0] : '';
+  };
 
-  // '음식점 추천(AI)' 탭 로직 수정
   useEffect(() => {
     const fetchAIRecommendations = async () => {
       if (active === '음식점 추천(AI)') {
+        // ★★★ recentStores가 비어있으면 바로 리턴 ★★★
         if (recentStores.length === 0) {
-          console.log('AI 추천: 최근 본 가게 기록이 없어 추천을 시작할 수 없습니다.')
-          setOpenAi(['최근 본 가게 기록에서 추천 키워드를 찾을 수 없습니다.'])
-          setLoading(false)
-          setAiModifiedKeywords('') // 상태 초기화
-          return
+          console.log("AI 추천: 최근 본 가게 기록이 없어 추천을 시작할 수 없습니다.");
+          setOpenAi(["최근 본 가게 기록에서 추천 키워드를 찾을 수 없습니다."]);
+          setLoading(false);
+          setAiModifiedKeywords('');
+          return;
+        }
+        
+        // 데이터가 이미 로드되었고, 로딩 중이 아니라면 다시 요청하지 않습니다.
+        if (openai.length > 0 && aiModifiedKeywords !== '' && !loading) {
+            console.log("AI 추천: 이미 로드된 데이터가 있어 다시 요청하지 않습니다.");
+            setLoading(false); // 혹시 로딩 중이었으면 해제
+            return;
         }
 
-        setLoading(true)
-        setOpenAi([])
-        setAiModifiedKeywords('') // 상태 초기화
+        setLoading(true);
+        setOpenAi([]);
+        setAiModifiedKeywords('');
 
         try {
-          // ★★★ 가장 빈번한 키워드 (단일 문자열)를 가져옵니다. ★★★
-          const singleMostFrequentKeyword = extractMostFrequentKeywords(recentStores)
+          // ★★★ extractMostFrequentKeywords가 이제 단일 키워드 문자열을 반환 ★★★
+          const singleMostFrequentKeyword = extractMostFrequentKeywords(recentStores);
 
-          if (!singleMostFrequentKeyword) {
-            // 키워드가 없으면
-            console.log('AI 추천: 최근 본 가게에서 유의미한 키워드를 추출할 수 없습니다.')
-            setOpenAi(['최근 본 가게 기록에서 추천 키워드를 찾을 수 없습니다.'])
-            setLoading(false)
-            return
-          }
+          // ★★★ 수정: 키워드가 비어있을 경우 fallback 프롬프트 사용 ★★★
+          const baseKeyword = singleMostFrequentKeyword || '한국 음식'; // 키워드가 없으면 '한국 음식'으로 대체
+          console.log(`AI 추천: 추출된 기본 키워드 (또는 대체 키워드): "${baseKeyword}"`);
 
-          // ★★★ 2단계: 추출된 단일 키워드를 기반으로 OpenAI에게 음식 유형 카테고리화를 요청합니다. ★★★
           const keywordRefinementPrompt = `
-            다음은 사용자가 최근 방문한 음식점의 가장 대표적인 키워드입니다: "${singleMostFrequentKeyword}"
+            다음은 사용자가 최근 방문한 음식점의 가장 대표적인 키워드입니다: "${baseKeyword}"
             이 키워드를 분석하여 다음 음식 유형 카테고리 중 사용자의 선호도를 가장 잘 나타내는 하나의 키워드를 JSON 형식의 문자열로 추출해주세요: "한식", "일식", "양식", "중식", "야식", "간식", "카페/디저트".
-            만약 주어진 키워드가 위의 카테고리 중 어떤 것에도 명확하게 속하지 않는다고 판단되면, 원래 키워드 "${singleMostFrequentKeyword}"를 JSON 형식의 문자열로 그대로 반환하세요.
+            만약 주어진 키워드가 위의 카테고리 중 어떤 것에도 명확하게 속하지 않는다고 판단되면, 원래 키워드 "${baseKeyword}"를 JSON 형식의 문자열로 그대로 반환하세요.
             결과는 반드시 JSON 형식의 문자열로만 출력해야 합니다. JSON 외에는 아무 것도 출력하지 마세요.
             예시 1 (카테고리 분류 가능): "한식"
             예시 2 (카테고리 분류 불가능, 원본 키워드 사용): "곱창"
-          `
-          console.log('OpenAI 키워드 정제 요청 프롬프트:', keywordRefinementPrompt)
-          const keywordResponse = await callOpenAi(keywordRefinementPrompt)
+          `;
+          console.log("OpenAI 키워드 정제 요청 프롬프트:", keywordRefinementPrompt);
+          const keywordResponse = await callOpenAi(keywordRefinementPrompt);
 
-          let refinedKeyword = '' // 단일 키워드이므로 문자열로 선언
+          let refinedKeyword = '';
           if (keywordResponse.data && typeof keywordResponse.data === 'string') {
             try {
-              const parsedResult = JSON.parse(keywordResponse.data) // 일단 파싱
+              const parsedResult = JSON.parse(keywordResponse.data);
 
-              // 파싱 결과가 문자열이라면 그대로 사용
               if (typeof parsedResult === 'string') {
-                refinedKeyword = parsedResult
-              }
-              // 파싱 결과가 배열이라면 첫 번째 요소를 사용
-              else if (Array.isArray(parsedResult) && parsedResult.length > 0) {
-                refinedKeyword = parsedResult[0]
-              }
-              // 파싱 결과가 객체이고 'category' 또는 'keyword' 키를 가지고 있다면 그 값을 사용
-              // OpenAI가 `{ "category": "한식" }` 또는 `{ "keyword": "한식" }` 등으로 응답할 수 있으므로
-              else if (typeof parsedResult === 'object' && parsedResult !== null) {
+                refinedKeyword = parsedResult;
+              } else if (Array.isArray(parsedResult) && parsedResult.length > 0) {
+                refinedKeyword = parsedResult[0];
+              } else if (typeof parsedResult === 'object' && parsedResult !== null) {
                 if ('category' in parsedResult && typeof parsedResult.category === 'string') {
-                  refinedKeyword = parsedResult.category
+                    refinedKeyword = parsedResult.category;
                 } else if ('keyword' in parsedResult && typeof parsedResult.keyword === 'string') {
-                  refinedKeyword = parsedResult.keyword
+                    refinedKeyword = parsedResult.keyword;
                 } else {
-                  refinedKeyword = singleMostFrequentKeyword // 예상치 못한 객체 형태면 원본 사용
+                    refinedKeyword = baseKeyword; // 예상치 못한 객체 형태면 원본 사용
                 }
+              } else {
+                refinedKeyword = baseKeyword;
               }
-              // 위의 모든 경우가 아니라면 원래 키워드 사용
-              else {
-                refinedKeyword = singleMostFrequentKeyword
-              }
-
-              console.log('OpenAI로부터 정제된 키워드:', refinedKeyword)
-              setAiModifiedKeywords(refinedKeyword) // 상태에 저장
+              
+              console.log("OpenAI로부터 정제된 키워드:", refinedKeyword);
+              setAiModifiedKeywords(refinedKeyword);
             } catch (parseErr) {
-              console.error('키워드 정제 OpenAI 응답 JSON 파싱 오류:', parseErr)
-              refinedKeyword = singleMostFrequentKeyword // 파싱 실패 시 원본 키워드 사용
-              setAiModifiedKeywords(singleMostFrequentKeyword)
+              console.error("키워드 정제 OpenAI 응답 JSON 파싱 오류:", parseErr);
+              refinedKeyword = baseKeyword; // 파싱 실패 시 원본 키워드 사용
+              setAiModifiedKeywords(baseKeyword);
             }
           } else {
-            console.warn(
-              '키워드 정제 OpenAI 응답이 유효하지 않거나 문자열이 아닙니다. 원본 키워드 사용.',
-            )
-            refinedKeyword = singleMostFrequentKeyword // 응답 실패 시 원본 키워드 사용
-            setAiModifiedKeywords(singleMostFrequentKeyword)
+            console.warn("키워드 정제 OpenAI 응답이 유효하지 않거나 문자열이 아닙니다. 원본 키워드 사용.");
+            refinedKeyword = baseKeyword; // 응답 실패 시 원본 키워드 사용
+            setAiModifiedKeywords(baseKeyword);
           }
 
-          // ★★★ 3단계: 정제된 단일 키워드를 기반으로 OpenAI에게 음식점 추천을 요청합니다. ★★★
           const restaurantRecommendationPrompt = `
             다음은 사용자가 선호하는 음식점의 대표 키워드입니다: "${refinedKeyword}"
             이 키워드와 **가장 관련이 깊은** 음식점 3곳을 추천해 주세요.
@@ -281,124 +328,131 @@ const MyPageForm = () => {
             - description: 음식점 설명 (간단하고 매력적인 한 줄, 예: "매콤한 떡볶이가 일품인 곳")
             - keyword: 이 음식점의 키워드 배열 (예: ["#떡볶이", "#분식", "#매운맛"])
             JSON 외에는 아무 것도 출력하지 마세요.
-          `
-          console.log('OpenAI 음식점 추천 요청 프롬프트:', restaurantRecommendationPrompt)
-          const restaurantResponse = await callOpenAi(restaurantRecommendationPrompt)
+          `;
+          console.log("OpenAI 음식점 추천 요청 프롬프트:", restaurantRecommendationPrompt);
+          const restaurantResponse = await callOpenAi(restaurantRecommendationPrompt);
 
           if (restaurantResponse.data && typeof restaurantResponse.data === 'string') {
             try {
-              const parsedRecommendations = JSON.parse(restaurantResponse.data)
-              setOpenAi(parsedRecommendations)
+              const parsedRecommendations = JSON.parse(restaurantResponse.data);
+              // ★★★ AI 응답 유효성 검사 강화 ★★★
+              if (Array.isArray(parsedRecommendations) && parsedRecommendations.every(item => typeof item === 'object' && item !== null && 'title' in item)) {
+                setOpenAi(parsedRecommendations);
+              } else {
+                console.error("음식점 추천 OpenAI 응답 JSON 구조가 예상과 다릅니다:", parsedRecommendations);
+                setOpenAi(["추천을 처리하는 중 오류가 발생했습니다. (응답 구조 불일치)"]);
+              }
             } catch (parseErr) {
-              console.error('음식점 추천 OpenAI 응답 JSON 파싱 오류:', parseErr)
-              setOpenAi(['추천을 처리하는 중 오류가 발생했습니다.'])
+              console.error("음식점 추천 OpenAI 응답 JSON 파싱 오류:", parseErr);
+              setOpenAi(["추천을 처리하는 중 오류가 발생했습니다."]);
             }
           } else {
-            console.error('음식점 추천 OpenAI 응답 데이터가 유효하지 않습니다.')
-            setOpenAi(['AI 추천을 받을 수 없습니다.'])
+            console.error("음식점 추천 OpenAI 응답 데이터가 유효하지 않습니다.");
+            setOpenAi(["AI 추천을 받을 수 없습니다."]);
           }
 
           // DALL-E 이미지 생성 (대표 키워드를 사용하여)
           if (refinedKeyword) {
-            // refinedKeyword가 비어있지 않을 때만 이미지 생성
-            const imageUrl = await callDalleImage(refinedKeyword)
-            setDalleImage(imageUrl)
+            const imageUrl = await callDalleImage(refinedKeyword);
+            setDalleImage(imageUrl);
           } else {
-            setDalleImage(null)
+            setDalleImage(null);
           }
+
         } catch (apiError) {
-          console.error('AI 추천 전체 프로세스 실패:', apiError)
-          setOpenAi(['AI 추천을 불러오는 중 오류가 발생했습니다.'])
+          console.error("AI 추천 전체 프로세스 실패:", apiError);
+          setOpenAi(["AI 추천을 불러오는 중 오류가 발생했습니다."]);
         } finally {
-          setLoading(false)
+          setLoading(false);
         }
       } else {
-        setDalleImage(null)
-        setLoading(false)
-        setOpenAi([]) // 탭 변경 시 추천 목록 초기화
-        setAiModifiedKeywords('') // 탭 변경 시 AI 변경 키워드 초기화
+        setDalleImage(null);
+        setLoading(false);
+        setOpenAi([]);
+        setAiModifiedKeywords('');
       }
-    }
-    fetchAIRecommendations()
-  }, [active, recentStores, userId]) // ★★★ 의존성 배열에서 openai?.length, aiModifiedKeywords 제거 ★★★
+    };
+    fetchAIRecommendations();
+  }, [active, recentStores, userId]); // 의존성 배열 유지
 
   const callDalleImage = async keyword => {
     try {
+      // ★★★ DALL-E 프롬프트 개선 적용 ★★★
+      const improvedDallePrompt = `한종류의 완성된 음식을 해당 키워드 집중하여 관련된 식욕을 돋우는 선명한 색감과 생생한 질감 많은 채소나 재료보다는 **완성된 음식을 표현해주세요**, 그리고 따뜻하고 편안한 분위기가 느껴지도록 다음 키워드를 가지고 이미지를 생성해주세요. 키워드:${keyword}.`;
+
       const res = await axios
         .post('http://localhost:3000/api/azure/dalle', {
-          prompt: `한종류의 완성된 음식을 해당 키워드 집중하여 관련된 식욕을 돋우는 선명한 색감과 생생한 질감 많은 채소나 재료보다는 **완성된 음식을 표현해주세요**, 그리고 따뜻하고 편안한 분위기가 느껴지도록 다음 키워드를 가지고 이미지를 생성해주세요. 키워드:${keyword}.`,
+          prompt: improvedDallePrompt, 
         })
         .catch(err => {
-          console.error(`DALL·E 호출 실패 (${keyword}):`, err)
-          return null
-        })
-      console.log(res)
-      return res?.data?.imageUrl || null
+          console.error(`DALL·E 호출 실패 (${keyword}):`, err);
+          return null;
+        });
+      console.log(res);
+      return res?.data?.imageUrl || null;
     } catch (err) {
-      console.error(`DALL·E 호출 실패 (${keyword}):`, err)
-      return null
+      console.error(`DALL·E 호출 실패 (${keyword}):`, err);
+      return null;
     }
-  }
+  };
 
   const handleClick = (e, tab) => {
-    e.preventDefault()
-    setActive(tab)
+    e.preventDefault();
+    setActive(tab);
     if (tab !== '계정 설정') {
-      setIsAuthenticatedForSettings(false)
+      setIsAuthenticatedForSettings(false);
     }
-  }
+  };
 
   const handleEditToggle = () => {
     if (!isEditing) {
-      setTempNickname(userNickname)
+      setTempNickname(userNickname);
     }
-    setIsEditing(prev => !prev)
-  }
+    setIsEditing(prev => !prev);
+  };
 
   const handleSaveChanges = async () => {
     try {
       const response = await axios.put(
         'http://localhost:3000/auth/profile',
         { nickname: tempNickname, email: userEmail, phone: userPhone },
-        { withCredentials: true },
-      )
+        { withCredentials: true }
+      );
       if (response.status === 200) {
-        alert('프로필 정보가 성공적으로 업데이트되었습니다.')
-        setUserNickname(tempNickname)
-        setIsEditing(false)
+        alert('프로필 정보가 성공적으로 업데이트되었습니다.');
+        setUserNickname(tempNickname);
+        setIsEditing(false);
       } else {
-        alert(`프로필 정보 업데이트 실패: ${response.data.message || '알 수 없는 오류'}`)
+        alert(`프로필 정보 업데이트 실패: ${response.data.message || '알 수 없는 오류'}`);
       }
     } catch (error) {
-      console.error('프로필 정보 업데이트 실패:', error)
-      alert(
-        `프로필 정보 업데이트 중 오류가 발생했습니다: ${error.response?.data?.message || '서버 오류'}`,
-      )
+      console.error('프로필 정보 업데이트 실패:', error);
+      alert(`프로필 정보 업데이트 중 오류가 발생했습니다: ${error.response?.data?.message || '서버 오류'}`);
     }
-  }
+  };
 
   const handleDeleteAccount = async () => {
     if (window.confirm('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
       try {
         const response = await axios.delete('http://localhost:3000/auth/account', {
           withCredentials: true,
-        })
+        });
         if (response.status === 200) {
-          alert('계정이 성공적으로 삭제되었습니다. 로그인 페이지로 이동합니다.')
-          localStorage.removeItem('accessToken')
-          window.location.href = '/login'
+          alert('계정이 성공적으로 삭제되었습니다. 로그인 페이지로 이동합니다.');
+          localStorage.removeItem('accessToken');
+          window.location.href = '/login';
         }
       } catch (error) {
-        console.error('계정 삭제 실패:', error)
+        console.error('계정 삭제 실패:', error);
       }
     }
-  }
+  };
 
   const renderContent = () => {
     switch (active) {
       case '최근기록':
         return (
-          <div className="flex justify-center ">
+          <div className="flex justify-center flex-col items-center"> {/* flex-col 및 items-center 추가 */}
             {recentStores.length === 0 ? (
               <p className="py-5 text-gray-600">최근 본 가게 기록이 없습니다.</p>
             ) : (
@@ -417,8 +471,8 @@ const MyPageForm = () => {
                       <button
                         type="button"
                         onClick={e => {
-                          e.stopPropagation()
-                          toggleBookmark(item)
+                          e.stopPropagation();
+                          toggleBookmark(item);
                         }}
                         className="absolute top-2 right-2 bg-white bg-opacity-70 rounded-full p-2 shadow hover:bg-opacity-100"
                       >
@@ -480,7 +534,7 @@ const MyPageForm = () => {
                       </p>
                       {item.keyword && (
                         <p className="py-1 text-sm text-gray-700">
-                          #{Array.isArray(item.keyword) ? item.keyword.join(', #') : item.keyword}
+                          {Array.isArray(item.keyword) ? item.keyword.map(k => `#${k}`).join(' ') : `#${item.keyword}`}
                         </p>
                       )}
                       <p className="py-5 text-sm text-black">
@@ -488,8 +542,8 @@ const MyPageForm = () => {
                       </p>
                       <button
                         onClick={e => {
-                          e.stopPropagation()
-                          navigate(`/place/${item._id}`)
+                          e.stopPropagation();
+                          navigate(`/place/${item._id}`);
                         }}
                         className="mt-2 text-blue-500 hover:underline text-sm"
                       >
@@ -501,7 +555,7 @@ const MyPageForm = () => {
               </ul>
             )}
           </div>
-        )
+        );
 
       case '찜':
         return (
@@ -512,9 +566,8 @@ const MyPageForm = () => {
               <ul className="flex flex-col gap-9 py-5">
                 {bookmarkedStoresForDisplay.map(shop => (
                   <li key={shop._id} className="flex gap-4">
-                    <div
-                      className="relative w-[250px] h-[250px] cursor-pointer"
-                      onClick={() => navigate(`/place/${shop._id}`)}
+                    <div className="relative w-[250px] h-[250px] cursor-pointer"
+                         onClick={() => navigate(`/place/${shop._id}`)}
                     >
                       <img
                         src={shop.thumbnail || `https://picsum.photos/250/250?random=${shop._id}`}
@@ -524,8 +577,8 @@ const MyPageForm = () => {
                       <button
                         type="button"
                         onClick={e => {
-                          e.stopPropagation()
-                          toggleBookmark(shop)
+                          e.stopPropagation();
+                          toggleBookmark(shop);
                         }}
                         className="absolute top-2 right-2 bg-white bg-opacity-70 rounded-full p-2 shadow hover:bg-opacity-100"
                       >
@@ -557,14 +610,13 @@ const MyPageForm = () => {
                       <p className="text-sm text-gray-500">{shop.address}</p>
                       {shop.keywords && (
                         <p className="text-sm text-gray-700">
-                          #
-                          {Array.isArray(shop.keywords) ? shop.keywords.join(', #') : shop.keywords}
+                          #{Array.isArray(shop.keywords) ? shop.keywords.join(', #') : shop.keywords}
                         </p>
                       )}
                       <button
                         onClick={e => {
-                          e.stopPropagation()
-                          navigate(`/place/${shop._id}`)
+                          e.stopPropagation();
+                          navigate(`/place/${shop._id}`);
                         }}
                         className="mt-2 text-blue-500 hover:underline text-sm"
                       >
@@ -576,13 +628,14 @@ const MyPageForm = () => {
               </ul>
             )}
           </div>
-        )
+        );
       case '리뷰':
         return (
+          // ★★★ MyPageFormReviews 컴포넌트 렌더링 ★★★
           <div ref={wrapperRefs}>
             <MyPageFormReviews user={user} currentTab="리뷰" wrappers={wrapperRefs} />
           </div>
-        )
+        );
 
       case '음식점 추천(AI)':
         return (
@@ -600,7 +653,7 @@ const MyPageForm = () => {
                 )}
                 {openai?.length > 0 ? (
                   <ul className="flex flex-col gap-9 py-5">
-                    {/* ★★★ 변경된 키워드 표시: 이제 단일 키워드를 직접 표시 ★★★ */}
+                    {/* 변경된 키워드 표시 */}
                     {aiModifiedKeywords && (
                       <p className="py-2 text-center text-lg font-semibold">
                         {userNickname} 님의 취향은 "{aiModifiedKeywords}" 입니다!
@@ -608,14 +661,12 @@ const MyPageForm = () => {
                     )}
                     <h2 className="text-center text-xl font-bold py-3">이 음식점들을 추천해요!</h2>
                     {openai.map((item, index) => (
-                      <li
-                        key={index}
-                        className="flex gap-4 p-4 border rounded-lg shadow-sm w-full max-w-md"
-                      >
+                      // ★★★ item.title이 undefined일 경우 'No Title'로 대체하여 오류 방지 ★★★
+                      <li key={index} className="flex gap-4 p-4 border rounded-lg shadow-sm w-full max-w-md">
                         <div className="flex-shrink-0">
-                          <img
-                            src={`https://placehold.co/100x100/F0F0F0/6C757D?text=${encodeURIComponent(item.title.substring(0, 5))}`}
-                            alt={item.title}
+                           <img
+                            src={`https://placehold.co/100x100/F0F0F0/6C757D?text=${encodeURIComponent((item.title || 'No Title').substring(0, Math.min((item.title || 'No Title').length, 5)))}`}
+                            alt={item.title || '대체 이미지'}
                             className="w-24 h-24 object-cover rounded-md"
                           />
                         </div>
@@ -623,13 +674,11 @@ const MyPageForm = () => {
                           <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
                           <p className="text-yellow-500 text-sm">⭐ {item.rating}</p>
                           <p className="text-gray-600 text-sm mt-1">{item.description}</p>
-                          {item.keyword &&
-                            Array.isArray(item.keyword) &&
-                            item.keyword.length > 0 && (
-                              <p className="text-blue-500 text-xs mt-2">
-                                {item.keyword.map(k => `#${k}`).join(' ')}
-                              </p>
-                            )}
+                          {item.keyword && Array.isArray(item.keyword) && item.keyword.length > 0 && (
+                            <p className="text-blue-500 text-xs mt-2">
+                              {item.keyword.map(k => `#${k}`).join(' ')}
+                            </p>
+                          )}
                         </div>
                       </li>
                     ))}
@@ -640,22 +689,22 @@ const MyPageForm = () => {
               </>
             )}
           </div>
-        )
+        );
 
       case '계정 설정':
         if (!isAuthenticatedForSettings) {
           return (
             <MypagesAuthForm
               onAuthenticated={() => {
-                setIsAuthenticatedForSettings(true)
-                setActive('계정 설정')
+                setIsAuthenticatedForSettings(true);
+                setActive('계정 설정');
               }}
               onCancel={() => {
-                setActive('최근기록')
-                setIsAuthenticatedForSettings(false)
+                setActive('최근기록');
+                setIsAuthenticatedForSettings(false);
               }}
             />
-          )
+          );
         }
         return (
           <div className="flex justify-center">
@@ -791,12 +840,12 @@ const MyPageForm = () => {
               </div>
             </div>
           </div>
-        )
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-6 pb-5">
@@ -835,9 +884,8 @@ const MyPageForm = () => {
           ))}
         </ul>
       </div>
-      {/* <hr className="border-gray-500 hr-line !important" /> */}
 
-      {showPasswordChangeModal && ( // 이 조건이 핵심입니다!
+      {showPasswordChangeModal && (
         <PwdChangeModal
           onClose={() => setShowPasswordChangeModal(false)}
           onPasswordChangeSuccess={handlePasswordChangeSuccess}
@@ -845,10 +893,10 @@ const MyPageForm = () => {
       )}
 
       <div className="max-w-5xl mx-auto px-6">
-        {renderContent()} {/* 이제 active 탭에 따라 renderContent가 내부적으로 인증을 확인 */}
+        {renderContent()}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default MyPageForm
+export default MyPageForm;
