@@ -143,7 +143,7 @@ const TermsForm = ({ nextStep }) => {
         )}
         <button
           type="submit"
-          className="border border-color-gray-900 p-3 bg-color-gray-900 text-white rounded-lg outline-hidden disabled:border-color-gray-700 disabled:bg-color-gray-700 cursor-pointer disabled:cursor-default"
+          className="font-semibold border border-color-gray-900 p-3 bg-color-gray-900 text-white rounded-lg outline-hidden disabled:border-color-gray-700 disabled:bg-color-gray-700 cursor-pointer disabled:cursor-default"
           disabled={disabled}
         >
           다음

@@ -1,38 +1,51 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { targetEmailSchema } from '../../schema/targetEmailSchema'
 import { toast } from 'react-toastify'
+import { CSSTransition } from 'react-transition-group'
 import axios from 'axios'
-import style from './findAccountTargetEmailForm.module.css'
 
 const FindAccountTargetEmailForm = ({ nextStep }) => {
+  const [showError, setShowError] = useState(false)
   const {
     register,
     handleSubmit,
     setFocus,
-    setError,
+    reset,
+    resetField,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(targetEmailSchema),
-    mode: 'onSubmit',
-    reValidateMode: 'onSubmit',
   })
-  const onSubmit = async (data) => {
+  const errorRef = useRef(null)
+  useEffect(() => {
+    setFocus('email')
+  }, [setFocus])
+  useEffect(() => {
+    setShowError(!!errors.email)
+  }, [errors.email])
+  const onSubmit = async data => {
     try {
       await axios.post('http://localhost:3000/auth/target', data)
+      reset()
       nextStep()
     } catch (e) {
       if (e.response.status === 404) {
-        setError('email', { message: e.response.data.message })
+        toast.error(
+          <div className="Toastify__toast-body cursor-default">가입된 계정이 아닙니다</div>,
+          {
+            position: 'top-center',
+          },
+        )
+        resetField('email')
+        setFocus('email')
       } else {
         toast.error(
-          <div>
-            서버 오류가 발생했습니다.
-            <br />
-            잠시 후 다시 시도해주세요.
-          </div>,
-          { autoClose: 3000 },
+          <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
+          {
+            position: 'top-center',
+          },
         )
       }
     }
@@ -43,18 +56,28 @@ const FindAccountTargetEmailForm = ({ nextStep }) => {
     }
   }
   return (
-    <form
-      autoComplete="off"
-      className={style.findAccountTargetEmailForm}
-      onSubmit={handleSubmit(onSubmit, onIsValid)}
-    >
+    <form autoComplete="off" onSubmit={handleSubmit(onSubmit, onIsValid)}>
       <fieldset className="flex flex-col gap-3">
         <legend className="hidden">이메일 설정 폼</legend>
-        <div className={`${style.findAccountTargetEmailFormField} flex flex-col`}>
-          <input type="text" placeholder="이메일" {...register('email')} />
-          {errors.email && <span className={style.errorSpan}>{errors.email.message}</span>}
+        <div className="flex flex-col gap-1.5">
+          <input
+            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
+            type="text"
+            placeholder="이메일"
+            {...register('email')}
+          />
+          <CSSTransition nodeRef={errorRef} timeout={300} in={showError} classNames="fade">
+            <span ref={errorRef} className="text-xs sm:text-sm text-color-red-700 cursor-default">
+              {errors.email?.message}
+            </span>
+          </CSSTransition>
         </div>
-        <button type="submit">비밀번호 찾기</button>
+        <button
+          type="submit"
+          className="border border-color-gray-900 p-3 bg-color-gray-900 text-white rounded-lg outline-hidden cursor-pointer "
+        >
+          비밀번호 찾기
+        </button>
       </fieldset>
     </form>
   )

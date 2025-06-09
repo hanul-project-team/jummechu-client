@@ -71,7 +71,7 @@ const RegistTypeForm = ({ nextStep }) => {
             </ul>
             <button
               type='button'
-              className="text-center outline-hidden p-3 rounded-lg cursor-pointer text-white border border-color-gray-900 bg-color-gray-900"
+              className="font-semibold text-center outline-hidden p-3 rounded-lg cursor-pointer text-white border border-color-gray-900 bg-color-gray-900"
               onClick={() => roleSubmit('member')}
             >
               일반 회원으로 시작하기
@@ -125,7 +125,7 @@ const RegistTypeForm = ({ nextStep }) => {
             </ul>
             <button
               type='button'
-              className="text-center outline-hidden p-3 rounded-lg cursor-pointer text-white border border-color-gray-900 bg-color-gray-900"
+              className="font-semibold text-center outline-hidden p-3 rounded-lg cursor-pointer text-white border border-color-gray-900 bg-color-gray-900"
               onClick={() => roleSubmit('business')}
             >
               파트너 회원으로 시작하기

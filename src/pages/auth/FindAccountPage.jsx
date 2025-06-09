@@ -33,9 +33,9 @@ const FindAccountPage = () => {
     if (step === 'target') setStep('verify')
   }
   return (
-    <main className="container mx-auto flex justify-center ">
-      <section className={`max-w-sm w-full flex flex-col gap-5`}>
-        <div className="flex justify-center">
+    <main className="container mx-auto max-w-5xl flex justify-center px-6 ">
+      <section className='max-w-sm w-full flex flex-col gap-8'>
+        <div className="flex flex-col items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 56 56"
@@ -79,24 +79,25 @@ const FindAccountPage = () => {
               fill="#39D2D7"
             ></path>
           </svg>
+          <h2 className='text-xl font-semibold cursor-default'>아이디·비밀번호 찾기</h2>
         </div>
-        <TabGroup className="flex flex-col gap-5" selectedIndex={tabIndex} onChange={tabChange}>
+        <TabGroup className="flex flex-col gap-8" selectedIndex={tabIndex} onChange={tabChange}>
           <TabList className="flex">
-            <Tab className="data-selected:border-b grow font-bold py-2 ">아이디 찾기</Tab>
-            <Tab className="data-selected:border-b grow font-bold py-2">비밀번호 찾기</Tab>
+            <Tab className="data-selected:border-b-2 data-selected:text-color-gray-900 border-color-gray-900 text-color-gray-700 hover:text-color-gray-900 grow text-sm font-semibold py-2 cursor-pointer outline-hidden">아이디 찾기</Tab>
+            <Tab className="data-selected:border-b-2 data-selected:text-color-gray-900 border-color-gray-900 text-color-gray-700 hover:text-color-gray-900 grow text-sm font-semibold py-2 cursor-pointer outline-hidden">비밀번호 찾기</Tab>
           </TabList>
           <TabPanels>
-            <TabPanel className="flex flex-col gap-3">
-              <h2 className="text-center font-bold">
+            <TabPanel className="flex flex-col gap-8 outline-hidden">
+              <h2 className="text-center font-semibold cursor-default">
                 아이디를 찾으시려면 <br />
                 본인인증을 진행해 주세요
               </h2>
               <FindAccountVerifyForm type={type} />
             </TabPanel>
-            <TabPanel className="flex flex-col gap-3">
+            <TabPanel className="flex flex-col gap-8 outline-hidden">
               {step === 'target' && (
                 <>
-                  <h2 className="text-center font-bold">
+                  <h2 className="text-center font-semibold cursor-default">
                     비밀번호를 찾고자하는
                     <br />
                     이메일을 입력해 주세요
@@ -106,7 +107,7 @@ const FindAccountPage = () => {
               )}
               {step === 'verify' && (
                 <>
-                  <h2 className="text-center font-bold">
+                  <h2 className="text-center font-semibold cursor-default">
                     안전한 비밀번호 재설정을 위해
                     <br />
                     본인 인증이 필요합니다

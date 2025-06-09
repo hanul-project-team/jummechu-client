@@ -56,6 +56,9 @@ const RegistDetailsForm = () => {
     phone: createRef(null),
   })
   useEffect(() => {
+    setFocus('email')
+  },[setFocus])
+  useEffect(() => {
     const isValid = /^01[016789][0-9]{8}$/.test(phoneValue)
     setIsPhone(!!isValid)
   }, [phoneValue])
@@ -88,12 +91,25 @@ const RegistDetailsForm = () => {
   const phoneSubmit = async () => {
     const isValid = await trigger('phone')
     if (isValid) {
-      const phone = getValues('phone')
-      // await axios.post('http://localhost:3000/auth/send_code', { phone }, { withCredentials: true })
-      setIsRequested(true)
-      resetField('code')
-      setFocus('code')
-      setTimerKey(prev => prev + 1)
+      try {
+        const phone = getValues('phone')
+        // await axios.post(
+        //   'http://localhost:3000/auth/send_code',
+        //   { phone },
+        //   { withCredentials: true },
+        // )
+        setIsRequested(true)
+        resetField('code')
+        setFocus('code')
+        setTimerKey(prev => prev + 1)
+      } catch {
+        toast.error(
+          <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
+          {
+            position: 'top-center',
+          },
+        )
+      }
     }
   }
   const codeSubmit = async () => {
@@ -123,6 +139,13 @@ const RegistDetailsForm = () => {
           )
           resetField('code')
           setFocus('code')
+        } else {
+          toast.error(
+            <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
+            {
+              position: 'top-center',
+            },
+          )
         }
       }
     }
@@ -215,7 +238,7 @@ const RegistDetailsForm = () => {
             </span>
           </CSSTransition>
         </div>
-        <div className="relative flex flex-col">
+        <div className="relative flex flex-col gap-1.5">
           <div className="flex justify-between items-center">
             <label htmlFor="password" className="font-semibold">
               비밀번호<span className="ps-0.5 text-color-red-500">*</span>
@@ -236,7 +259,7 @@ const RegistDetailsForm = () => {
             setter={setPasswordState}
             visible={passwordState.visible}
             hasValue={passwordState.hasValue}
-            className="absolute top-11 right-3 "
+            className="absolute top-[51px] right-3 "
           />
           <CSSTransition
             nodeRef={errorRefs.current.password}
@@ -252,7 +275,7 @@ const RegistDetailsForm = () => {
             </span>
           </CSSTransition>
         </div>
-        <div className="relative flex flex-col">
+        <div className="relative flex flex-col gap-1.5">
           <input
             className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
             type={passwordCheckState.visible ? 'text' : 'password'}
@@ -265,7 +288,7 @@ const RegistDetailsForm = () => {
             setter={setPasswordCheckState}
             visible={passwordCheckState.visible}
             hasValue={passwordCheckState.hasValue}
-            className="absolute top-5 right-3 "
+            className="absolute top-[21px] right-3 "
           />
           <CSSTransition
             nodeRef={errorRefs.current.passwordCheck}
@@ -281,7 +304,7 @@ const RegistDetailsForm = () => {
             </span>
           </CSSTransition>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-1.5">
           <label htmlFor="name" className="font-semibold">
             이름<span className="ps-0.5 text-color-red-500">*</span>
           </label>
@@ -306,7 +329,7 @@ const RegistDetailsForm = () => {
             </span>
           </CSSTransition>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-1.5">
           <label htmlFor="phone" className="font-semibold">
             전화번호<span className="ps-0.5 text-color-red-500">*</span>
           </label>
@@ -327,7 +350,7 @@ const RegistDetailsForm = () => {
                 type="button"
                 onClick={phoneSubmit}
                 disabled={!isPhone}
-                className="bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
+                className="font-semibold bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
               >
                 인증하기
               </button>
@@ -337,7 +360,7 @@ const RegistDetailsForm = () => {
                 type="button"
                 onClick={phoneSubmit}
                 disabled={!isPhone}
-                className="bg-color-gray-900 rounded-lg text-white min-w-24 cursor-pointer"
+                className="font-semibold bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
               >
                 재전송하기
               </button>
@@ -358,7 +381,7 @@ const RegistDetailsForm = () => {
           </CSSTransition>
         </div>
         {isRequested && !isSMSAuthenticated && (
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-1.5">
             <label htmlFor="phone" className="font-semibold">
               <Timer key={timerKey} duration={180} onExpire={onExpire} />
             </label>
@@ -378,7 +401,7 @@ const RegistDetailsForm = () => {
                 type="button"
                 onClick={codeSubmit}
                 disabled={!isCode}
-                className="bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
+                className="font-semibold bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
               >
                 확인
               </button>
@@ -388,7 +411,7 @@ const RegistDetailsForm = () => {
         <button
           type="submit"
           disabled={!isSMSAuthenticated}
-          className="border border-color-gray-900 p-3 bg-color-gray-900 text-white rounded-lg outline-hidden disabled:border-color-gray-700 disabled:bg-color-gray-700 cursor-pointer disabled:cursor-default"
+          className="font-semibold border border-color-gray-900 p-3 bg-color-gray-900 text-white rounded-lg outline-hidden disabled:border-color-gray-700 disabled:bg-color-gray-700 cursor-pointer disabled:cursor-default"
         >
           가입하기
         </button>
