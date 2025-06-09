@@ -6,6 +6,7 @@ import StarYellow from '../../../assets/images/star-yellow.png'
 import { toast } from 'react-toastify'
 import Rating from 'react-rating'
 import SortDropdown from '../../../features/place/components/reviews/sortButton/SortDropdown.jsx'
+import ModifyReviewModal from './review/ModifyReviewModal.jsx'
 
 const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   const [showReviewMore, setShowReviewMore] = useState(5)
@@ -15,15 +16,14 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   const [myReviews, setMyReviews] = useState([])
   const [sortedReviews, setSortedReviews] = useState([])
   const [currentSort, setCurrentSort] = useState('none')
+  const [modifyReviewId, setModifyReviewId] = useState(null)
+  const [lineCounts, setLineCounts] = useState({})
+  const [expandedReviews, setExpandedReviews] = useState({})
+  const commentRefs = useRef({})
 
   const userReviewRef = useRef(null)
   const dropdownRef = useRef(null)
-  // 리뷰 정보 불러오기
-  useEffect(() => {
-    if (currentTab === '리뷰' && myReviews !== userReviewRef.current) {
-      initialFetchFromDB()
-    }
-  }, [currentTab])
+
   const initialFetchFromDB = () => {
     axios
       .get(`http://localhost:3000/review/read/user/${user.id}`, {
@@ -49,6 +49,12 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
         console.log(err)
       })
   }
+  // 리뷰 정보 불러오기
+  useEffect(() => {
+    if (currentTab === '리뷰' && myReviews !== userReviewRef.current) {
+      initialFetchFromDB()
+    }
+  }, [currentTab, myReviews])
   // 리뷰 드랍다운 메뉴 바깥클릭 시 접기
   useEffect(() => {
     const handleClickOutside = e => {
@@ -65,7 +71,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   }, [])
   // 리뷰 정렬 기능
   useEffect(() => {
-    let sorted = [...myReviews]
+    let sorted = Array.isArray(myReviews) ? [...myReviews] : []
     switch (currentSort) {
       case 'none':
       default:
@@ -100,6 +106,33 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [currentSort, showSort, myReviews])
+  // 리뷰 수정중 모달 이외 접근 금지
+  useEffect(() => {
+    if (modifyReviewId !== null) {
+      document.body.style.overflow = 'hidden'
+    } else if (modifyReviewId === null) {
+      document.body.style.overflow = 'auto'
+    }
+  }, [modifyReviewId])
+  useEffect(() => {
+    if (!commentRefs.current || Object.keys(commentRefs.current).length === 0) {
+      return
+    }
+    const getLineCount = element => {
+      const lineHeight = parseFloat(getComputedStyle(element).lineHeight)
+      const height = element.offsetHeight
+      return Math.round(height / lineHeight)
+    }
+    const newLineCounts = {}
+    if (commentRefs) {
+      Object.entries(commentRefs.current).forEach(([id, el]) => {
+        if (el) {
+          newLineCounts[id] = getLineCount(el)
+        }
+      })
+    }
+    setLineCounts(newLineCounts)
+  }, [sortedReviews])
 
   const handleShowUserTap = rv => {
     setOpenTabId(prev => (prev === rv._id ? null : rv._id))
@@ -186,74 +219,90 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
       }
     }
   }
+  const handleModifyMyReview = rv => {
+    setModifyReviewId(rv?._id)
+    setOpenTabId(null)
+  }
+  const toggleExpand = reviewId => {
+    setExpandedReviews(prev => ({
+      ...prev,
+      [reviewId]: !prev[reviewId],
+    }))
+  }
   return (
-    <div>
-      {/* 정렬 버튼 */}
-      {sortedReviews?.length > 0 && (
-        <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative" ref={dropdownRef}>
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
-            onClick={() => setShowSort(!showSort)}
-          >
-            정렬
-          </button>
-          <SortDropdown handleSortChange={handleSortChange} showSort={showSort} />
-        </div>
-      )}
-      {/* 리뷰 영역 */}
-      {sortedReviews?.length > 0 ? (
-        sortedReviews.slice(0, count).map((rv, i) => (
-          <div
-            key={i}
-            className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto flex items-center relative"
-          >
-            <div className="flex-2">
-              <img src={Icon} alt="icon" className="sm:max-h-[80px] max-h-[40px]" />
-              <p>{rv?.user?.name}</p>
-              <div>
-                <Rating
-                  initialRating={rv.rating}
-                  emptySymbol={<img src={StarGray} alt="gray-star" className="w-6 h-6" />}
-                  fullSymbol={<img src={StarYellow} alt="yellow-star" className="w-6 h-6" />}
-                  readonly={true}
-                />
-              </div>
-            </div>
-            <div className="flex-4">
-              {/* 날짜, 더보기 메뉴 */}
-              <div
-                className="text-end absolute right-2 flex items-center gap-3 top-0"
-                ref={el => {
-                  if (el) {
-                    wrappers.current[rv._id] = el
-                  } else if(wrappers.current) {
-                    delete wrappers.current[rv._id]
-                  }
-                }}
-              >
-                <p>
-                  <strong>{rv?.store?.name}</strong>
-                </p>
-                <p>{rv?.createdAt?.split('T')[0]}</p>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  onClick={() => handleShowUserTap(rv)}
-                  className={`size-8 mt-1 relative sm:p-[2px] active:bg-gray-300 sm:hover:bg-color-gray-300 rounded-3xl`}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+    <>
+      <div>
+        {/* 정렬 버튼 */}
+        {sortedReviews?.length > 0 && (
+          <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative" ref={dropdownRef}>
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
+              onClick={() => setShowSort(!showSort)}
+            >
+              정렬
+            </button>
+            <SortDropdown handleSortChange={handleSortChange} showSort={showSort} />
+          </div>
+        )}
+        {/* 리뷰 영역 */}
+        {sortedReviews?.length > 0 ? (
+          sortedReviews.slice(0, count).map((rv, i) => (
+            <div
+              key={i}
+              className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto flex items-center relative"
+            >
+              <div className="flex-2 max-w-1/3">
+                <img src={Icon} alt="icon" className="sm:max-h-[80px] max-h-[40px]" />
+                <p>{rv?.user?.name}</p>
+                <div>
+                  <Rating
+                    initialRating={rv.rating}
+                    emptySymbol={<img src={StarGray} alt="gray-star" className="w-6 h-6" />}
+                    fullSymbol={<img src={StarYellow} alt="yellow-star" className="w-6 h-6" />}
+                    readonly={true}
                   />
-                </svg>
+                </div>
+              </div>
+              <div className="flex-4 max-w-2/3">
+                {/* 날짜, 더보기 메뉴 */}
                 <div
-                  className={`absolute right-[-1.5rem] top-10 max-w-fit p-3 bg-white transition-all duration-200 ease-in-out z-50 border-1 border-gray-300 rounded-xl ${openTabId === rv._id ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                  className="text-end absolute right-2 flex items-center gap-3 top-0"
+                  ref={el => {
+                    if (el) {
+                      wrappers.current[rv._id] = el
+                    } else if (wrappers.current) {
+                      delete wrappers.current[rv._id]
+                    }
+                  }}
                 >
-                  {rv?.user?._id === user.id && (
+                  <p>
+                    <strong>{rv?.store?.name}</strong>
+                  </p>
+                  <p>{rv?.createdAt?.split('T')[0]}</p>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    onClick={() => handleShowUserTap(rv)}
+                    className={`size-8 mt-1 relative sm:p-[2px] active:bg-gray-300 sm:hover:bg-color-gray-300 rounded-3xl`}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+                    />
+                  </svg>
+                  <div
+                    className={`absolute right-[-1.5rem] top-10 flex flex-col max-w-fit p-3 bg-white transition-all duration-200 ease-in-out z-50 border-1 border-gray-300 rounded-xl ${openTabId === rv._id ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                  >
+                    <button
+                      className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl bg-color-gray-700 sm:bg-gray-600 sm:hover:bg-gray-400 text-white"
+                      onClick={() => handleModifyMyReview(rv)}
+                    >
+                      수정
+                    </button>
                     <button
                       className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl bg-color-red-700 sm:bg-red-600 sm:hover:bg-red-400 text-white"
                       onClick={e => {
@@ -263,47 +312,78 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                     >
                       삭제
                     </button>
+                  </div>
+                </div>
+                <div className="mt-[2rem]">
+                  <p
+                    className={`indent-2 max-w-9/10 break-all ${expandedReviews[rv._id] ? '' : 'line-clamp-3'}`}
+                    ref={el => {
+                      if (el) {
+                        commentRefs.current[rv._id] = el
+                      } else delete commentRefs.current[rv._id]
+                    }}
+                  >
+                    {rv?.comment}
+                  </p>
+                  {/* 3줄이상 더보기 버튼 */}
+                  {(lineCounts[rv._id] ?? 0) >= 3 && (
+                    <div>
+                      <button
+                        onClick={() => toggleExpand(rv._id)}
+                        className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl bg-color-gray-900 hover:bg-gray-400 text-white"
+                      >
+                        {expandedReviews[rv._id] ? '간략히' : '더보기'}
+                      </button>
+                    </div>
                   )}
                 </div>
-              </div>
-              <div>
-                <p className="indent-2">{rv?.comment}</p>
-              </div>
-              <div className="absolute right-2 bottom-0 pb-1">
-                {handleReviewDate(rv?.createdAt)}
+                <div className="absolute right-2 bottom-0 pb-1">
+                  {handleReviewDate(rv?.createdAt)}
+                </div>
               </div>
             </div>
+          ))
+        ) : (
+          <div className="text-center p-2">
+            <p className="loading-jump text-center p-3 sm:mb-[1000px]">
+              Loading
+              <span className="jump-dots">
+                <span>.</span>
+                <span>.</span>
+                <span>.</span>
+              </span>
+            </p>
           </div>
-        ))
-      ) : (
-        <div className="text-center p-2">
-          <p className="loading-jump text-center p-3 sm:mb-[1000px]">
-            Loading
-            <span className="jump-dots">
-              <span>.</span>
-              <span>.</span>
-              <span>.</span>
-            </span>
-          </p>
+        )}
+        {/* 더보기 버튼 */}
+        {sortedReviews?.length > 0 && (
+          <div className="mx-auto max-w-fit my-2">
+            <button
+              type="button"
+              className={`${sortedReviews?.length <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
+              onClick={handleReviewshowReviewMore}
+            >
+              {sortedReviews?.length > 5 && sortedReviews?.length - count > 5
+                ? '5개 더보기'
+                : sortedReviews?.length - count <= 5 && sortedReviews?.length - count > 0
+                  ? sortedReviews?.length - count + '개 더보기'
+                  : sortedReviews?.length > 5 && count - sortedReviews?.length === 0 && '접기'}
+            </button>
+          </div>
+        )}
+      </div>
+      {/* 리뷰 수정 모달 */}
+      {modifyReviewId && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex justify-center items-center text-color-gray-300">
+          <ModifyReviewModal
+            user={user}
+            review={sortedReviews.find(rv => rv?._id === modifyReviewId)}
+            setModifyReviewId={setModifyReviewId}
+            setMyReviews={setMyReviews}
+          />
         </div>
       )}
-      {/* 더보기 버튼 */}
-      {sortedReviews?.length > 0 && (
-        <div className="mx-auto max-w-fit my-2">
-          <button
-            type="button"
-            className={`${sortedReviews?.length <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
-            onClick={handleReviewshowReviewMore}
-          >
-            {sortedReviews?.length > 5 && sortedReviews?.length - count > 5
-              ? '5개 더보기'
-              : sortedReviews?.length - count <= 5 && sortedReviews?.length - count > 0
-                ? sortedReviews?.length - count + '개 더보기'
-                : sortedReviews?.length > 5 && count - sortedReviews?.length === 0 && '접기'}
-          </button>
-        </div>
-      )}
-    </div>
+    </>
   )
 }
 
