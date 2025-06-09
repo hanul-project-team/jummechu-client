@@ -130,6 +130,7 @@ const ReviewWriteForm = ({ user, placeDetail, setShowReviewForm, setCurrentSort 
             value={formData.comment}
             rows={5}
             cols={60}
+            spellCheck={false}
             className={`bg-white indent-1 max-h-auto max-w-fit min-w-1/5 resize-none mt-1 block w-full border rounded-md shadow-sm p-2 resize-none
             ${errorText.length > 0 ? 'border-red-500 focus:ring-red-500' : 'border-color-gray-300 focus:ring-blue-500'}
             ${errorRating.length > 0 ? 'border-red-500 focus:ring-red-500' : 'border-color-gray-300 focus:ring-blue-500'}
