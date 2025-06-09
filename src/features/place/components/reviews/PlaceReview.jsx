@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import zustandStore from '../../../../app/zustandStore.js'
 import axios from 'axios'
 import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import Icon from '../../../../assets/images/icon.png'
 import StarYellow from '../../../../assets/images/star-yellow.png'
 import StarGray from '../../../../assets/images/star-gray.png'
@@ -15,20 +15,37 @@ const PlaceReview = () => {
   const [showReviewMore, setShowReviewMore] = useState(5)
   const [openTabId, setOpenTabId] = useState(null)
   const [showSort, setShowSort] = useState(false)
-  const [isUser, setIsUser] = useState(false)
   const [prevResult, setPrevResult] = useState(null)
   const [showReviewForm, setShowReviewForm] = useState(false)
   const user = useSelector(state => state.auth.user)
   let count = showReviewMore
   const setReviewInfo = zustandStore(state => state.setReviewInfo)
   const reviewInfo = zustandStore(state => state.reviewInfo)
+  const [sortedReviews, setSortedReviews] = useState([])
   const placeDetail = zustandStore(state => state.placeDetail)
   const navigate = useNavigate()
-
+  const location = useLocation()
+  const returnUrl = location.pathname + location?.search
   const [currentSort, setCurrentSort] = useState('none')
 
   const tabRefs = useRef([])
+  const dropdownRef = useRef(null)
 
+  useEffect(() => {
+    const handleClickOutside = e => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowSort(false)
+      }
+    }
+    if (showSort) {
+      document.addEventListener('mousedown', handleClickOutside)
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showSort])
   useEffect(() => {
     const handleClickOutside = e => {
       const isOutside = tabRefs.current.every(ref => {
@@ -44,12 +61,9 @@ const PlaceReview = () => {
   }, [])
 
   useEffect(() => {
-    if (user.name.length > 0) {
-      setIsUser(true)
-    } else {
-      setIsUser(false)
+    if (sortedReviews !== reviewInfo) {
+      setSortedReviews(reviewInfo)
     }
-
     let sorted = [...reviewInfo]
     // console.log(sorted)
     switch (currentSort) {
@@ -70,13 +84,13 @@ const PlaceReview = () => {
         sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
         break
     }
-    setReviewInfo(sorted)
+    setSortedReviews(sorted)
 
     const result = handleTotalRating(reviewInfo)
     if (typeof result == 'number' && prevResult !== result) {
       setPrevResult(result)
     }
-  }, [currentSort, isUser, placeDetail])
+  }, [currentSort, placeDetail, reviewInfo])
 
   const handleReviewDate = createdAt => {
     const diff = new Date() - new Date(createdAt)
@@ -125,15 +139,20 @@ const PlaceReview = () => {
     }
   }
   const handleReviewshowReviewMore = () => {
-    if (reviewInfo.length - showReviewMore > 5) {
-      setShowReviewMore(prev => (prev += 5))
-      count = count + 5
-    } else if (reviewInfo.length - showReviewMore <= 5 && reviewInfo.length - showReviewMore > 0) {
-      setShowReviewMore(prev => prev + (reviewInfo.length - prev))
-      count = count + showReviewMore
-    } else if (reviewInfo.length - showReviewMore === 0) {
-      setShowReviewMore(5)
-      count = showReviewMore
+    if (reviewInfo?.length > 5) {
+      if (reviewInfo?.length - showReviewMore > 5) {
+        setShowReviewMore(prev => (prev += 5))
+        count = count + 5
+      } else if (
+        reviewInfo?.length - showReviewMore <= 5 &&
+        reviewInfo?.length - showReviewMore > 0
+      ) {
+        setShowReviewMore(reviewInfo?.length)
+        count = reviewInfo?.length
+      } else if (reviewInfo?.length === showReviewMore) {
+        setShowReviewMore(5)
+        count = 5
+      }
     }
   }
   const handleSortChange = sort => {
@@ -145,13 +164,10 @@ const PlaceReview = () => {
       setShowSort(!showSort)
     }
   }
-  // const handleSeeAllReviews = () => {
-  //   setShowReviewMore(reviewInfo.length)
-  // }
   const handleReviewWrite = () => {
-    if (isUser === false) {
+    if (user.name?.length === 0) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니가?')) {
-        navigate('/login')
+        navigate('/login', { state: { returnUrl } })
       }
     } else {
       setShowReviewForm(prev => !prev)
@@ -171,6 +187,7 @@ const PlaceReview = () => {
           .then(res => {
             // console.log('리뷰 삭제 정보', res)
             setReviewInfo(prev => prev.filter(review => review._id !== rv?._id))
+            setSortedReviews(prev => prev.filter(review => review._id !== rv?._id))
           })
           .catch(err => {
             console.error('리뷰 삭제 실패 에러 발생', err)
@@ -254,8 +271,8 @@ const PlaceReview = () => {
       {/* 리뷰 보이는곳 */}
       <div className="container sm:max-w-3/5 max-w-5/6 mx-auto">
         {/* 정렬 버튼 */}
-        {reviewInfo.length > 0 && (
-          <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative">
+        {sortedReviews?.length > 0 && (
+          <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative" ref={dropdownRef}>
             <button
               className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
               onClick={() => setShowSort(!showSort)}
@@ -267,8 +284,8 @@ const PlaceReview = () => {
         )}
         {/* 리뷰 영역 */}
         <div>
-          {reviewInfo.length > 0 ? (
-            reviewInfo.slice(0, count).map((rv, i) => (
+          {sortedReviews?.length > 0 ? (
+            sortedReviews?.slice(0, count).map((rv, i) => (
               <div
                 key={i}
                 className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto flex items-center relative"
@@ -309,7 +326,7 @@ const PlaceReview = () => {
                       />
                     </svg>
                     <div
-                      className={`absolute top-10 flex flex-col gap-2 max-w-fit p-3 bg-white transition-all duration-200 ease-in-out z-50 border-1 border-gray-300 rounded-xl ${openTabId === rv._id ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                      className={`absolute top-10 right-[-2.5rem] flex flex-col gap-2 max-w-fit p-3 bg-white transition-all duration-200 ease-in-out z-50 border-1 border-gray-300 rounded-xl ${openTabId === rv._id ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
                     >
                       <button className="hover:cursor-pointer transition ease-in-out sm:text-sm text-xs rounded-2xl active:bg-gray-300 sm:active:bg-gray-500 sm:active:text-white sm:hover:bg-gray-300 p-2">
                         리뷰 신고하기
@@ -343,18 +360,18 @@ const PlaceReview = () => {
           )}
         </div>
         {/* 더보기 버튼 */}
-        {reviewInfo.length > 0 && (
+        {sortedReviews?.length > 0 && (
           <div className="mx-auto max-w-fit my-2">
             <button
               type="button"
-              className={`${reviewInfo.length <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
+              className={`${sortedReviews?.length <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
               onClick={handleReviewshowReviewMore}
             >
-              {reviewInfo.length - showReviewMore > 5
+              {sortedReviews?.length > 5 && sortedReviews?.length - count > 5
                 ? '5개 더보기'
-                : reviewInfo.length - showReviewMore <= 5 && reviewInfo.length - showReviewMore > 0
-                  ? reviewInfo.length - count + '개 더보기'
-                  : reviewInfo.length > 5 && showReviewMore - reviewInfo.length === 0 && '접기'}
+                : sortedReviews?.length - count <= 5 && sortedReviews?.length - count > 0
+                  ? sortedReviews?.length - count + '개 더보기'
+                  : sortedReviews?.length > 5 && count - sortedReviews?.length === 0 && '접기'}
             </button>
           </div>
         )}

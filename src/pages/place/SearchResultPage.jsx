@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import zustandStore from '../../app/zustandStore.js'
 import axios from 'axios'
-import Rating from 'react-rating'
-import StarYellow from '../../assets/images/star-yellow.png'
 import { useNavigate } from 'react-router-dom'
 import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
-import '../../assets/styles/global.css'
+import SearchResultPageList from '../../features/search/SearchResultPageList.jsx'
+import SearchResultPageFilter from '../../features/search/SearchResultPageFilter.jsx'
 
 const SearchResult = () => {
   const [tag, setTag] = useState([])
@@ -122,75 +121,23 @@ const SearchResult = () => {
           </span>
         </p>
       ) : (
-        <>
-          <span className="ml-3">{searchData.length} 개의 검색 결과</span>
-          {searchData.map((sd, i) => {
-            return (
-              <div key={i} className="flex gap-2 p-2 my-3">
-                <div className="md:min-w-[200px]">
-                  <img
-                    src={`https://picsum.photos/200/200?random=${Math.floor(Math.random() * 1000)}`}
-                    alt="picsum"
-                    className="md:w-[200px] md:h-[200px] sm:w-[150px] sm:h-[150px] hover:cursor-pointer object-cover rounded-lg"
-                    onClick={() => handleNavigate(sd)}
-                  />
-                </div>
-                <div className="md:max-h-[200px] overflow-y-auto">
-                  <span
-                    className="hover:cursor-pointer text-2xl"
-                    onClick={() => handleNavigate(sd)}
-                  >
-                    <strong>{sd.place_name}</strong>
-                  </span>
-                  <p>
-                    <strong>주소지</strong>:{sd.address_name}
-                  </p>
-                  <p>
-                    {sd.phone ? (
-                      <>
-                        <strong>연락처: </strong>
-                        <span>{sd.phone}</span>
-                      </>
-                    ) : (
-                      '연락처 미공개'
-                    )}
-                  </p>
-                  <div className="flex items-center">
-                    <p>
-                      <strong>사용자 평점</strong>:{' '}
-                    </p>
-                    <span className="flex">
-                      <Rating
-                        initialRating={1}
-                        fullSymbol={<img src={StarYellow} className="w-4 h-4" />}
-                        emptySymbol={<img src={StarYellow} className="w-4 h-4" />}
-                        stop={1}
-                        readonly
-                      />
-                      <p>{handleAvgRating(nearPlaceReviews, sd)}</p>&nbsp;
-                    </span>
-                    <span>&#40;{handleCountReviews(nearPlaceReviews, sd)}&#41;</span>
-                  </div>
-                  <div className="flex gap-1 py-1">
-                    {tag.length > 0 && (
-                      <p className="border-1 rounded-2xl px-2 py-1 text-white bg-color-teal-400">
-                        {tag.filter(tg => tg === extractCategory(sd))}
-                      </p>
-                    )}
-                    {filterKeyword(sd).map((key, i) => (
-                      <p
-                        key={i}
-                        className="border-1 rounded-2xl px-2 py-1 border-gray-700 bg-color-gray-50"
-                      >
-                        {key}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </>
+        <div className="flex">
+          <div className='flex-1'>
+            <SearchResultPageFilter search={searchData} />
+          </div>
+          <div className='flex-4'>
+            <SearchResultPageList
+              npr={nearPlaceReviews}
+              filter={filterKeyword}
+              tag={tag}
+              extract={extractCategory}
+              count={handleCountReviews}
+              search={searchData}
+              navi={handleNavigate}
+              avg={handleAvgRating}
+            />
+          </div>
+        </div>
       )}
     </div>
   )

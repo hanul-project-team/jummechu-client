@@ -1,0 +1,310 @@
+import React, { useEffect, useState, useRef } from 'react'
+import axios from 'axios'
+import Icon from '../../../assets/images/icon.png'
+import StarGray from '../../../assets/images/star-gray.png'
+import StarYellow from '../../../assets/images/star-yellow.png'
+import { toast } from 'react-toastify'
+import Rating from 'react-rating'
+import SortDropdown from '../../../features/place/components/reviews/sortButton/SortDropdown.jsx'
+
+const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
+  const [showReviewMore, setShowReviewMore] = useState(5)
+  let count = showReviewMore
+  const [openTabId, setOpenTabId] = useState(null)
+  const [showSort, setShowSort] = useState(false)
+  const [myReviews, setMyReviews] = useState([])
+  const [sortedReviews, setSortedReviews] = useState([])
+  const [currentSort, setCurrentSort] = useState('none')
+
+  const userReviewRef = useRef(null)
+  const dropdownRef = useRef(null)
+  // 리뷰 정보 불러오기
+  useEffect(() => {
+    if (currentTab === '리뷰' && myReviews !== userReviewRef.current) {
+      initialFetchFromDB()
+    }
+  }, [currentTab])
+  const initialFetchFromDB = () => {
+    axios
+      .get(`http://localhost:3000/review/read/user/${user.id}`, {
+        withCredentials: true,
+      })
+      .then(res => {
+        const data = res.data
+        if (data.length < 1 && userReviewRef.current) {
+          setMyReviews([])
+          userReviewRef.current = []
+          return
+        } else {
+          const sorted = data.sort((a, b) => a.createdAt - b.createdAt)
+          setMyReviews(sorted)
+          userReviewRef.current = sorted
+          return
+        }
+      })
+      .catch(err => {
+        toast.error(<div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>, {
+          position: 'top-center',
+        })
+        console.log(err)
+      })
+  }
+  // 리뷰 드랍다운 메뉴 바깥클릭 시 접기
+  useEffect(() => {
+    const handleClickOutside = e => {
+      const isOutside = Object.values(wrappers.current || {}).some(ref => {
+        return ref instanceof HTMLElement && ref.contains(e.target)
+      })
+      if (!isOutside) {
+        setOpenTabId(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+  // 리뷰 정렬 기능
+  useEffect(() => {
+    let sorted = [...myReviews]
+    switch (currentSort) {
+      case 'none':
+      default:
+        sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        break
+      case 'rating-high':
+        sorted.sort((a, b) => b.rating - a.rating)
+        break
+      case 'rating-low':
+        sorted.sort((a, b) => a.rating - b.rating)
+        break
+      case 'latest':
+        sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        break
+      case 'old':
+        sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+        break
+    }
+    setSortedReviews(sorted)
+
+    const handleClickOutside = e => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowSort(false)
+      }
+    }
+    if (showSort) {
+      document.addEventListener('mousedown', handleClickOutside)
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [currentSort, showSort, myReviews])
+
+  const handleShowUserTap = rv => {
+    setOpenTabId(prev => (prev === rv._id ? null : rv._id))
+  }
+  const handleDeleteMyReview = rv => {
+    const userId = user.id
+    if (userId) {
+      if (confirm('리뷰를 삭제하시겠습니까?')) {
+        axios
+          .delete(`http://localhost:3000/review/delete/${rv._id}`, {
+            withCredentials: true,
+            headers: {
+              user: userId,
+            },
+          })
+          .then(res => {
+            if (res.status === 200) {
+              //   console.log('리뷰 삭제 정보', res)
+              setSortedReviews(prev => {
+                const updated = prev.filter(review => review._id !== rv._id)
+                if (updated?.length <= 5) {
+                  setShowReviewMore(5)
+                  count = 5
+                } else {
+                  setShowReviewMore(5)
+                  count = 5
+                }
+                return updated
+              })
+            }
+          })
+          .catch(err => {
+            toast.error(
+              <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
+              {
+                position: 'top-center',
+              },
+            )
+          })
+      }
+    }
+  }
+  const handleSortChange = sort => {
+    if (currentSort !== sort) {
+      setCurrentSort(sort)
+      setShowSort(!showSort)
+    } else if (currentSort == sort) {
+      setCurrentSort('none')
+      setShowSort(!showSort)
+    }
+  }
+  const handleReviewDate = createdAt => {
+    const diff = new Date() - new Date(createdAt)
+    const day = Math.round(diff / (1000 * 60 * 60 * 24))
+    const minutes = Math.round(diff / (1000 * 60))
+    if (day / 365 >= 1) {
+      return <p>{Math.floor(day / 365)}년전</p>
+    } else if (day / 30 >= 1) {
+      return <p>{Math.floor(day / 30)}달전</p>
+    } else if (day / 30 < 1) {
+      if (day < 1) {
+        if (minutes < 60) {
+          return <p>{minutes}분 전</p>
+        }
+        return <p>{Math.floor(minutes / 60)}시간 전</p>
+      }
+      return <p>{day}일전</p>
+    }
+  }
+  const handleReviewshowReviewMore = () => {
+    if (sortedReviews?.length > 5) {
+      if (sortedReviews?.length - showReviewMore > 5) {
+        setShowReviewMore(prev => (prev += 5))
+        count = count + 5
+      } else if (
+        sortedReviews?.length - showReviewMore <= 5 &&
+        sortedReviews?.length - showReviewMore > 0
+      ) {
+        setShowReviewMore(sortedReviews?.length)
+        count = sortedReviews?.length
+      } else if (sortedReviews?.length === showReviewMore) {
+        setShowReviewMore(5)
+        count = 5
+      }
+    }
+  }
+  return (
+    <div>
+      {/* 정렬 버튼 */}
+      {sortedReviews?.length > 0 && (
+        <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative" ref={dropdownRef}>
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
+            onClick={() => setShowSort(!showSort)}
+          >
+            정렬
+          </button>
+          <SortDropdown handleSortChange={handleSortChange} showSort={showSort} />
+        </div>
+      )}
+      {/* 리뷰 영역 */}
+      {sortedReviews?.length > 0 ? (
+        sortedReviews.slice(0, count).map((rv, i) => (
+          <div
+            key={i}
+            className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto flex items-center relative"
+          >
+            <div className="flex-2">
+              <img src={Icon} alt="icon" className="sm:max-h-[80px] max-h-[40px]" />
+              <p>{rv?.user?.name}</p>
+              <div>
+                <Rating
+                  initialRating={rv.rating}
+                  emptySymbol={<img src={StarGray} alt="gray-star" className="w-6 h-6" />}
+                  fullSymbol={<img src={StarYellow} alt="yellow-star" className="w-6 h-6" />}
+                  readonly={true}
+                />
+              </div>
+            </div>
+            <div className="flex-4">
+              {/* 날짜, 더보기 메뉴 */}
+              <div
+                className="text-end absolute right-2 flex items-center gap-3 top-0"
+                ref={el => {
+                  if (el) {
+                    wrappers.current[rv._id] = el
+                  } else if(wrappers.current) {
+                    delete wrappers.current[rv._id]
+                  }
+                }}
+              >
+                <p>
+                  <strong>{rv?.store?.name}</strong>
+                </p>
+                <p>{rv?.createdAt?.split('T')[0]}</p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  onClick={() => handleShowUserTap(rv)}
+                  className={`size-8 mt-1 relative sm:p-[2px] active:bg-gray-300 sm:hover:bg-color-gray-300 rounded-3xl`}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+                  />
+                </svg>
+                <div
+                  className={`absolute right-[-1.5rem] top-10 max-w-fit p-3 bg-white transition-all duration-200 ease-in-out z-50 border-1 border-gray-300 rounded-xl ${openTabId === rv._id ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                >
+                  {rv?.user?._id === user.id && (
+                    <button
+                      className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl bg-color-red-700 sm:bg-red-600 sm:hover:bg-red-400 text-white"
+                      onClick={e => {
+                        e.stopPropagation()
+                        handleDeleteMyReview(rv)
+                      }}
+                    >
+                      삭제
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div>
+                <p className="indent-2">{rv?.comment}</p>
+              </div>
+              <div className="absolute right-2 bottom-0 pb-1">
+                {handleReviewDate(rv?.createdAt)}
+              </div>
+            </div>
+          </div>
+        ))
+      ) : (
+        <div className="text-center p-2">
+          <p className="loading-jump text-center p-3 sm:mb-[1000px]">
+            Loading
+            <span className="jump-dots">
+              <span>.</span>
+              <span>.</span>
+              <span>.</span>
+            </span>
+          </p>
+        </div>
+      )}
+      {/* 더보기 버튼 */}
+      {sortedReviews?.length > 0 && (
+        <div className="mx-auto max-w-fit my-2">
+          <button
+            type="button"
+            className={`${sortedReviews?.length <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
+            onClick={handleReviewshowReviewMore}
+          >
+            {sortedReviews?.length > 5 && sortedReviews?.length - count > 5
+              ? '5개 더보기'
+              : sortedReviews?.length - count <= 5 && sortedReviews?.length - count > 0
+                ? sortedReviews?.length - count + '개 더보기'
+                : sortedReviews?.length > 5 && count - sortedReviews?.length === 0 && '접기'}
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default MyPageFormReviews

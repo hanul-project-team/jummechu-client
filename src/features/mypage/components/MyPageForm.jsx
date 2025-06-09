@@ -1,10 +1,9 @@
-// src/pages/mypage/MyPageForm.jsx
-
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import Modal from '../components/UserModal.jsx'
 import PwdChangeModal from '../components/PwdChangeModal.jsx'
 import MypagesAuthForm from '../components/MypagesAuthForm.jsx'
+import MyPageFormReviews from './MyPageFormReviews.jsx'
 import axios from 'axios'
 import { useSelector } from 'react-redux'
 import '../MyPage.css'
@@ -14,9 +13,9 @@ const MyPageForm = () => {
   const location = useLocation()
   const user = useSelector(state => state.auth.user)
   const userId = user?.id
-
-  console.log('Redux에서 가져온 전체 user 객체:', user)
-  console.log('추출된 userId:', userId)
+  const wrapperRefs = useRef({})
+  // console.log('Redux에서 가져온 전체 user 객체:', user);
+  // console.log('추출된 userId:', userId);
 
   const [active, setActive] = useState(() => {
     if (location.state?.fromVerification && location.state?.activeTab) {
@@ -54,94 +53,38 @@ const MyPageForm = () => {
   const [recentStores, setRecentStores] = useState([])
   const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false)
 
-  const isBookmarked = item => {
-    return bookmarkedStoreIds.has(item._id)
-  }
-
-  const toggleBookmark = async item => {
-    if (!userId) {
-      alert('로그인 후 찜 기능을 이용할 수 있습니다.')
-      return
-    }
-    const storeId = item._id
-    try {
-      if (isBookmarked(item)) {
-        await axios.delete(`http://localhost:3000/auth/delete/${storeId}`, {
-          headers: { user: userId },
-          withCredentials: true,
-        })
-        setBookmarkedStoreIds(prev => {
-          const newSet = new Set(prev)
-          newSet.delete(storeId)
-          return newSet
-        })
-        alert('찜이 해제되었습니다.')
-      } else {
-        await axios.post(
-          `http://localhost:3000/auth/regist/${storeId}`,
-          { headers: { user: userId } },
-          { withCredentials: true },
-        )
-        setBookmarkedStoreIds(prev => new Set(prev).add(storeId))
-        alert('찜 목록에 추가되었습니다.')
-      }
-      fetchBookmarks()
-    } catch (error) {
-      console.error('찜 토글 실패:', error.response?.data || error.message)
-      alert('찜 기능 처리 중 오류가 발생했습니다.')
-    }
-  }
-
-  useEffect(() => {
-    const fetchBookmarks = async () => {
-      if (!userId) {
-        setBookmarkedStoreIds(new Set())
-        setBookmarkedStoresForDisplay([])
-        return
-      }
-      try {
-        const response = await axios.get(`http://localhost:3000/auth/read/${userId}`, {
-          withCredentials: true,
-        })
-        const fetchedStores = response.data || []
-        setBookmarkedStoresForDisplay(fetchedStores)
-        const ids = new Set(fetchedStores.map(store => store._id))
-        setBookmarkedStoreIds(ids)
-      } catch (error) {
-        console.error('찜 목록 불러오기 실패:', error.response?.data || error.message)
-        setBookmarkedStoreIds(new Set())
-        setBookmarkedStoresForDisplay([])
-      }
-    }
-
-    if (active === '찜') {
-      fetchBookmarks()
-    }
-  }, [active, userId])
-
   const handlePasswordChangeSuccess = () => {
-    alert('비밀번호가 성공적으로 변경되었습니다! 다시 로그인 해주세요.')
-    localStorage.removeItem('accessToken')
+    alert('비밀번호가 성공적으로 변경되었습니다! 다시 로그인 해주세요.') // 사용자에게 알림
+
+    // ★★★ 가장 중요한 부분: 기존 토큰 및 인증 상태 제거 ★★★
+    // 1. 로컬 스토리지에서 JWT 토큰 삭제 (혹은 쿠키)
+    localStorage.removeItem('accessToken') // 'accessToken'은 예시. 실제 토큰 저장 키에 맞게 수정
+    // localStorage.removeItem('refreshToken'); // Refresh Token도 있다면 함께 삭제
+
+    // 2. Redux (또는 다른 전역 상태 관리)에서 사용자 인증 정보 초기화
+    //    이 부분은 프로젝트의 Redux 설정에 따라 달라집니다.
+    //    예: dispatch(logoutUser()); // 인증 상태를 '로그아웃'으로 변경하는 Redux 액션 디스패치
+
+    // 3. 로그인 페이지로 리다이렉트 (강제 이동)
     navigate('/login')
   }
 
   useEffect(() => {
     const fetchRecentStores = async () => {
       if (!userId) {
-        console.log('사용자 ID가 없어 최근 기록을 불러올 수 없습니다.')
+        // console.log('사용자 ID가 없어 최근 기록을 불러올 수 없습니다.')
         setRecentStores([])
         return
       }
 
       try {
-        const response = await axios.get(
-          `http://localhost:3000/auth/recent-history?userId=${userId}`,
-          { withCredentials: true },
-        )
-        setRecentStores(response.data.recentViewedStores)
-        console.log('최근 본 가게 데이터:', response.data.recentViewedStores)
+        // const response = await axios.get(`http://localhost:3000/auth/recent-history?userId=${userId}`, {
+        //   withCredentials: true, // 세션 쿠키 등을 함께 전송해야 할 경우
+        // })
+        // setRecentStores(response.data.recentViewedStores)
+        // console.log('최근 본 가게 데이터:', response.data.recentViewedStores)
       } catch (error) {
-        console.error('최근 기록 불러오기 실패:', error)
+        // console.error('최근 기록 불러오기 실패:', error)
         setRecentStores([])
       }
     }
@@ -635,7 +578,11 @@ const MyPageForm = () => {
           </div>
         )
       case '리뷰':
-        return <p> 작성한 리뷰가 없습니다. </p>
+        return (
+          <div ref={wrapperRefs}>
+            <MyPageFormReviews user={user} currentTab="리뷰" wrappers={wrapperRefs} />
+          </div>
+        )
 
       case '음식점 추천(AI)':
         return (
@@ -888,15 +835,18 @@ const MyPageForm = () => {
           ))}
         </ul>
       </div>
+      {/* <hr className="border-gray-500 hr-line !important" /> */}
 
-      {showPasswordChangeModal && (
+      {showPasswordChangeModal && ( // 이 조건이 핵심입니다!
         <PwdChangeModal
           onClose={() => setShowPasswordChangeModal(false)}
           onPasswordChangeSuccess={handlePasswordChangeSuccess}
         />
       )}
 
-      <div className="max-w-5xl mx-auto px-6">{renderContent()}</div>
+      <div className="max-w-5xl mx-auto px-6">
+        {renderContent()} {/* 이제 active 탭에 따라 renderContent가 내부적으로 인증을 확인 */}
+      </div>
     </div>
   )
 }

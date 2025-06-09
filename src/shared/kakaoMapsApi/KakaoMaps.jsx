@@ -209,7 +209,7 @@ const KakaoMaps = () => {
                     </div>
                     <div className="flex-2 sm:flex-1 text-center">
                       <button
-                        className="button w-fit px-3 py-2 rounded-3xl sm:px-5 sm:py-2 bg-color-teal-400 focus:bg-teal-500 text-white hover:cursor-pointer"
+                        className="button w-fit px-3 py-2 rounded-3xl sm:px-5 sm:py-2 bg-color-teal-400 hover:bg-teal-400/90 active:bg-teal-500/80 text-white hover:cursor-pointer"
                         type="submit"
                       >
                         <p className="sm:w-max sm:text-sm text-xs">검색</p>

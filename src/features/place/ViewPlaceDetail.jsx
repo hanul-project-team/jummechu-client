@@ -35,7 +35,7 @@ const ViewPlaceDetail = () => {
       if (isDifferentStore || renewReviewInfo) {
         try {
           Promise.all([
-            axios.get(`http://localhost:3000/review/read/${placeDetail._id}`),
+            axios.get(`http://localhost:3000/review/read/store/${placeDetail._id}`),
             // axios.post(`http://localhost:3000/api/kakao/search/${placeDetail._id}`, {
             //   headers: {
             //     lat: placeDetail.latitude,

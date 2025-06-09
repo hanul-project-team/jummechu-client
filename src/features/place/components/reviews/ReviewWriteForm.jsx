@@ -9,17 +9,39 @@ import { toast } from 'react-toastify'
 const ReviewWriteForm = ({ user, placeDetail, setShowReviewForm, setCurrentSort }) => {
   const setReviewInfo = zustandStore(state => state.setReviewInfo)
   let MIN_LENGTH = 6
-  const [errorMessage, setErrorMessage] = useState('')
+  const [errorText, setErrorText] = useState('')
+  const [errorRating, setErrorRating] = useState('')
+  const [isRequested, setIsRequested] = useState(false)
   const [formData, setFormData] = useState({
     user: '',
     comment: '',
     rating: 0,
     store: '',
   })
-  const [starRating, setStarRating] = useState(0)
+  useEffect(() => {
+    if (isRequested === true) {
+      if (formData.comment.length < MIN_LENGTH) {
+        setErrorText(`최소 ${MIN_LENGTH}자 이상 입력해주세요. (현재 ${formData.comment.length}자)`)
+        if (errorText.length > 0) {
+          setErrorRating('')
+        }
+        return
+      } else {
+        setErrorText('')
+      }
+      if (formData?.rating === 0) {
+        if (formData.comment.length > MIN_LENGTH) {
+          setErrorText('')
+        }
+        setErrorRating('별점을 입력해주세요')
+        return
+      } else {
+        setErrorRating('')
+      }
+    }
+  }, [errorText.length, formData.comment.length, MIN_LENGTH, formData?.rating, isRequested])
 
   const handleRatingChange = rate => {
-    setStarRating(rate)
     setFormData({
       ...formData,
       rating: rate,
@@ -27,16 +49,7 @@ const ReviewWriteForm = ({ user, placeDetail, setShowReviewForm, setCurrentSort 
   }
   const handleSubmit = e => {
     e.preventDefault()
-    if (formData.comment.length < MIN_LENGTH) {
-      setErrorMessage(`최소 ${MIN_LENGTH}자 이상 입력해주세요. (현재 ${formData.comment.length}자)`)
-      return
-    } else {
-      setErrorMessage('')
-    }
-    if (formData?.rating < 1) {
-      alert('별점을 정확히 입력해주세요')
-      return
-    }
+    setIsRequested(true)
     if (user?.id && placeDetail?._id) {
       const updatedFormData = {
         ...formData,
@@ -44,38 +57,44 @@ const ReviewWriteForm = ({ user, placeDetail, setShowReviewForm, setCurrentSort 
         store: placeDetail._id,
       }
       // console.log(updatedFormData)
-      axios
-        .post('http://localhost:3000/review/regist', updatedFormData, {
-          withCredentials: true,
-        })
-        .then(
-          /* async */ res => {
-            // const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
-            if (res.status === 201) {
-              toast.success(
-                <div className="Toastify__toast-body cursor-default">
-                  리뷰가 등록되었습니다.
-                </div>,
-                {
-                  position: 'top-center',
-                },
-              )
-              setShowReviewForm(prev => !prev)
-              // await sleep(500)
-              setFormData({
-                ...formData,
-                rating: 0,
-                comment: '',
-              })
-              setStarRating(0)
-              setReviewInfo(res.data.data)
-              setCurrentSort('latest')
-            }
-          },
-        )
-        .catch(err => {
-          console.log(err)
-        })
+      if (formData.comment.length > MIN_LENGTH && formData?.rating > 0) {
+        axios
+          .post('http://localhost:3000/review/regist', updatedFormData, {
+            withCredentials: true,
+          })
+          .then(
+            /* async */ res => {
+              // const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+              if (res.status === 201) {
+                toast.success(
+                  <div className="Toastify__toast-body cursor-default">리뷰가 등록되었습니다.</div>,
+                  {
+                    position: 'top-center',
+                  },
+                )
+                setShowReviewForm(prev => !prev)
+                // await sleep(500)
+                setFormData({
+                  ...formData,
+                  rating: 0,
+                  comment: '',
+                })
+                setReviewInfo(res.data.data)
+                setCurrentSort('latest')
+              }
+            },
+            setIsRequested(false)
+          )
+          .catch(err => {
+            toast.error(
+              <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
+              {
+                position: 'top-center',
+              },
+            )
+            console.log(err)
+          })
+      }
     }
   }
   const handleChange = e => {
@@ -92,7 +111,9 @@ const ReviewWriteForm = ({ user, placeDetail, setShowReviewForm, setCurrentSort 
       rating: 0,
       store: '',
     })
-    setStarRating(0)
+    setErrorRating('')
+    setErrorText('')
+    setIsRequested(false)
   }
   return (
     <div className="max-w-3/5 mx-auto">
@@ -108,9 +129,10 @@ const ReviewWriteForm = ({ user, placeDetail, setShowReviewForm, setCurrentSort 
             onChange={handleChange}
             value={formData.comment}
             rows={5}
-            cols={50}
+            cols={60}
             className={`bg-white indent-1 max-h-auto max-w-fit min-w-1/5 resize-none mt-1 block w-full border rounded-md shadow-sm p-2 resize-none
-            ${errorMessage ? 'border-red-500 focus:ring-red-500' : 'border-color-gray-300 focus:ring-blue-500'}
+            ${errorText.length > 0 ? 'border-red-500 focus:ring-red-500' : 'border-color-gray-300 focus:ring-blue-500'}
+            ${errorRating.length > 0 ? 'border-red-500 focus:ring-red-500' : 'border-color-gray-300 focus:ring-blue-500'}
             focus:border-blue-500 focus:outline-none focus:ring-1`}
           />
         </div>
@@ -127,6 +149,8 @@ const ReviewWriteForm = ({ user, placeDetail, setShowReviewForm, setCurrentSort 
               initialRating={formData.rating}
             />
           </div>
+          {errorText && <p className="mt-1 text-sm text-red-600">{errorText}</p>}
+          {errorRating && <p className="mt-1 text-sm text-red-600">{errorRating}</p>}
           {/* 이하 버튼 */}
           <div>
             <button
@@ -144,7 +168,6 @@ const ReviewWriteForm = ({ user, placeDetail, setShowReviewForm, setCurrentSort 
             </button>
           </div>
         </div>
-        {errorMessage && <p className="mt-1 text-sm text-red-600">{errorMessage}</p>}
       </form>
     </div>
   )
