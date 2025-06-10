@@ -63,7 +63,7 @@ const ViewPlaceDetail = () => {
       }
     }
   }, [isBookmarked, placeDetail, userBookmark])
-  // console.log(placeDetail)
+
   const handleBookmark = () => {
     if (!user.role) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 하시겠습니까?')) {

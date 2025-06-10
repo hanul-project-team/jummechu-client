@@ -19,7 +19,9 @@ const MypagesAuthForm = ({ onAuthenticated, onCancel }) => {
     setError('')
     setMessage('')
 
+    // ★★★ 디버깅 로그 추가 시작 ★★★
     console.log('handleSubmit 함수 호출됨')
+    // ★★★ 디버깅 로그 추가 끝 ★★★
 
     if (!password) {
       setError('비밀번호를 입력해주세요.')
@@ -27,18 +29,23 @@ const MypagesAuthForm = ({ onAuthenticated, onCancel }) => {
     }
 
     try {
+      // ★★★ 디버깅 로그 추가 시작 ★★★
       console.log('비밀번호 인증 API 호출 시도 중...')
+      // ★★★ 디버깅 로그 추가 끝 ★★★
       const response = await axios.post(
         'http://localhost:3000/auth/verify-password',
         { password: password },
         { withCredentials: true },
       )
 
+      // ★★★ 디버깅 로그 추가 시작 ★★★
       console.log('API 응답 수신:', response)
+      // ★★★ 디버깅 로그 추가 끝 ★★★
 
       if (response.status === 200 && response.data.success) {
         setMessage('비밀번호 인증에 성공했습니다.')
         console.log('비밀번호 인증 성공! 부모 컴포넌트에 알림...')
+        // ★★★ navigate 대신 onAuthenticated 콜백 호출 ★★★
         if (onAuthenticated) {
           onAuthenticated()
         }

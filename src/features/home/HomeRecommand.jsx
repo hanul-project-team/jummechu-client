@@ -45,7 +45,7 @@ const HomeRecommand = () => {
               })
               .then(res => {
                 const data = res.data
-                // console.log(data) 
+                // console.log(data)
                 setNearPlaceReviews(data)
                 setIsLoading(false)
                 setCountDown(60)
@@ -132,7 +132,7 @@ const HomeRecommand = () => {
       return 0
     }
   }
-  
+
   return (
     <div className="max-xl:m-3">
       {isLoading === true ? (
