@@ -17,9 +17,6 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   const [sortedReviews, setSortedReviews] = useState([])
   const [currentSort, setCurrentSort] = useState('none')
   const [modifyReviewId, setModifyReviewId] = useState(null)
-  const [lineCounts, setLineCounts] = useState({})
-  const [expandedReviews, setExpandedReviews] = useState({})
-  const commentRefs = useRef({})
 
   const userReviewRef = useRef(null)
   const dropdownRef = useRef(null)
@@ -114,25 +111,6 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
       document.body.style.overflow = 'auto'
     }
   }, [modifyReviewId])
-  useEffect(() => {
-    if (!commentRefs.current || Object.keys(commentRefs.current).length === 0) {
-      return
-    }
-    const getLineCount = element => {
-      const lineHeight = parseFloat(getComputedStyle(element).lineHeight)
-      const height = element.offsetHeight
-      return Math.round(height / lineHeight)
-    }
-    const newLineCounts = {}
-    if (commentRefs) {
-      Object.entries(commentRefs.current).forEach(([id, el]) => {
-        if (el) {
-          newLineCounts[id] = getLineCount(el)
-        }
-      })
-    }
-    setLineCounts(newLineCounts)
-  }, [sortedReviews])
 
   const handleShowUserTap = rv => {
     setOpenTabId(prev => (prev === rv._id ? null : rv._id))
@@ -223,15 +201,10 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
     setModifyReviewId(rv?._id)
     setOpenTabId(null)
   }
-  const toggleExpand = reviewId => {
-    setExpandedReviews(prev => ({
-      ...prev,
-      [reviewId]: !prev[reviewId],
-    }))
-  }
+
   return (
-    <>
-      <div>
+    <div className="h-full">
+      <div className="h-full">
         {/* 정렬 버튼 */}
         {sortedReviews?.length > 0 && (
           <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative" ref={dropdownRef}>
@@ -249,9 +222,9 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
           sortedReviews.slice(0, count).map((rv, i) => (
             <div
               key={i}
-              className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto flex items-center relative"
+              className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto flex items-center relative h-full"
             >
-              <div className="flex-2 max-w-1/3">
+              <div className="flex-2 max-w-1/3 grow shrink-0 h-full sm:min-h-[128px]">
                 <img src={Icon} alt="icon" className="sm:max-h-[80px] max-h-[40px]" />
                 <p>{rv?.user?.name}</p>
                 <div>
@@ -263,10 +236,10 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                   />
                 </div>
               </div>
-              <div className="flex-4 max-w-2/3">
+              <div className="flex-4 max-w-2/3 flex flex-col justify-between grow shrink-0 h-full sm:min-h-[128px]">
                 {/* 날짜, 더보기 메뉴 */}
                 <div
-                  className="text-end absolute right-2 flex items-center gap-3 top-0"
+                  className="self-end flex items-center gap-3 top-0 relative"
                   ref={el => {
                     if (el) {
                       wrappers.current[rv._id] = el
@@ -295,7 +268,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                     />
                   </svg>
                   <div
-                    className={`absolute right-[-1.5rem] top-10 flex flex-col max-w-fit p-3 bg-white transition-all duration-200 ease-in-out z-50 border-1 border-gray-300 rounded-xl ${openTabId === rv._id ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                    className={`absolute right-[-1.5rem] top-9 flex flex-col max-w-fit p-3 bg-white transition-all duration-200 ease-in-out z-50 border-1 border-gray-300 rounded-xl ${openTabId === rv._id ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
                   >
                     <button
                       className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl bg-color-gray-700 sm:bg-gray-600 sm:hover:bg-gray-400 text-white"
@@ -314,32 +287,10 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                     </button>
                   </div>
                 </div>
-                <div className="mt-[2rem]">
-                  <p
-                    className={`indent-2 max-w-9/10 break-all ${expandedReviews[rv._id] ? '' : 'line-clamp-3'}`}
-                    ref={el => {
-                      if (el) {
-                        commentRefs.current[rv._id] = el
-                      } else delete commentRefs.current[rv._id]
-                    }}
-                  >
-                    {rv?.comment}
-                  </p>
-                  {/* 3줄이상 더보기 버튼 */}
-                  {(lineCounts[rv._id] ?? 0) >= 3 && (
-                    <div>
-                      <button
-                        onClick={() => toggleExpand(rv._id)}
-                        className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl bg-color-gray-900 hover:bg-gray-400 text-white"
-                      >
-                        {expandedReviews[rv._id] ? '간략히' : '더보기'}
-                      </button>
-                    </div>
-                  )}
+                <div className="flex items-end">
+                  <p className={`indent-2 max-w-9/10 break-all`}>{rv?.comment}</p>
                 </div>
-                <div className="absolute right-2 bottom-0 pb-1">
-                  {handleReviewDate(rv?.createdAt)}
-                </div>
+                <div className="flex justify-end">{handleReviewDate(rv?.createdAt)}</div>
               </div>
             </div>
           ))
@@ -383,7 +334,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
           />
         </div>
       )}
-    </>
+    </div>
   )
 }
 
