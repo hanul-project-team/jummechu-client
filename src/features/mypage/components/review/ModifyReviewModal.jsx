@@ -90,7 +90,7 @@ const ModifyReviewModal = ({ user, review, setModifyReviewId, setMyReviews }) =>
   return (
     <form
       key={review._id}
-      className="sm:max-w-2/3 sm:min-w-1/3 bg-color-gray-300 p-3 text-color-gray-900 rounded-[15px]"
+      className="sm:max-w-2/3 sm:min-w-1/3 bg-color-gray-300 p-3 text-color-gray-900 rounded-[15px] sm:min-h-1/3"
       onSubmit={e => handleSubmitModifiedReview(e, review)}
     >
       {/* 기타 정보 */}
@@ -107,13 +107,13 @@ const ModifyReviewModal = ({ user, review, setModifyReviewId, setMyReviews }) =>
       </div>
       <textarea
         name="comment"
-        rows={3}
-        cols={40}
+        rows={10}
+        cols={60}
         spellCheck={false}
         id={`comment-${review?._id}`}
         value={formData?.comment ?? review?.comment}
         onChange={e => handleChangeModifyReview(e, review)}
-        className={`resize-none focus:outline-none indent-2 border-gray-400/30 outline-none border-1 my-2
+        className={`resize-none focus:outline-none indent-2 border-gray-400/30 outline-none border-1 rounded-xl px-1 my-2
         ${
           isRequested === true && formData.comment.length < MIN_LENGTH
             ? 'border-red-500 focus:ring-red-500'
