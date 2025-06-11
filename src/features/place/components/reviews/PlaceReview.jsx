@@ -340,7 +340,7 @@ const PlaceReview = () => {
                 <div>
                   {/* 코멘트 */}
                   <div>
-                    <p className="indent-2 my-5 max-w-9/10">{rv.comment}</p>
+                    <p className="indent-2 my-5 max-w-9/10 break-all">{rv.comment}</p>
                   </div>
                   {/* 이미지 */}
                   {rv.attachments?.length > 0 && (
