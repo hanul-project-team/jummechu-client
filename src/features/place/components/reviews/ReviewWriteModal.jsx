@@ -273,6 +273,7 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                     onChange={handleFileChange}
                     multiple
                   />
+                  <p className='font-bold text-color-gray-700'>리뷰와 관련없는 이미지를 업로드시 삭제 될 수 있습니다.</p>
                 </div>
                 {/* 미리보기 */}
                 {fileData && fileData?.length > 0 && (
