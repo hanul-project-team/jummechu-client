@@ -1,21 +1,22 @@
 // src/pages/mypage/MyPageForm.jsx
 
-import React, { useState, useEffect, useRef } from 'react'; // useRef import 추가
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Modal from '../components/UserModal.jsx';
 import PwdChangeModal from '../components/PwdChangeModal.jsx';
 import MypagesAuthForm from '../components/MypagesAuthForm.jsx';
-import MyPageFormReviews from './MyPageFormReviews.jsx'; // MyPageFormReviews 임포트 추가
+import MypageFromReview from './MyPageFormReviews.jsx'
+// import zustandStore from '../../app/zustandStore.js';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import '../MyPage.css';
+import MyPageFormBookmark from './MyPageFormBookmark.jsx'
 
 const MyPageForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = useSelector(state => state.auth.user);
   const userId = user?.id;
-  const wrapperRefs = useRef({}); // useRef 훅 선언 추가
 
   console.log('Redux에서 가져온 전체 user 객체:', user);
   console.log('추출된 userId:', userId);
@@ -31,94 +32,93 @@ const MyPageForm = () => {
     return location.state?.fromVerification && location.state?.activeTab === '계정 설정';
   });
 
-  const [bookmarkedStoreIds, setBookmarkedStoreIds] = useState(new Set());
-  const [bookmarkedStoresForDisplay, setBookmarkedStoresForDisplay] = useState([]);
-
   const tabs = ['최근기록', '찜', '리뷰', '음식점 추천(AI)', '계정 설정'];
   const [isopen, setIsOpen] = useState(false);
   const [openai, setOpenAi] = useState([]); // AI 추천 음식점 목록
   const [dalleImage, setDalleImage] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // 로딩 상태
   const [userNickname, setUserNickname] = useState('로딩중');
   const [userEmail, setUserEmail] = useState('');
-  const [userPhone, setUserPhone] = useState(''); 
+  const [userPhone, setUserPhone] = useState('');
   const [userName, setUserName] = useState('');
   const [userProfileImage, setUserProfileImage] = useState(
     'http://localhost:3000/static/images/defaultProfileImg.jpg',
   );
-
-  // AI에 의해 변경된 키워드를 저장
-  const [aiModifiedKeywords, setAiModifiedKeywords] = useState(''); 
 
   const [tempNickname, setTempNickname] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [recentStores, setRecentStores] = useState([]);
   const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false);
 
+  const [bookmarkedStoreIds, setBookmarkedStoreIds] = useState(new Set());
+  const [bookmarkedStoresData, setBookmarkedStoresData] = useState([]);
+
+  // ★★★ AI 추천이 이미 성공적으로 로드되었는지 추적하는 상태 (중복 호출 방지) ★★★
+  const [hasFetchedAIRecommendations, setHasFetchedAIRecommendations] = useState(false);
+
+
+  // 찜 상태 확인 함수
   const isBookmarked = (item) => {
     return bookmarkedStoreIds.has(item._id);
   };
 
+  // 찜 토글 함수
   const toggleBookmark = async (item) => {
     if (!userId) {
       alert('로그인 후 찜 기능을 이용할 수 있습니다.');
       return;
     }
+
     const storeId = item._id;
     try {
-      if (isBookmarked(item)) {
-        await axios.delete(`http://localhost:3000/auth/delete/${storeId}`, {
-          headers: { user: userId },
-          withCredentials: true,
+      if (bookmarkedStoreIds.has(storeId)) {
+        await axios.delete(`http://localhost:3000/auth/bookmarks`, {
+          data: { storeId: storeId },
+          withCredentials: true
         });
         setBookmarkedStoreIds(prev => {
           const newSet = new Set(prev);
           newSet.delete(storeId);
           return newSet;
         });
+        setBookmarkedStoresData(prev => prev.filter(store => store._id !== storeId));
         alert('찜이 해제되었습니다.');
       } else {
-        // ★★★ axios.post 인자 전달 방식 수정: data는 빈 객체로, headers는 config 객체로 전달 ★★★
-        await axios.post(`http://localhost:3000/auth/regist/${storeId}`, 
-          {}, // body는 빈 객체로 보냄 (필요한 경우 여기에 데이터를 추가)
-          { headers: { user: userId }, withCredentials: true } // headers는 config 객체에 포함
-        );
+        await axios.post(`http://localhost:3000/auth/bookmarks`, { storeId: storeId }, {
+          withCredentials: true
+        });
         setBookmarkedStoreIds(prev => new Set(prev).add(storeId));
+        fetchBookmarks();
         alert('찜 목록에 추가되었습니다.');
       }
-      fetchBookmarks(); 
     } catch (error) {
-      console.error('찜 토글 실패:', error.response?.data || error.message);
+      console.error('찜 토글 실패:', error);
       alert('찜 기능 처리 중 오류가 발생했습니다.');
     }
   };
 
+  // 찜 목록 불러오기 useEffect
   useEffect(() => {
     const fetchBookmarks = async () => {
-      if (!userId) {
-        setBookmarkedStoreIds(new Set());
-        setBookmarkedStoresForDisplay([]);
-        return;
-      }
+      if (!userId) return;
       try {
-        const response = await axios.get(`http://localhost:3000/auth/read/${userId}`, {
+        const response = await axios.get(`http://localhost:3000/auth/bookmarks`, {
           withCredentials: true
         });
-        const fetchedStores = response.data || [];
-        setBookmarkedStoresForDisplay(fetchedStores);
-        const ids = new Set(fetchedStores.map(store => store._id));
-        setBookmarkedStoreIds(ids);
+        const fullStores = response.data.bookmarkedStores;
+        setBookmarkedStoresData(fullStores);
+        setBookmarkedStoreIds(new Set(fullStores.map(store => store._id)));
+        console.log("찜 목록 불러오기 성공:", fullStores);
       } catch (error) {
-        console.error('찜 목록 불러오기 실패:', error.response?.data || error.message);
+        console.error('찜 목록 불러오기 실패:', error);
+        setBookmarkedStoresData([]);
         setBookmarkedStoreIds(new Set());
-        setBookmarkedStoresForDisplay([]);
       }
     };
-    
     if (active === '찜') {
       fetchBookmarks();
     }
-  }, [active, userId]);
+  }, [userId, active]);
 
 
   const handlePasswordChangeSuccess = () => {
@@ -138,18 +138,19 @@ const MyPageForm = () => {
       try {
         const response = await axios.get(
           `http://localhost:3000/auth/recent-history?userId=${userId}`,
-          { withCredentials: true }
+          {
+            withCredentials: true,
+          },
         );
         setRecentStores(response.data.recentViewedStores);
-        console.log('최근 본 가게 데이터:', response.data.recentViewedStores);
+        console.log("최근 본 가게 데이터 로드 성공:", response.data.recentViewedStores);
       } catch (error) {
         console.error('최근 기록 불러오기 실패:', error);
         setRecentStores([]);
       }
     };
 
-    // ★★★ '최근기록' 탭과 '음식점 추천(AI)' 탭 모두에서 최근 기록을 불러오도록 수정 ★★★
-    if (active === '최근기록' || active === '음식점 추천(AI)') {
+    if (active === '최근기록') {
       fetchRecentStores();
     }
   }, [active, userId]);
@@ -161,7 +162,7 @@ const MyPageForm = () => {
         setIsAuthenticatedForSettings(true);
         navigate(location.pathname, { replace: true, state: {} });
       } else if (location.state.fromMyPage) {
-        // ...
+        // MyPageForm에서 인증 페이지로 이동했을 때의 처리 (이 경우, isAuthenticatedForSettings는 false 유지)
       }
     }
   }, [location.state, navigate, location.pathname]);
@@ -201,28 +202,28 @@ const MyPageForm = () => {
     fetchUserProfile();
   }, []);
 
-  const callOpenAi = async (prompt) => {
+  const callOpenAi = async (promptContent) => {
     try {
-      // ★★★ 수정: prompt를 headers가 아닌 request body로 전달 ★★★
       const response = await axios.post('http://localhost:3000/api/azure/openai', {
-        prompt: prompt, // 받은 prompt를 request body로 직접 전달
+        prompt: promptContent, // ★★★ 'prompt'를 req.body의 최상위 필드로 직접 보냅니다. ★★★
       });
       return response;
     } catch (error) {
-      console.error('OpenAI 호출 실패:', error);
-      return { data: null }; // 오류 발생 시 빈 데이터 반환
+      console.error('OpenAI 호출 실패:', error.response?.data || error.message);
+      return { data: null };
     }
   };
+
 
   const extractMostFrequentKeywords = data => {
     const allKeywords = {};
     data.forEach(item => {
       const keywordsArray = Array.isArray(item.keyword)
         ? item.keyword
-        : item.keyword ? item.keyword.split(',').map(k => k.trim()) : [];
+        : item.keyword ? String(item.keyword).split(',').map(k => k.trim()) : [];
 
       keywordsArray.forEach(keyword => {
-        if (keyword) { // 빈 문자열 키워드 방지
+        if (keyword) {
           allKeywords[keyword] = (allKeywords[keyword] || 0) + 1;
         }
       });
@@ -235,163 +236,129 @@ const MyPageForm = () => {
       }
     }
 
-    // ★★★ 수정: 키워드가 없으면 빈 문자열 반환 (단일 키워드 반환 목적) ★★★
-    if (maxCount === 0) return ''; 
-
-    const mostFrequent = Object.keys(allKeywords).filter(keyword => allKeywords[keyword] === maxCount);
-    // ★★★ 수정: 단일 키워드를 반환하도록 변경 (빈 배열일 경우에도 대비) ★★★
-    return mostFrequent.length > 0 ? mostFrequent[0] : '';
+    if (maxCount === 0) return [];
+    return Object.keys(allKeywords).filter(keyword => allKeywords[keyword] === maxCount);
   };
 
+
   useEffect(() => {
-    const fetchAIRecommendations = async () => {
-      if (active === '음식점 추천(AI)') {
-        // ★★★ recentStores가 비어있으면 바로 리턴 ★★★
-        if (recentStores.length === 0) {
-          console.log("AI 추천: 최근 본 가게 기록이 없어 추천을 시작할 수 없습니다.");
-          setOpenAi(["최근 본 가게 기록에서 추천 키워드를 찾을 수 없습니다."]);
-          setLoading(false);
-          setAiModifiedKeywords('');
-          return;
-        }
+    // '음식점 추천(AI)' 탭이 활성화될 때만 로직 실행
+    if (active === '음식점 추천(AI)') {
+      // 최근 본 가게 기록이 없으면 추천을 시작하지 않음
+      if (recentStores.length === 0) {
+        console.log("AI 추천: 최근 본 가게 기록이 없어 추천을 시작할 수 없습니다.");
+        setOpenAi(["최근 본 가게 기록에서 추천 키워드를 찾을 수 없습니다."]);
+        setLoading(false);
+        setHasFetchedAIRecommendations(false); // 재시도 가능하게 플래그 초기화
+        return;
+      }
+      // 이미 AI 추천을 불러왔거나 (hasFetchedAIRecommendations === true), 현재 로딩 중이면 함수를 종료
+      if (hasFetchedAIRecommendations || loading) {
+        console.log("AI 추천: 이미 불러온 추천이 있거나 로딩 중이므로 다시 불러오지 않습니다.");
+        return;
+      }
+
+      setLoading(true); // 로딩 시작
+      setHasFetchedAIRecommendations(true); // AI 추천 요청 시작 플래그 설정 (중복 호출 방지)
+      setOpenAi([]); // 이전 추천 초기화
+      setDalleImage(null); // 이전 이미지 초기화
+
+
+      const keywordsForAI = extractMostFrequentKeywords(recentStores);
+
+      if (keywordsForAI.length === 0) {
+        console.log("AI 추천: 최근 본 가게에서 유의미한 키워드를 추출할 수 없습니다.");
+        setOpenAi(["최근 본 가게 기록에서 추천 키워드를 찾을 수 없습니다."]);
+        setLoading(false);
+        return;
+      }
+
+      // ★★★ OpenAI 첫 번째 호출 (음식점 추천) 프롬프트 구성 ★★★
+      const restaurantRecommendationPrompt = `
+        다음은 사용자가 최근 방문한 음식점들의 키워드 목록입니다:
+        ${keywordsForAI.join(', ')}
         
-        // 데이터가 이미 로드되었고, 로딩 중이 아니라면 다시 요청하지 않습니다.
-        if (openai.length > 0 && aiModifiedKeywords !== '' && !loading) {
-            console.log("AI 추천: 이미 로드된 데이터가 있어 다시 요청하지 않습니다.");
-            setLoading(false); // 혹시 로딩 중이었으면 해제
-            return;
-        }
+        이 키워드들과 **가장 많이** 겹치는 음식점 3곳을 추천해 주세요.
+        
+        결과는 다음 필드를 포함하는 JSON 형식의 배열로만 출력하세요. JSON 외에는 아무 것도 출력하지 마세요.
+        각 추천 음식점은 다음 필드를 포함해야 합니다:
+        - title: 음식점 이름
+        - rating: 평점 (0.0 ~ 5.0)
+        - description: 음식점 설명 (간단하고 매력적인 한 줄)
+        - keyword: 이 음식점의 키워드 배열 (예: ["#떡볶이", "#분식", "#매운맛"])
+        - overlap_count: 겹치는 키워드 수
+      `;
 
-        setLoading(true);
-        setOpenAi([]);
-        setAiModifiedKeywords('');
-
-        try {
-          // ★★★ extractMostFrequentKeywords가 이제 단일 키워드 문자열을 반환 ★★★
-          const singleMostFrequentKeyword = extractMostFrequentKeywords(recentStores);
-
-          // ★★★ 수정: 키워드가 비어있을 경우 fallback 프롬프트 사용 ★★★
-          const baseKeyword = singleMostFrequentKeyword || '한국 음식'; // 키워드가 없으면 '한국 음식'으로 대체
-          console.log(`AI 추천: 추출된 기본 키워드 (또는 대체 키워드): "${baseKeyword}"`);
-
-          const keywordRefinementPrompt = `
-            다음은 사용자가 최근 방문한 음식점의 가장 대표적인 키워드입니다: "${baseKeyword}"
-            이 키워드를 분석하여 다음 음식 유형 카테고리 중 사용자의 선호도를 가장 잘 나타내는 하나의 키워드를 JSON 형식의 문자열로 추출해주세요: "한식", "일식", "양식", "중식", "야식", "간식", "카페/디저트".
-            만약 주어진 키워드가 위의 카테고리 중 어떤 것에도 명확하게 속하지 않는다고 판단되면, 원래 키워드 "${baseKeyword}"를 JSON 형식의 문자열로 그대로 반환하세요.
-            결과는 반드시 JSON 형식의 문자열로만 출력해야 합니다. JSON 외에는 아무 것도 출력하지 마세요.
-            예시 1 (카테고리 분류 가능): "한식"
-            예시 2 (카테고리 분류 불가능, 원본 키워드 사용): "곱창"
-          `;
-          console.log("OpenAI 키워드 정제 요청 프롬프트:", keywordRefinementPrompt);
-          const keywordResponse = await callOpenAi(keywordRefinementPrompt);
-
-          let refinedKeyword = '';
-          if (keywordResponse.data && typeof keywordResponse.data === 'string') {
-            try {
-              const parsedResult = JSON.parse(keywordResponse.data);
-
-              if (typeof parsedResult === 'string') {
-                refinedKeyword = parsedResult;
-              } else if (Array.isArray(parsedResult) && parsedResult.length > 0) {
-                refinedKeyword = parsedResult[0];
-              } else if (typeof parsedResult === 'object' && parsedResult !== null) {
-                if ('category' in parsedResult && typeof parsedResult.category === 'string') {
-                    refinedKeyword = parsedResult.category;
-                } else if ('keyword' in parsedResult && typeof parsedResult.keyword === 'string') {
-                    refinedKeyword = parsedResult.keyword;
-                } else {
-                    refinedKeyword = baseKeyword; // 예상치 못한 객체 형태면 원본 사용
-                }
-              } else {
-                refinedKeyword = baseKeyword;
+      callOpenAi(restaurantRecommendationPrompt)
+        .then(response => {
+          if (response && response.data) {
+            let parsedData = response.data;
+            // axios가 응답을 자동으로 JSON.parse 해주지만, 만약을 대비하여 한번 더 문자열인 경우 파싱 시도
+            if (typeof response.data === 'string') {
+              try {
+                parsedData = JSON.parse(response.data);
+              } catch (e) {
+                console.error("Client: AI 응답 JSON 파싱 오류 (문자열 -> JSON):", e);
+                setOpenAi(["AI 응답 형식이 유효하지 않아 추천을 표시할 수 없습니다."]);
+                setLoading(false);
+                return; // 여기서 함수 종료
               }
-              
-              console.log("OpenAI로부터 정제된 키워드:", refinedKeyword);
-              setAiModifiedKeywords(refinedKeyword);
-            } catch (parseErr) {
-              console.error("키워드 정제 OpenAI 응답 JSON 파싱 오류:", parseErr);
-              refinedKeyword = baseKeyword; // 파싱 실패 시 원본 키워드 사용
-              setAiModifiedKeywords(baseKeyword);
+            }
+
+            // 파싱된 데이터가 배열인지 확인
+            if (Array.isArray(parsedData) && parsedData.length > 0) {
+              setOpenAi(parsedData);
+              console.log("AI 추천 음식점 목록 설정:", parsedData);
+
+              // DALL-E 이미지 생성 (대표 키워드를 사용하여)
+              const keywordSummary = Array.from(new Set(keywordsForAI)).slice(0, 10).join(',');
+              return callDalleImage(keywordSummary); // Promise 반환하여 다음 .then()으로 체인
+            } else {
+              console.error("AI 응답이 예상된 배열 형태가 아닙니다:", parsedData);
+              setOpenAi(["AI 응답이 예상된 형식이 아니거나 비어있습니다."]);
+              setLoading(false);
             }
           } else {
-            console.warn("키워드 정제 OpenAI 응답이 유효하지 않거나 문자열이 아닙니다. 원본 키워드 사용.");
-            refinedKeyword = baseKeyword; // 응답 실패 시 원본 키워드 사용
-            setAiModifiedKeywords(baseKeyword);
-          }
-
-          const restaurantRecommendationPrompt = `
-            다음은 사용자가 선호하는 음식점의 대표 키워드입니다: "${refinedKeyword}"
-            이 키워드와 **가장 관련이 깊은** 음식점 3곳을 추천해 주세요.
-            각 추천 음식점은 다음 필드를 포함하는 JSON 형식의 배열로만 출력하세요:
-            - title: 음식점 이름 (예: "행복한 분식집")
-            - rating: 평점 (0.0 ~ 5.0, 예: 4.5)
-            - description: 음식점 설명 (간단하고 매력적인 한 줄, 예: "매콤한 떡볶이가 일품인 곳")
-            - keyword: 이 음식점의 키워드 배열 (예: ["#떡볶이", "#분식", "#매운맛"])
-            JSON 외에는 아무 것도 출력하지 마세요.
-          `;
-          console.log("OpenAI 음식점 추천 요청 프롬프트:", restaurantRecommendationPrompt);
-          const restaurantResponse = await callOpenAi(restaurantRecommendationPrompt);
-
-          if (restaurantResponse.data && typeof restaurantResponse.data === 'string') {
-            try {
-              const parsedRecommendations = JSON.parse(restaurantResponse.data);
-              // ★★★ AI 응답 유효성 검사 강화 ★★★
-              if (Array.isArray(parsedRecommendations) && parsedRecommendations.every(item => typeof item === 'object' && item !== null && 'title' in item)) {
-                setOpenAi(parsedRecommendations);
-              } else {
-                console.error("음식점 추천 OpenAI 응답 JSON 구조가 예상과 다릅니다:", parsedRecommendations);
-                setOpenAi(["추천을 처리하는 중 오류가 발생했습니다. (응답 구조 불일치)"]);
-              }
-            } catch (parseErr) {
-              console.error("음식점 추천 OpenAI 응답 JSON 파싱 오류:", parseErr);
-              setOpenAi(["추천을 처리하는 중 오류가 발생했습니다."]);
-            }
-          } else {
-            console.error("음식점 추천 OpenAI 응답 데이터가 유효하지 않습니다.");
+            console.error("AI 응답 데이터가 유효하지 않습니다.");
             setOpenAi(["AI 추천을 받을 수 없습니다."]);
+            setLoading(false);
           }
-
-          // DALL-E 이미지 생성 (대표 키워드를 사용하여)
-          if (refinedKeyword) {
-            const imageUrl = await callDalleImage(refinedKeyword);
+        })
+        .then(imageUrl => { // DALL-E 이미지 URL을 여기서 받음
+          if (imageUrl) {
             setDalleImage(imageUrl);
+            console.log("DALL-E 이미지 URL 설정:", imageUrl);
           } else {
             setDalleImage(null);
+            console.warn("DALL-E 이미지 생성 실패 또는 URL 없음.");
           }
-
-        } catch (apiError) {
-          console.error("AI 추천 전체 프로세스 실패:", apiError);
+        })
+        .catch(apiError => {
+          console.error("OpenAI/DALL-E API 호출 실패:", apiError);
           setOpenAi(["AI 추천을 불러오는 중 오류가 발생했습니다."]);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setDalleImage(null);
-        setLoading(false);
-        setOpenAi([]);
-        setAiModifiedKeywords('');
-      }
-    };
-    fetchAIRecommendations();
-  }, [active, recentStores, userId]); // 의존성 배열 유지
+          setDalleImage(null); // 에러 발생 시 이미지도 초기화
+        })
+        .finally(() => {
+          setLoading(false); // 모든 처리 완료 후 로딩 종료
+        });
+    } else {
+      // 다른 탭으로 이동할 때 AI 관련 상태 초기화
+      setDalleImage(null);
+      setLoading(false);
+      setOpenAi([]);
+      setHasFetchedAIRecommendations(false); // 다른 탭으로 가면 플래그 초기화하여 다음에 다시 불러올 수 있도록
+    }
+  }, [active, recentStores, hasFetchedAIRecommendations]); // ★★★ `loading` 제거 ★★★
 
   const callDalleImage = async keyword => {
     try {
-      // ★★★ DALL-E 프롬프트 개선 적용 ★★★
-      const improvedDallePrompt = `한종류의 완성된 음식을 해당 키워드 집중하여 관련된 식욕을 돋우는 선명한 색감과 생생한 질감 많은 채소나 재료보다는 **완성된 음식을 표현해주세요**, 그리고 따뜻하고 편안한 분위기가 느껴지도록 다음 키워드를 가지고 이미지를 생성해주세요. 키워드:${keyword}.`;
-
-      const res = await axios
-        .post('http://localhost:3000/api/azure/dalle', {
-          prompt: improvedDallePrompt, 
-        })
-        .catch(err => {
-          console.error(`DALL·E 호출 실패 (${keyword}):`, err);
-          return null;
-        });
-      console.log(res);
+      const res = await axios.post('http://localhost:3000/api/azure/dalle', {
+          prompt: `${keyword}에 대한 실제 음식 사진처럼 보이고, 시선을 사로잡는 아름다운 구도와 부드러운 자연광이 돋보이는 초고화질 음식 사진을 생성해주세요. 식욕을 돋우는 선명한 색감과 생생한 질감을 가진, 배경은 단순하게 처리하고 음식에 집중해주세요.`,
+      });
+      console.log("DALL-E 응답:", res);
       return res?.data?.imageUrl || null;
     } catch (err) {
-      console.error(`DALL·E 호출 실패 (${keyword}):`, err);
+      console.error(`DALL·E 호출 실패 (${keyword}):`, err.response?.data || err.message);
       return null;
     }
   };
@@ -415,19 +382,29 @@ const MyPageForm = () => {
     try {
       const response = await axios.put(
         'http://localhost:3000/auth/profile',
-        { nickname: tempNickname, email: userEmail, phone: userPhone },
-        { withCredentials: true }
+        {
+          nickname: tempNickname,
+          email: userEmail,
+          phone: userPhone,
+        },
+        {
+          withCredentials: true,
+        },
       );
+
       if (response.status === 200) {
         alert('프로필 정보가 성공적으로 업데이트되었습니다.');
         setUserNickname(tempNickname);
         setIsEditing(false);
+        console.log('프로필 업데이트 성공:', response.data);
       } else {
         alert(`프로필 정보 업데이트 실패: ${response.data.message || '알 수 없는 오류'}`);
       }
     } catch (error) {
       console.error('프로필 정보 업데이트 실패:', error);
-      alert(`프로필 정보 업데이트 중 오류가 발생했습니다: ${error.response?.data?.message || '서버 오류'}`);
+      alert(
+        `프로필 정보 업데이트 중 오류가 발생했습니다: ${error.response?.data?.message || '서버 오류'}`,
+      );
     }
   };
 
@@ -437,6 +414,7 @@ const MyPageForm = () => {
         const response = await axios.delete('http://localhost:3000/auth/account', {
           withCredentials: true,
         });
+
         if (response.status === 200) {
           alert('계정이 성공적으로 삭제되었습니다. 로그인 페이지로 이동합니다.');
           localStorage.removeItem('accessToken');
@@ -449,10 +427,12 @@ const MyPageForm = () => {
   };
 
   const renderContent = () => {
+    const mostFrequentKeywords = extractMostFrequentKeywords(recentStores);
+
     switch (active) {
       case '최근기록':
         return (
-          <div className="flex justify-center flex-col items-center"> {/* flex-col 및 items-center 추가 */}
+          <div className="flex justify-center ">
             {recentStores.length === 0 ? (
               <p className="py-5 text-gray-600">최근 본 가게 기록이 없습니다.</p>
             ) : (
@@ -534,7 +514,7 @@ const MyPageForm = () => {
                       </p>
                       {item.keyword && (
                         <p className="py-1 text-sm text-gray-700">
-                          {Array.isArray(item.keyword) ? item.keyword.map(k => `#${k}`).join(' ') : `#${item.keyword}`}
+                          #{Array.isArray(item.keyword) ? item.keyword.join(', #') : item.keyword}
                         </p>
                       )}
                       <p className="py-5 text-sm text-black">
@@ -559,89 +539,112 @@ const MyPageForm = () => {
 
       case '찜':
         return (
-          <div className="flex justify-center">
-            {bookmarkedStoresForDisplay.length === 0 ? (
-              <p className="py-5 text-gray-600">찜한 목록이 없습니다.</p>
-            ) : (
-              <ul className="flex flex-col gap-9 py-5">
-                {bookmarkedStoresForDisplay.map(shop => (
-                  <li key={shop._id} className="flex gap-4">
-                    <div className="relative w-[250px] h-[250px] cursor-pointer"
-                         onClick={() => navigate(`/place/${shop._id}`)}
-                    >
-                      <img
-                        src={shop.thumbnail || `https://picsum.photos/250/250?random=${shop._id}`}
-                        alt={shop.name}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={e => {
-                          e.stopPropagation();
-                          toggleBookmark(shop);
-                        }}
-                        className="absolute top-2 right-2 bg-white bg-opacity-70 rounded-full p-2 shadow hover:bg-opacity-100"
-                      >
-                        {isBookmarked(shop) ? (
-                          <span role="img" aria-label="bookmarked">
-                            ❤️
-                          </span>
-                        ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="size-6"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
-                            />
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                    <div className="py-3">
-                      <h4 className="text-lg font-semibold">{shop.name}</h4>
-                      {shop.rating && <p>{shop.rating} ⭐</p>}
-                      <p className="text-sm text-gray-500">{shop.address}</p>
-                      {shop.keywords && (
-                        <p className="text-sm text-gray-700">
-                          #{Array.isArray(shop.keywords) ? shop.keywords.join(', #') : shop.keywords}
-                        </p>
-                      )}
-                      <button
-                        onClick={e => {
-                          e.stopPropagation();
-                          navigate(`/place/${shop._id}`);
-                        }}
-                        className="mt-2 text-blue-500 hover:underline text-sm"
-                      >
-                        상세 보기
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          <MyPageFormBookmark />
+          // <div className="flex justify-center">
+          //   {bookmarkedStoresData.length === 0 ? (
+          //     <p>찜한 목록이 없습니다.</p>
+          //   ) : (
+          //     <ul className="flex flex-col gap-9 py-5">
+          //       {bookmarkedStoresData.map(item => (
+          //         <li key={item._id} className="flex gap-4">
+          //           <div className="relative w-[250px] h-[250px] cursor-pointer"
+          //                onClick={() => navigate(`/place/${item._id}`)}>
+          //             <img
+          //               src={item.thumbnail || `https://placehold.co/250x250/F0F0F0/6C757D?text=${encodeURIComponent(item.name.substring(0, Math.min(5, item.name.length)))}`}
+          //               alt={item.name}
+          //               className="w-full h-full object-cover rounded-lg"
+          //             />
+          //             <button
+          //               type="button"
+          //               onClick={(e) => { e.stopPropagation(); toggleBookmark(item); }}
+          //               className="absolute top-2 right-2 bg-white bg-opacity-70 rounded-full p-2 shadow hover:bg-opacity-100"
+          //             >
+          //               {isBookmarked(item) ? (
+          //                 <span role="img" aria-label="bookmarked">
+          //                   ❤️
+          //                 </span>
+          //               ) : (
+          //                 <svg
+          //                   xmlns="http://www.w3.org/2000/svg"
+          //                   fill="none"
+          //                   viewBox="0 0 24 24"
+          //                   strokeWidth={1.5}
+          //                   stroke="currentColor"
+          //                   className="size-6"
+          //                 >
+          //                   <path
+          //                     strokeLinecap="round"
+          //                     strokeLinejoin="round"
+          //                     d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+          //                   />
+          //                 </svg>
+          //               )}
+          //             </button>
+          //           </div>
+          //           <div className="py-3">
+          //             <h2 className="text-lg py-1 font-SinchonRhapsody flex">{item.name}</h2>
+          //             {item.rating && <p className="py-1">⭐{item.rating} </p>}
+          //             <p className="py-1 flex items-center text-sm text-gray-500">
+          //               <svg
+          //                 fill="#000000"
+          //                 height="25px"
+          //                 width="25px"
+          //                 version="1.1"
+          //                 id="Capa_1"
+          //                 xmlns="http://www.w3.org/2000/svg"
+          //                 xmlnsXlink="http://www.w3.org/1999/xlink"
+          //                 viewBox="0 0 487.379 487.379"
+          //                 xmlSpace="preserve"
+          //               >
+          //                 <g>
+          //                   <path
+          //                     d="M393.722,438.868L371.37,271.219h0.622c6.564,0,11.885-5.321,11.885-11.885V17.668c0-4.176-2.183-8.03-5.751-10.18
+          //                     c-3.569-2.152-7.998-2.279-11.679-0.335c-46.345,24.454-75.357,72.536-75.357,124.952v101.898
+          //                     c0,20.551,16.665,37.215,37.218,37.215h2.818l-22.352,167.649c-1.625,12.235,2.103,24.599,10.228,33.886
+          //                     c8.142,9.289,19.899,14.625,32.246,14.625c12.346,0,24.104-5.336,32.246-14.625C391.619,463.467,395.347,451.104,393.722,438.868z"
+          //                   />
+          //                   <path
+          //                     d="M207.482,0c-9.017,0-16.314,7.297-16.314,16.313v91.128h-16.314V16.313C174.854,7.297,167.557,0,158.54,0
+          //                     c-9.017,0-16.313,7.297-16.313,16.313v91.128h-16.314V16.313C125.912,7.297,118.615,0,109.599,0
+          //                     c-9.018,0-16.314,7.297-16.314,16.313v91.128v14.913v41.199c0,24.2,19.611,43.811,43.811,43.811h3.616L115,438.74
+          //                     c-1.37,12.378,2.596,24.758,10.896,34.047c8.317,9.287,20.186,14.592,32.645,14.592c12.459,0,24.327-5.305,32.645-14.592
+          //                     c8.301-9.289,12.267-21.669,10.896-34.047l-25.713-231.375h3.617c24.199,0,43.811-19.611,43.811-43.811v-41.199v-14.913V16.313
+          //                     C223.796,7.297,216.499,0,207.482,0z"
+          //                   />
+          //                 </g>
+          //               </svg>
+          //               {item.address}
+          //             </p>
+          //             {item.keyword && (
+          //               <p className="py-1 text-sm text-gray-700">
+          //                 #{Array.isArray(item.keyword) ? item.keyword.join(', #') : item.keyword}
+          //               </p>
+          //             )}
+          //             <button
+          //                 onClick={(e) => { e.stopPropagation(); navigate(`/place/${item._id}`); }}
+          //                 className="mt-2 text-blue-500 hover:underline text-sm"
+          //             >
+          //                 상세 보기
+          //             </button>
+          //           </div>
+          //         </li>
+          //       ))}
+          //     </ul>
+          //   )}
+          // </div>
         );
+
+
       case '리뷰':
         return (
-          // ★★★ MyPageFormReviews 컴포넌트 렌더링 ★★★
-          <div ref={wrapperRefs}>
-            <MyPageFormReviews user={user} currentTab="리뷰" wrappers={wrapperRefs} />
-          </div>
-        );
+          <MypageFromReview />
+        )
 
       case '음식점 추천(AI)':
         return (
           <div className="flex flex-col gap-5 items-center">
             {loading ? (
-              <p className="py-5 text-gray-600">AI 추천을 준비 중입니다...</p>
+              <p className="py-5 text-gray-600">추천 가게를 불러오는 중...</p>
             ) : (
               <>
                 {dalleImage && (
@@ -651,22 +654,18 @@ const MyPageForm = () => {
                     className="w-[300px] h-[300px] rounded shadow-md py-5"
                   />
                 )}
-                {openai?.length > 0 ? (
+                {openai && openai.length > 0 ? ( // openai가 배열이고 비어있지 않은지 확인
                   <ul className="flex flex-col gap-9 py-5">
-                    {/* 변경된 키워드 표시 */}
-                    {aiModifiedKeywords && (
-                      <p className="py-2 text-center text-lg font-semibold">
-                        {userNickname} 님의 취향은 "{aiModifiedKeywords}" 입니다!
-                      </p>
-                    )}
+                    <p className="py-2 text-center text-lg font-semibold">
+                      {userNickname} 님의 취향은 "{mostFrequentKeywords.join(', ')}" 입니다.
+                    </p>
                     <h2 className="text-center text-xl font-bold py-3">이 음식점들을 추천해요!</h2>
                     {openai.map((item, index) => (
-                      // ★★★ item.title이 undefined일 경우 'No Title'로 대체하여 오류 방지 ★★★
                       <li key={index} className="flex gap-4 p-4 border rounded-lg shadow-sm w-full max-w-md">
                         <div className="flex-shrink-0">
                            <img
-                            src={`https://placehold.co/100x100/F0F0F0/6C757D?text=${encodeURIComponent((item.title || 'No Title').substring(0, Math.min((item.title || 'No Title').length, 5)))}`}
-                            alt={item.title || '대체 이미지'}
+                            src={`https://placehold.co/100x100/F0F0F0/6C757D?text=${encodeURIComponent(item.title.substring(0, Math.min(5, item.title.length)))}`}
+                            alt={item.title}
                             className="w-24 h-24 object-cover rounded-md"
                           />
                         </div>
@@ -717,14 +716,14 @@ const MyPageForm = () => {
                     style={{ backgroundImage: `url('${userProfileImage}')` }}
                   />
                   <span
-                    className="absolute bottom-0 right-0 bg-white bg-opacity-70 rounded-full p-2 shadow hover:bg-opacity-100 cursor-pointer"
+                    className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow hover:bg-opacity-700 cursor-pointer"
                     onClick={() => setIsOpen(true)}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
-                      strokeWidth={1.5}
+                      strokeWidth="1.5"
                       stroke="currentColor"
                       className="size-6"
                     >

@@ -47,7 +47,7 @@ const ViewPlace = () => {
       try {
         console.log(`ViewPlace: 백엔드에서 placeDetail (ID: ${storeId})을 불러오는 중...`);
         // /api/places/:id 엔드포인트에서 상세 정보를 반환한다고 가정합니다.
-        const response = await axios.get(`http://localhost:3000/api/places/${storeId}`);
+        const response = await axios.get(`http://localhost:3000/auth/places/${storeId}`);
         
         if (response.data.success && response.data.place) {
           setPlaceDetail(response.data.place);
