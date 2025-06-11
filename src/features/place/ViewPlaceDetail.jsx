@@ -25,7 +25,7 @@ const ViewPlaceDetail = () => {
   const isBookmarked = zustandUser(state => state.isBookmarked)
 
   useEffect(() => {
-    if (placeDetail !== null || placeDetail !== undefined) {
+    if (placeDetail !== null && placeDetail !== undefined) {
       const storeId = placeDetail._id
       const isDifferentStore = lastStoreRef.current !== placeDetail._id
       if (lastStoreRef.current === storeId) {
