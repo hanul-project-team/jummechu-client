@@ -63,6 +63,9 @@ const KakaoMaps = () => {
           setTimeout(() => getNowLocation(retryCountRef, 1000))
         } else {
           console.log('위치 정보 획득 실패 및 재시도 실패')
+          if (err.code === 1) {
+            alert('위치 권한이 거부 되었습니다. 사용자 권한을 설정해주세요.')
+          }
         }
       },
       { enableHighAccuracy: true },
@@ -175,7 +178,7 @@ const KakaoMaps = () => {
       {isRoot === true ? (
         <>
           <div className="md:max-w-1/2 mx-auto">
-          <h1 className="text-center text-4xl sm:text-5xl font-bold">오늘 뭐 먹지?</h1>
+            <h1 className="text-center text-4xl sm:text-5xl font-bold">오늘 뭐 먹지?</h1>
             <form className="p-3 my-3" onSubmit={handleSubmit} autoComplete="off">
               <fieldset>
                 <legend className="hidden">kakao search</legend>

@@ -1,7 +1,7 @@
 const SortDropdown = ({ handleSortChange, showSort }) => {
   return (
     <div
-      className={`absolute right-[-1.5rem] flex flex-col rounded-xl overflow-hidden z-50
+      className={`absolute right-[-1.35rem] flex flex-col rounded-xl overflow-hidden z-50
           transform transition-all duration-300 ease-out bg-color-gray-50 p-2 border-color-gray-300 border-1
           ${showSort ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0 pointer-events-none'}
           `}
