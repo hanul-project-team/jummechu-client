@@ -10,6 +10,7 @@ const KakaoMaps = () => {
   const setUserNearPlace = zustandStore(state => state.setUserNearPlace)
   const userNearPlace = zustandStore(state => state.userNearPlace)
   const setSearchData = zustandStore(state => state.setSearchData)
+  const isLoading = zustandStore(state => state.isLoading)
 
   const intervalRef = useRef(null)
   const [lat, setLat] = useState('')
@@ -77,7 +78,7 @@ const KakaoMaps = () => {
       console.warn('유효하지 않은 center 값으로 getKakaoData 호출됨:', center)
       return
     }
-    if (userNearPlace?.length === 0 || !userNearPlace) {
+    if (isLoading === false && (userNearPlace?.length === 0 || !userNearPlace)) {
       axios
         .post(
           'http://localhost:3000/api/kakao/user/nearplace',
