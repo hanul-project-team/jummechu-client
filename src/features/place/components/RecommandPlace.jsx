@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom'
 
 const RecommandPlace = ({ placeDetail }) => {
   const userNearPlace = zustandStore(state => state.userNearPlace)
+  const searchNearData = zustandStore(state => state.searchNearData)
   const navigate = useNavigate()
   const handleNavigate = snd => {
     try {
@@ -38,7 +39,7 @@ const RecommandPlace = ({ placeDetail }) => {
                 // .filter(snd => snd.id !== placeDetail._id)
                 .map((snd, i) => {
                   return (
-                    <SwiperSlide key={i} className="gap-3 p-2 text-center !mr-0">
+                    <SwiperSlide key={i} className="gap-3 p-2 sm:max-w-[14rem] text-center !mr-0">
                       <div key={i}>
                         <div className="hover:cursor-pointer" onClick={() => handleNavigate(snd)}>
                           <img src={Icon} alt="icon" className="w-[100px] h-[100px] mx-auto" />
