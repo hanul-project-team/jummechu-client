@@ -103,14 +103,11 @@ const MainHeaderTop = () => {
         <div className="flex gap-3">
           <Link
             to="/login"
-            className="border text-sm sm:text-lg border-color-gray-700 bg-white text-color-gray-800 rounded-2xl p-2"
+            className="font-semibold border text-sm sm:text-base border-color-gray-300 bg-white text-color-gray-800 rounded-2xl p-2"
           >
             로그인
           </Link>
-          <Link
-            to="/regist/type"
-            className="bg-color-teal-400 text-sm sm:text-lg text-white  rounded-2xl p-2"
-          >
+          <Link to="/regist/type" className="font-semibold bg-color-teal-400 text-sm sm:text-base text-white  rounded-2xl p-2">
             회원가입
           </Link>
         </div>

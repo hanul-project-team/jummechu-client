@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import RegistTypeForm from '../../features/auth/components/regist/RegistTypeForm'
 import TermsForm from '../../features/auth/components/regist/TermsForm'
 import RegistDetailsForm from '../../features/auth/components/regist/RegistDetailsForm'
@@ -12,8 +13,14 @@ const RegistPage = () => {
     if (!step) {
       navigate('/regist/type')
     } else if (step === 'terms' && !localStorage.getItem('role')) {
+      toast.error(<div className="Toastify__toast-body cursor-default">잘못된 접근입니다</div>, {
+        position: 'top-center',
+      })
       navigate('/regist/type')
     } else if (step === 'details' && !localStorage.getItem('termsAgreement')) {
+      toast.error(<div className="Toastify__toast-body cursor-default">잘못된 접근입니다</div>, {
+        position: 'top-center',
+      })
       navigate('/regist/type')
     }
   }, [step, navigate])
@@ -22,12 +29,13 @@ const RegistPage = () => {
       localStorage.removeItem('role')
       localStorage.removeItem('termsAgreement')
     }
-  },[])
+  }, [])
   const nextStep = () => {
-    if( step === 'type') navigate('/regist/terms')
+    if (step === 'type') navigate('/regist/terms')
     else if (step === 'terms') navigate('/regist/details')
   }
-
+  if(step === 'terms' && !localStorage.getItem('role')) return null
+  if(step === 'details' && !localStorage.getItem('termsAgreement')) return null
   return (
     <main className="container mx-auto max-w-5xl flex justify-center px-6 ">
       <section className={`${!(step === 'type') && 'max-w-sm'} w-full flex flex-col`}>
@@ -53,7 +61,9 @@ const RegistPage = () => {
         )}
         {step === 'details' && (
           <div className="flex flex-col gap-10">
-            <h2 className="text-center text-2xl font-semibold cursor-default">회원 정보를 입력해주세요</h2>
+            <h2 className="text-center text-2xl font-semibold cursor-default">
+              회원 정보를 입력해주세요
+            </h2>
             <RegistDetailsForm />
           </div>
         )}

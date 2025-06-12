@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { restoreLogin } from '../features/auth/slice/authSlice'
 import Mainlayout from '../layouts/Mainlayout'
@@ -30,15 +30,15 @@ const App = () => {
       </Route>
       <Route element={<Simplelayout />}>
         <Route path="login" element={<LoginPage />} />
+        <Route path="regist" element={<Navigate to="/regist/type" replace />} />
         <Route path="regist/:step" element={<RegistPage />} />
         <Route path="find_account" element={<FindAccountPage />} />
-        <Route path="find_account/result" element={<FindAccountResultPage />} />
+        <Route path="find_account/result" element={<FindAccountResultPage  />} />
         <Route path="find_account/reset" element={<ResetPasswordPage />} />
       </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
 
 export default App
-
-
