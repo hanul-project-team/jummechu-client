@@ -3,42 +3,58 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import Icon from '../../../assets/images/icon.png'
 import axios from 'axios'
 import 'swiper/css'
+import { toast } from 'react-toastify'
 import zustandStore from '../../../app/zustandStore.js'
 import { useNavigate } from 'react-router-dom'
 
 const RecommandPlace = ({ placeDetail }) => {
+  const setIsLoading = zustandStore(state => state.setIsLoading)
   const userNearPlace = zustandStore(state => state.userNearPlace)
+  const searchNearData = zustandStore(state => state.searchNearData)
   const navigate = useNavigate()
   const handleNavigate = snd => {
-    try {
-      axios
-        .post('http://localhost:3000/store/save', snd)
-        .then(res => {
-          const place = res.data
-          navigate(`/place/${place._id}`, { state: place })
-        })
-        .catch(err => {
-          console.log('axios 요청 실패', err)
-        })
-    } catch (err) {
-      console.log('try 실패', err)
+    console.log(snd)
+    if (snd) {
+      axios.post('http://localhost:3000/store/storeInfo', snd).then(res => {
+        if (res.status === 200) {
+          const data = res.data
+          navigate(`/place/${data._id}`, { state: data })
+        } else if (res.status === 400) {
+          setIsLoading(true)
+          axios
+            .post('http://localhost:3000/store/save', snd)
+            .then(res => {
+              const data = res.data
+              navigate(`/place/${data._id}`, { state: data })
+              setIsLoading(false)
+            })
+            .catch(err => {
+              toast.error(
+                <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
+                {
+                  position: 'top-center',
+                },
+              )
+            })
+        }
+      })
     }
   }
 
   return (
     <>
-      {userNearPlace.filter(snd => snd.id !== placeDetail.id).length > 0 && (
+      {searchNearData.filter(snd => snd.id !== placeDetail.id).length > 0 && (
         <div className="max-w-full my-5 min-h-[200px]">
           <div className="text-start">
             <p className="font-bold text-lg">다른 장소도 둘러보세요!</p>
           </div>
-          {userNearPlace && (
+          {searchNearData && (
             <Swiper spaceBetween={50} slidesPerView={3} className="border-t-1 border-gray-700 flex">
-              {userNearPlace
+              {searchNearData
                 // .filter(snd => snd.id !== placeDetail._id)
                 .map((snd, i) => {
                   return (
-                    <SwiperSlide key={i} className="gap-3 p-2 text-center !mr-0">
+                    <SwiperSlide key={i} className="gap-3 p-2 sm:max-w-[14rem] text-center !mr-0">
                       <div key={i}>
                         <div className="hover:cursor-pointer" onClick={() => handleNavigate(snd)}>
                           <img src={Icon} alt="icon" className="w-[100px] h-[100px] mx-auto" />

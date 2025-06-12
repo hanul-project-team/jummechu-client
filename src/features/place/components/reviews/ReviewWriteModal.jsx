@@ -208,7 +208,6 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                 {/* 별점 */}
                 <p className="text-2xl mt-10">얼마나 만족스러우셨나요?</p>
                 <div className="flex justify-center">
-                  {/* 별점 */}
                   <Rating
                     name="rating"
                     start={0}

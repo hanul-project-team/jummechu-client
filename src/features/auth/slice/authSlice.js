@@ -36,10 +36,7 @@ const authSlice = createSlice({
     },
     logout: state => {
       state.isAuthenticated = false
-      state.user.id = ''
-      state.user.name = ''
-      state.user.profileImage = ''
-      state.user.role = ''
+      state.user = initialState.user
     },
   },
   extraReducers: build => {

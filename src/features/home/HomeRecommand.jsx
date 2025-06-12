@@ -44,9 +44,11 @@ const HomeRecommand = () => {
                 places: places,
               })
               .then(res => {
-                const data = res.data
+                const data = res.data.data
+                const reviews = data.allReivews
+                const stores = data.allStores
                 // console.log(data)
-                setNearPlaceReviews(data)
+                setNearPlaceReviews(reviews)
                 setIsLoading(false)
                 setCountDown(60)
               })

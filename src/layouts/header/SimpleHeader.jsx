@@ -4,7 +4,7 @@ import LogoBig from '../../assets/images/logo-big.png'
 
 const SimpleHeader = () => {
   return (
-    <header className='py-10'>
+    <header className='py-10 mb-10'>
       <div className="container mx-auto max-w-5xl px-6">
         <div className='flex justify-center'>
             <Link to='/' className='outline-hidden'>

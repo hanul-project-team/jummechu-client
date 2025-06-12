@@ -216,7 +216,7 @@ const PlaceReview = () => {
           <span className="text-2xl italic">고객 리뷰</span>
         </div>
         {/* 리뷰 통계 */}
-        <div className="flex justify-between max-w-3/5 mx-auto items-center">
+        <div className="flex justify-between sm:max-w-5xl px-6 mx-auto items-center">
           <div>
             <p className="font-bold text-3xl">{handleTotalRating(reviewInfo)}</p>
             <div className="flex items-center">
@@ -261,7 +261,7 @@ const PlaceReview = () => {
         </div>
       </div>
       {/* 리뷰 보이는곳 */}
-      <div className="container sm:max-w-3/5 max-w-5/6 mx-auto">
+      <div className="container sm:max-w-5xl px-6 max-w-3xl mx-auto">
         {/* 정렬 버튼 */}
         {sortedReviews?.length > 0 && (
           <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative" ref={dropdownRef}>
@@ -340,7 +340,7 @@ const PlaceReview = () => {
                 <div>
                   {/* 코멘트 */}
                   <div>
-                    <p className="indent-2 my-5 max-w-9/10">{rv.comment}</p>
+                    <p className="indent-2 my-5 max-w-9/10 break-all">{rv.comment}</p>
                   </div>
                   {/* 이미지 */}
                   {rv.attachments?.length > 0 && (

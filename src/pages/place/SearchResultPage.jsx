@@ -122,9 +122,9 @@ const SearchResult = () => {
         </p>
       ) : (
         <div className="flex">
-          <div className='flex-1'>
+          {/* <div className='flex-1'>
             <SearchResultPageFilter search={searchData} />
-          </div>
+          </div> */}
           <div className='flex-4'>
             <SearchResultPageList
               npr={nearPlaceReviews}

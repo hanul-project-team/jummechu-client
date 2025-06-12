@@ -8,6 +8,7 @@ import Rating from 'react-rating'
 import SortDropdown from '../../../features/place/components/reviews/sortButton/SortDropdown.jsx'
 import ModifyReviewModal from './review/ModifyReviewModal.jsx'
 import ReviewImageSrc from '../../../shared/ReviewImageSrc.jsx'
+import { useNavigate } from 'react-router-dom'
 
 const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   const [showReviewMore, setShowReviewMore] = useState(5)
@@ -19,6 +20,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   const [currentSort, setCurrentSort] = useState('none')
   const [modifyReviewId, setModifyReviewId] = useState(null)
 
+  const navigate = useNavigate()
   const userReviewRef = useRef(null)
   const dropdownRef = useRef(null)
 
@@ -202,7 +204,9 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
     setModifyReviewId(rv?._id)
     setOpenTabId(null)
   }
-
+  const handleNavigateStore = rv => {
+    navigate(`/place/${rv.store._id}`)
+  }
   return (
     <div className="h-full">
       <div className="h-full">
@@ -231,6 +235,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                 <div className="w-full h-full flex justify-between items-start">
                   <div className="flex items-center gap-3">
                     <img src={Icon} alt="icon" className="sm:max-h-[80px] max-h-[40px]" />
+                    {/* 사용자명, 별점 */}
                     <div>
                       <p>{rv?.user?.name}</p>
                       <Rating
@@ -241,7 +246,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                       />
                     </div>
                   </div>
-                  {/* 날짜, 더보기 메뉴 */}
+                  {/* 날짜, 가게명, 더보기 메뉴 */}
                   <div
                     className="flex items-center gap-3 top-0 relative"
                     ref={el => {
@@ -252,7 +257,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                       }
                     }}
                   >
-                    <p>
+                    <p onClick={() => handleNavigateStore(rv)} className="hover:cursor-pointer">
                       <strong>{rv?.store?.name}</strong>
                     </p>
                     <p>{rv?.createdAt?.split('T')[0]}</p>
@@ -292,6 +297,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                     </div>
                   </div>
                 </div>
+                {/* 리뷰 내용 */}
                 <div className="h-full">
                   <div className="flex items-end">
                     <p className={`indent-2 max-w-9/10 break-all`}>{rv?.comment}</p>
@@ -340,7 +346,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
       </div>
       {/* 리뷰 수정 모달 */}
       {modifyReviewId && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex justify-center items-center text-color-gray-300">
+        <div className="fixed inset-0 bg-black/70 z-50 flex justify-center items-center text-color-gray-900">
           <ModifyReviewModal
             user={user}
             review={sortedReviews.find(rv => rv?._id === modifyReviewId)}
