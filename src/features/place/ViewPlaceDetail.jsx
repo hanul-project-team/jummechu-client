@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import Icon from '../../assets/images/icon.png'
 import '../../assets/styles/global.css'
 import axios from 'axios'
@@ -9,11 +9,13 @@ import { useSelector } from 'react-redux'
 import PlaceReview from './components/reviews/PlaceReview.jsx'
 import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
 import RecommandPlace from './components/RecommandPlace.jsx'
+import { toast } from 'react-toastify'
 
 const ViewPlaceDetail = () => {
   const setReviewInfo = zustandStore(state => state.setReviewInfo)
   const reviewInfo = zustandStore(state => state.reviewInfo)
   const placeDetail = zustandStore(state => state.placeDetail)
+  const setPlaceDetail = zustandStore(state => state.setPlaceDetail)
   const navigate = useNavigate()
   const setSearchNearData = zustandStore(state => state.setSearchNearData)
   const searchNearData = zustandStore(state => state.searchNearData)
@@ -23,7 +25,11 @@ const ViewPlaceDetail = () => {
   const setUserBookmark = zustandUser(state => state.setUserBookmark)
   const userBookmark = zustandUser(state => state.userBookmark)
   const isBookmarked = zustandUser(state => state.isBookmarked)
+  const [linkCopied, setLinkCopied] = useState(false)
+  const rootLocation = `${window.location.origin}`
+  const location = useLocation()
 
+  /* 정보 호출 및 갱신 */
   useEffect(() => {
     if (placeDetail !== null && placeDetail !== undefined) {
       const storeId = placeDetail._id
@@ -63,6 +69,25 @@ const ViewPlaceDetail = () => {
       }
     }
   }, [isBookmarked, placeDetail, userBookmark])
+
+  /* placeDetail이 없을시 불러오는 코드 */
+  useEffect(() => {
+    if (placeDetail?.length < 1) {
+      const placeLink = location.pathname
+      const placeId = placeLink.split('/')[2]
+      axios
+        .get(`http://localhost:3000/store/read/${placeId}`, {
+          withCredentials: true,
+        })
+        .then(res => {
+          const data = res.data
+          setPlaceDetail(data)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    }
+  }, [location.pathname, placeDetail])
 
   const handleBookmark = () => {
     if (!user.role) {
@@ -120,35 +145,87 @@ const ViewPlaceDetail = () => {
       return 0
     }
   }
+  const handleCopyClipBoard = async () => {
+    let shareLink = rootLocation + `${location.pathname}`
+    try {
+      await navigator.clipboard.writeText(shareLink)
+      toast.success(
+        <div className="Toastify__toast-body cursor-default">링크를 복사했습니다.</div>,
+        {
+          position: 'top-center',
+        },
+      )
+    } catch (err) {
+      toast.error(<div className="Toastify__toast-body cursor-default">다시 시도해 주세요.</div>, {
+        position: 'top-center',
+      })
+    }
+  }
   const totalRate = reviewInfo ? handleTotalRating(reviewInfo) : 0
   return (
     <div>
       <KakaoMaps />
-      <div className="container md:max-w-3/5 mx-auto p-3 m-3">
+      <div className="container md:max-w-5xl px-6 mx-auto p-3 m-3">
         {/* 타이틀 & 북마크 영역 */}
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">{placeDetail.name}</h1>
-          {/* 북마크 */}
-          <div
-            className="flex border-1 py-2 px-3 rounded-3xl hover:cursor-pointer"
-            onClick={handleBookmark}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill={`${isBookmarked === true ? 'red' : 'none'}`}
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className={`size-6 transition-all duration-300 ${isBookmarked ? 'text-red-500 scale-120' : 'text-black/80 scale-100'}`}
+          <div className="flex items-center gap-1">
+            {/* 북마크 */}
+            <div
+              className="flex border-1 py-2 px-3 rounded-3xl hover:cursor-pointer"
+              onClick={handleBookmark}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
-              />
-            </svg>
-            {/* 북마크 하트 아이콘 */}
-            <p className="font-bold">저장</p>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill={`${isBookmarked === true ? 'red' : 'none'}`}
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className={`size-6 transition-all duration-300 ${isBookmarked ? 'text-red-500 scale-120' : 'text-black/80 scale-100'}`}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
+                />
+              </svg>
+              {/* 북마크 하트 아이콘 */}
+              <p className="font-bold">저장</p>
+            </div>
+            {/* 링크 공유 */}
+            <div
+              className="flex border-1 py-2 px-3 rounded-3xl hover:cursor-pointer"
+              onClick={handleCopyClipBoard}
+            >
+              {linkCopied === false ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-5"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+              )}
+              <p className="font-bold">공유</p>
+            </div>
           </div>
         </div>
         <div>
