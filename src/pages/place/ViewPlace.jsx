@@ -15,10 +15,6 @@ const ViewPlace = () => {
   const userId = user?.id;
 
   // --- 1. location.state에 데이터가 있을 경우 Zustand 스토어에 placeDetail을 설정합니다. ---
-  const location = useLocation()
-  const setPlaceDetail = zustandStore(state => state.setPlaceDetail)
-  const setIsLoading = zustandStore(state => state.setIsLoading)
-  
   useEffect(() => {
     // placeDetail이 이미 Zustand 스토어에 있고, 현재 location.state의 _id와 같다면 업데이트를 건너뜜
     const currentPlaceDetailInStore = zustandStore.getState().placeDetail;
@@ -33,11 +29,6 @@ const ViewPlace = () => {
       // location.state가 없거나 유효하지 않으면 placeDetail을 null로 설정하여 ViewPlaceDetail이 스스로 불러오도록 유도
       setPlaceDetail(null);
       console.log('ViewPlace: location.state에 유효한 placeDetail 데이터가 없습니다. placeDetail을 null로 초기화합니다.');
-    if (location.state) {
-      setPlaceDetail(location.state)
-      if(location.state?._id) {
-        setIsLoading(false)
-      }
     }
   }, [location.state, setPlaceDetail]);
 

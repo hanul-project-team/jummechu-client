@@ -1,124 +1,59 @@
 // src/pages/mypage/MyPageForm.jsx
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import Modal from '../components/UserModal.jsx';
-import PwdChangeModal from '../components/PwdChangeModal.jsx';
-import MypagesAuthForm from '../components/MypagesAuthForm.jsx';
-import MypageFromReview from './MyPageFormReviews.jsx'
-// import zustandStore from '../../app/zustandStore.js';
-import axios from 'axios';
-import { useSelector } from 'react-redux';
-import '../MyPage.css';
-import MyPageFormBookmark from './MyPageFormBookmark.jsx'
+import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import Modal from '../components/UserModal.jsx'
+import PwdChangeModal from '../components/PwdChangeModal.jsx'
+import MypagesAuthForm from '../components/MypagesAuthForm.jsx'
+import MyPageFormReviews from './MyPageFormReviews.jsx' // MyPageFormReviews 임포트 경로 확인
+import axios from 'axios'
+import { useSelector } from 'react-redux'
+import '../MyPage.css'
+import MyPageFormBookmark from '../components/MyPageFormBookmark.jsx' // ★★★ MyPageFormBookmark 임포트 경로 확인 ★★★
 
 const MyPageForm = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const user = useSelector(state => state.auth.user);
-  const userId = user?.id;
+  const navigate = useNavigate()
+  const location = useLocation()
+  const user = useSelector(state => state.auth.user)
+  const userId = user?.id
 
-  console.log('Redux에서 가져온 전체 user 객체:', user);
-  console.log('추출된 userId:', userId);
-
+  // console.log('Redux에서 가져온 전체 user 객체:', user)
+  // console.log('추출된 userId:', userId)
+  const wrappersRefs = useRef({})
   const [active, setActive] = useState(() => {
     if (location.state?.fromVerification && location.state?.activeTab) {
-      return location.state.activeTab;
+      return location.state.activeTab
     }
-    return '최근기록';
-  });
+    return '최근기록'
+  })
 
   const [isAuthenticatedForSettings, setIsAuthenticatedForSettings] = useState(() => {
-    return location.state?.fromVerification && location.state?.activeTab === '계정 설정';
-  });
+    return location.state?.fromVerification && location.state?.activeTab === '계정 설정'
+  })
 
-  const tabs = ['최근기록', '찜', '리뷰', '음식점 추천(AI)', '계정 설정'];
-  const [isopen, setIsOpen] = useState(false);
-  const [openai, setOpenAi] = useState([]); // AI 추천 음식점 목록
-  const [dalleImage, setDalleImage] = useState(null);
-  const [loading, setLoading] = useState(false); // 로딩 상태
-  const [userNickname, setUserNickname] = useState('로딩중');
-  const [userEmail, setUserEmail] = useState('');
-  const [userPhone, setUserPhone] = useState('');
-  const [userName, setUserName] = useState('');
+  const tabs = ['최근기록', '찜', '리뷰', '음식점 추천(AI)', '계정 설정']
+  const [isopen, setIsOpen] = useState(false)
+  const [openai, setOpenAi] = useState([]) // AI 추천 음식점 목록
+  const [dalleImage, setDalleImage] = useState(null)
+  const [loading, setLoading] = useState(false) // 로딩 상태
+  const [userNickname, setUserNickname] = useState('로딩중')
+  const [userEmail, setUserEmail] = useState('')
+  const [userPhone, setUserPhone] = useState('')
+  const [userName, setUserName] = useState('')
   const [userProfileImage, setUserProfileImage] = useState(
     'http://localhost:3000/static/images/defaultProfileImg.jpg',
-  );
+  )
 
-  const [tempNickname, setTempNickname] = useState('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [recentStores, setRecentStores] = useState([]);
-  const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false);
+  const [tempNickname, setTempNickname] = useState('')
+  const [isEditing, setIsEditing] = useState(false)
+  const [recentStores, setRecentStores] = useState([])
+  const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false)
 
-  const [bookmarkedStoreIds, setBookmarkedStoreIds] = useState(new Set());
-  const [bookmarkedStoresData, setBookmarkedStoresData] = useState([]);
+  // ★★★ 찜 관련 상태 (bookmarkedStoreIds, bookmarkedStoresData) 및 함수 (isBookmarked, toggleBookmark, fetchBookmarks) 제거 ★★★
+  // 이 모든 로직은 이제 zustandUser.js와 MyPageFormBookmark.jsx에서 관리합니다.
 
   // ★★★ AI 추천이 이미 성공적으로 로드되었는지 추적하는 상태 (중복 호출 방지) ★★★
-  const [hasFetchedAIRecommendations, setHasFetchedAIRecommendations] = useState(false);
-
-
-  // 찜 상태 확인 함수
-  const isBookmarked = (item) => {
-    return bookmarkedStoreIds.has(item._id);
-  };
-
-  // 찜 토글 함수
-  const toggleBookmark = async (item) => {
-    if (!userId) {
-      alert('로그인 후 찜 기능을 이용할 수 있습니다.');
-      return;
-    }
-
-    const storeId = item._id;
-    try {
-      if (bookmarkedStoreIds.has(storeId)) {
-        await axios.delete(`http://localhost:3000/auth/bookmarks`, {
-          data: { storeId: storeId },
-          withCredentials: true
-        });
-        setBookmarkedStoreIds(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(storeId);
-          return newSet;
-        });
-        setBookmarkedStoresData(prev => prev.filter(store => store._id !== storeId));
-        alert('찜이 해제되었습니다.');
-      } else {
-        await axios.post(`http://localhost:3000/auth/bookmarks`, { storeId: storeId }, {
-          withCredentials: true
-        });
-        setBookmarkedStoreIds(prev => new Set(prev).add(storeId));
-        fetchBookmarks();
-        alert('찜 목록에 추가되었습니다.');
-      }
-    } catch (error) {
-      console.error('찜 토글 실패:', error);
-      alert('찜 기능 처리 중 오류가 발생했습니다.');
-    }
-  };
-
-  // 찜 목록 불러오기 useEffect
-  useEffect(() => {
-    const fetchBookmarks = async () => {
-      if (!userId) return;
-      try {
-        const response = await axios.get(`http://localhost:3000/auth/bookmarks`, {
-          withCredentials: true
-        });
-        const fullStores = response.data.bookmarkedStores;
-        setBookmarkedStoresData(fullStores);
-        setBookmarkedStoreIds(new Set(fullStores.map(store => store._id)));
-        console.log("찜 목록 불러오기 성공:", fullStores);
-      } catch (error) {
-        console.error('찜 목록 불러오기 실패:', error);
-        setBookmarkedStoresData([]);
-        setBookmarkedStoreIds(new Set());
-      }
-    };
-    if (active === '찜') {
-      fetchBookmarks();
-    }
-  }, [userId, active]);
+  const [hasFetchedAIRecommendations, setHasFetchedAIRecommendations] = useState(false)
 
 
   const handlePasswordChangeSuccess = () => {
@@ -205,7 +140,7 @@ const MyPageForm = () => {
   const callOpenAi = async (promptContent) => {
     try {
       const response = await axios.post('http://localhost:3000/api/azure/openai', {
-        prompt: promptContent, // ★★★ 'prompt'를 req.body의 최상위 필드로 직접 보냅니다. ★★★
+        prompt: promptContent,
       });
       return response;
     } catch (error) {
@@ -348,20 +283,34 @@ const MyPageForm = () => {
       setOpenAi([]);
       setHasFetchedAIRecommendations(false); // 다른 탭으로 가면 플래그 초기화하여 다음에 다시 불러올 수 있도록
     }
-  }, [active, recentStores, hasFetchedAIRecommendations]); // ★★★ `loading` 제거 ★★★
+  }, [active, recentStores, hasFetchedAIRecommendations]); // `loading` 제거 (로딩 상태가 여기에 직접 의존하면 무한 루프 발생 가능)
 
   const callDalleImage = async keyword => {
     try {
-      const res = await axios.post('http://localhost:3000/api/azure/dalle', {
-          prompt: `${keyword}에 대한 실제 음식 사진처럼 보이고, 시선을 사로잡는 아름다운 구도와 부드러운 자연광이 돋보이는 초고화질 음식 사진을 생성해주세요. 식욕을 돋우는 선명한 색감과 생생한 질감을 가진, 배경은 단순하게 처리하고 음식에 집중해주세요.`,
+      const payload = { instances: { prompt: keyword }, parameters: { "sampleCount": 1 } };
+      const apiKey = ""; // Canvas 환경에서 자동 제공되므로 비워둠
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
-      console.log("DALL-E 응답:", res);
-      return res?.data?.imageUrl || null;
-    } catch (err) {
-      console.error(`DALL·E 호출 실패 (${keyword}):`, err.response?.data || err.message);
+      const result = await response.json();
+
+      if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+        const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+        return imageUrl;
+      } else {
+        console.error("DALL-E 이미지 생성 실패: 응답 구조 오류", result);
+        return null;
+      }
+    } catch (imageError) {
+      console.error("DALL-E 이미지 API 호출 오류:", imageError);
       return null;
     }
   };
+
 
   const handleClick = (e, tab) => {
     e.preventDefault();
@@ -382,29 +331,19 @@ const MyPageForm = () => {
     try {
       const response = await axios.put(
         'http://localhost:3000/auth/profile',
-        {
-          nickname: tempNickname,
-          email: userEmail,
-          phone: userPhone,
-        },
-        {
-          withCredentials: true,
-        },
+        { nickname: tempNickname, email: userEmail, phone: userPhone },
+        { withCredentials: true }
       );
-
       if (response.status === 200) {
         alert('프로필 정보가 성공적으로 업데이트되었습니다.');
         setUserNickname(tempNickname);
         setIsEditing(false);
-        console.log('프로필 업데이트 성공:', response.data);
       } else {
         alert(`프로필 정보 업데이트 실패: ${response.data.message || '알 수 없는 오류'}`);
       }
     } catch (error) {
       console.error('프로필 정보 업데이트 실패:', error);
-      alert(
-        `프로필 정보 업데이트 중 오류가 발생했습니다: ${error.response?.data?.message || '서버 오류'}`,
-      );
+      alert(`프로필 정보 업데이트 중 오류가 발생했습니다: ${error.response?.data?.message || '서버 오류'}`);
     }
   };
 
@@ -414,7 +353,6 @@ const MyPageForm = () => {
         const response = await axios.delete('http://localhost:3000/auth/account', {
           withCredentials: true,
         });
-
         if (response.status === 200) {
           alert('계정이 성공적으로 삭제되었습니다. 로그인 페이지로 이동합니다.');
           localStorage.removeItem('accessToken');
@@ -448,20 +386,13 @@ const MyPageForm = () => {
                         alt={item.name}
                         className="w-full h-full object-cover rounded-lg"
                       />
+                      {/* 최근 기록 목록의 찜 버튼은 이제 직접 찜 토글을 하지 않고, 상세 페이지에서만 가능하도록 변경 */}
                       <button
                         type="button"
-                        onClick={e => {
-                          e.stopPropagation();
-                          toggleBookmark(item);
-                        }}
+                        onClick={(e) => { e.stopPropagation(); alert("찜 기능은 가게 상세 페이지에서 제공됩니다."); }} 
                         className="absolute top-2 right-2 bg-white bg-opacity-70 rounded-full p-2 shadow hover:bg-opacity-100"
                       >
-                        {isBookmarked(item) ? (
-                          <span role="img" aria-label="bookmarked">
-                            ❤️
-                          </span>
-                        ) : (
-                          <svg
+                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
@@ -475,7 +406,6 @@ const MyPageForm = () => {
                               d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
                             />
                           </svg>
-                        )}
                       </button>
                     </div>
                     <div className="py-3">
@@ -521,13 +451,10 @@ const MyPageForm = () => {
                         본 시간: {new Date(item.viewedAt).toLocaleString()}
                       </p>
                       <button
-                        onClick={e => {
-                          e.stopPropagation();
-                          navigate(`/place/${item._id}`);
-                        }}
-                        className="mt-2 text-blue-500 hover:underline text-sm"
+                          onClick={(e) => { e.stopPropagation(); navigate(`/place/${item._id}`); }}
+                          className="mt-2 text-blue-500 hover:underline text-sm"
                       >
-                        상세 보기
+                          상세 보기
                       </button>
                     </div>
                   </li>
@@ -539,106 +466,17 @@ const MyPageForm = () => {
 
       case '찜':
         return (
+          // ★★★ MyPageFormBookmark 컴포넌트를 사용하고 props를 전달하지 않습니다. ★★★
           <MyPageFormBookmark />
-          // <div className="flex justify-center">
-          //   {bookmarkedStoresData.length === 0 ? (
-          //     <p>찜한 목록이 없습니다.</p>
-          //   ) : (
-          //     <ul className="flex flex-col gap-9 py-5">
-          //       {bookmarkedStoresData.map(item => (
-          //         <li key={item._id} className="flex gap-4">
-          //           <div className="relative w-[250px] h-[250px] cursor-pointer"
-          //                onClick={() => navigate(`/place/${item._id}`)}>
-          //             <img
-          //               src={item.thumbnail || `https://placehold.co/250x250/F0F0F0/6C757D?text=${encodeURIComponent(item.name.substring(0, Math.min(5, item.name.length)))}`}
-          //               alt={item.name}
-          //               className="w-full h-full object-cover rounded-lg"
-          //             />
-          //             <button
-          //               type="button"
-          //               onClick={(e) => { e.stopPropagation(); toggleBookmark(item); }}
-          //               className="absolute top-2 right-2 bg-white bg-opacity-70 rounded-full p-2 shadow hover:bg-opacity-100"
-          //             >
-          //               {isBookmarked(item) ? (
-          //                 <span role="img" aria-label="bookmarked">
-          //                   ❤️
-          //                 </span>
-          //               ) : (
-          //                 <svg
-          //                   xmlns="http://www.w3.org/2000/svg"
-          //                   fill="none"
-          //                   viewBox="0 0 24 24"
-          //                   strokeWidth={1.5}
-          //                   stroke="currentColor"
-          //                   className="size-6"
-          //                 >
-          //                   <path
-          //                     strokeLinecap="round"
-          //                     strokeLinejoin="round"
-          //                     d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
-          //                   />
-          //                 </svg>
-          //               )}
-          //             </button>
-          //           </div>
-          //           <div className="py-3">
-          //             <h2 className="text-lg py-1 font-SinchonRhapsody flex">{item.name}</h2>
-          //             {item.rating && <p className="py-1">⭐{item.rating} </p>}
-          //             <p className="py-1 flex items-center text-sm text-gray-500">
-          //               <svg
-          //                 fill="#000000"
-          //                 height="25px"
-          //                 width="25px"
-          //                 version="1.1"
-          //                 id="Capa_1"
-          //                 xmlns="http://www.w3.org/2000/svg"
-          //                 xmlnsXlink="http://www.w3.org/1999/xlink"
-          //                 viewBox="0 0 487.379 487.379"
-          //                 xmlSpace="preserve"
-          //               >
-          //                 <g>
-          //                   <path
-          //                     d="M393.722,438.868L371.37,271.219h0.622c6.564,0,11.885-5.321,11.885-11.885V17.668c0-4.176-2.183-8.03-5.751-10.18
-          //                     c-3.569-2.152-7.998-2.279-11.679-0.335c-46.345,24.454-75.357,72.536-75.357,124.952v101.898
-          //                     c0,20.551,16.665,37.215,37.218,37.215h2.818l-22.352,167.649c-1.625,12.235,2.103,24.599,10.228,33.886
-          //                     c8.142,9.289,19.899,14.625,32.246,14.625c12.346,0,24.104-5.336,32.246-14.625C391.619,463.467,395.347,451.104,393.722,438.868z"
-          //                   />
-          //                   <path
-          //                     d="M207.482,0c-9.017,0-16.314,7.297-16.314,16.313v91.128h-16.314V16.313C174.854,7.297,167.557,0,158.54,0
-          //                     c-9.017,0-16.313,7.297-16.313,16.313v91.128h-16.314V16.313C125.912,7.297,118.615,0,109.599,0
-          //                     c-9.018,0-16.314,7.297-16.314,16.313v91.128v14.913v41.199c0,24.2,19.611,43.811,43.811,43.811h3.616L115,438.74
-          //                     c-1.37,12.378,2.596,24.758,10.896,34.047c8.317,9.287,20.186,14.592,32.645,14.592c12.459,0,24.327-5.305,32.645-14.592
-          //                     c8.301-9.289,12.267-21.669,10.896-34.047l-25.713-231.375h3.617c24.199,0,43.811-19.611,43.811-43.811v-41.199v-14.913V16.313
-          //                     C223.796,7.297,216.499,0,207.482,0z"
-          //                   />
-          //                 </g>
-          //               </svg>
-          //               {item.address}
-          //             </p>
-          //             {item.keyword && (
-          //               <p className="py-1 text-sm text-gray-700">
-          //                 #{Array.isArray(item.keyword) ? item.keyword.join(', #') : item.keyword}
-          //               </p>
-          //             )}
-          //             <button
-          //                 onClick={(e) => { e.stopPropagation(); navigate(`/place/${item._id}`); }}
-          //                 className="mt-2 text-blue-500 hover:underline text-sm"
-          //             >
-          //                 상세 보기
-          //             </button>
-          //           </div>
-          //         </li>
-          //       ))}
-          //     </ul>
-          //   )}
-          // </div>
         );
 
 
       case '리뷰':
         return (
-          <MypageFromReview />
-        )
+          <div ref={wrappersRefs}>
+            <MyPageFormReviews user={user} currentTab="리뷰" wrappers={wrappersRefs} />
+          </div>
+        );
 
       case '음식점 추천(AI)':
         return (
@@ -654,7 +492,7 @@ const MyPageForm = () => {
                     className="w-[300px] h-[300px] rounded shadow-md py-5"
                   />
                 )}
-                {openai && openai.length > 0 ? ( // openai가 배열이고 비어있지 않은지 확인
+                {openai && openai.length > 0 ? (
                   <ul className="flex flex-col gap-9 py-5">
                     <p className="py-2 text-center text-lg font-semibold">
                       {userNickname} 님의 취향은 "{mostFrequentKeywords.join(', ')}" 입니다.
@@ -716,7 +554,7 @@ const MyPageForm = () => {
                     style={{ backgroundImage: `url('${userProfileImage}')` }}
                   />
                   <span
-                    className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow hover:bg-opacity-700 cursor-pointer"
+                    className="absolute bottom-0 right-0 bg-white bg-opacity-70 rounded-full p-2 shadow hover:bg-opacity-700 cursor-pointer"
                     onClick={() => setIsOpen(true)}
                   >
                     <svg
@@ -730,7 +568,8 @@ const MyPageForm = () => {
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"
+                        d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0
+                        0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"
                       />
                       <path
                         strokeLinecap="round"
@@ -873,7 +712,7 @@ const MyPageForm = () => {
                 onClick={e => handleClick(e, tab)}
                 className={`pb-2 text-gray-600 font-medium border-b-2 transition duration-200 ${
                   active === tab
-                    ? 'border-cyan-500 text-blue-500'
+                    ? 'border-cyan-500 text-color-gray-800'
                     : 'border-transparent hover:border-gray-300 hover:text-black'
                 }`}
               >
@@ -883,7 +722,6 @@ const MyPageForm = () => {
           ))}
         </ul>
       </div>
-
       {showPasswordChangeModal && (
         <PwdChangeModal
           onClose={() => setShowPasswordChangeModal(false)}
