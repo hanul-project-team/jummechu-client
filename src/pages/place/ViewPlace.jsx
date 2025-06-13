@@ -14,6 +14,7 @@ const ViewPlace = () => {
 
   const { id: storeId } = useParams(); // URL에서 가게 ID 가져오기
 
+  // Redux 스토어에서 로그인된 사용자 ID를 가져옵니다.
   const user = useSelector(state => state.auth.user);
   const userId = user?.id; // Redux 스토어에서 사용자 ID 가져오기
 
@@ -128,7 +129,7 @@ const ViewPlace = () => {
           name: placeDetail.name, // 백엔드에서 'name'으로 받으므로 'name'으로 보냅니다.
           keywords: processedKeywords, 
         }, {
-          withCredentials: true
+          withCredentials: true // 인증 쿠키를 함께 전송
         });
         console.log('ViewPlace: 최근 기록 백엔드에 추가 성공:', response.data);
       } catch (err) {
@@ -136,24 +137,13 @@ const ViewPlace = () => {
       }
     };
 
-    // placeDetail이 스토어에 설정된 후에만 최근 기록을 추가하도록 종속성 설정
-    // 이렇게 하면 ViewPlaceDetail이 자신의 URL 기반 로딩을 완료한 후, 이 훅이 실행됩니다.
-    const unsubscribe = zustandStore.subscribe(
-      (state) => state.placeDetail,
-      (placeDetailFromStore) => {
-        if (placeDetailFromStore && placeDetailFromStore._id && userId) {
-          addRecentViewToHistory();
-        }
-      },
-      { fireImmediately: false } // 초기 마운트 시 바로 실행하지 않도록 설정
-    );
-
-    // 컴포넌트 언마운트 시 구독 해제
-    return () => unsubscribe();
-
-  }, [userId]); // userId가 변경될 때만 이 effect를 재설정
+    // userId 또는 location.state가 변경될 때마다 이 이펙트를 실행합니다.
+    // 이는 location.state가 업데이트된 후에 `addRecentViewToHistory`가 호출되도록 보장합니다.
+    addRecentViewToHistory();
+  }, [userId, location.state]); // 의존성 배열에 userId와 location.state 포함
 
   // ViewPlaceDetail 컴포넌트는 placeDetail 상태를 zustandStore에서 직접 가져와 사용합니다.
+  // 이 컴포넌트에는 더 이상 props를 전달할 필요가 없습니다.
   return <ViewPlaceDetail />;
 };
 

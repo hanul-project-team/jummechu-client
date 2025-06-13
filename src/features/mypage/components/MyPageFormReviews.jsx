@@ -31,7 +31,6 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
       })
       .then(res => {
         const data = res.data
-        console.log(data)
         if (data.length < 1 && userReviewRef.current) {
           setMyReviews([])
           userReviewRef.current = []
@@ -59,7 +58,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   // 리뷰 드랍다운 메뉴 바깥클릭 시 접기
   useEffect(() => {
     const handleClickOutside = e => {
-      const isOutside = Object.values(wrappers?.current || {}).some(ref => {
+      const isOutside = Object.values(wrappers.current || {}).some(ref => {
         return ref instanceof HTMLElement && ref.contains(e.target)
       })
       if (!isOutside) {
