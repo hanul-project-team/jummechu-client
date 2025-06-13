@@ -29,7 +29,9 @@ const ViewPlaceDetail = () => {
   const [linkCopied, setLinkCopied] = useState(false)
   const rootLocation = `${window.location.origin}`
   const location = useLocation()
-  // console.log(placeDetail)
+  const [recommandLoading, setRecommandLoading] = useState(false)
+
+  // console.log(placeDetail.keywords)
   /* 정보 호출 및 갱신 */
   useEffect(() => {
     if (placeDetail !== null && placeDetail !== undefined) {
@@ -60,7 +62,25 @@ const ViewPlaceDetail = () => {
             if (searchRes.statusText === 'OK' || searchRes.status === 200) {
               const data = searchRes.data
               // console.log(data)
-              setSearchNearData(data)
+              if (data?.length > 0) {
+                setRecommandLoading(true)
+                axios
+                  .post('http://localhost:3000/store/save', data)
+                  .then(res => {
+                    const nearPlaces = res.data
+                    // console.log(nearPlaces)
+                    setSearchNearData(nearPlaces)
+                    setRecommandLoading(false)
+                  })
+                  .catch(err => {
+                    toast.error(
+                      <div className="Toastify__toast-body cursor-default">주변 정보를 불러오지 못했습니다.</div>,
+                      {
+                        position: 'top-center',
+                      },
+                    )
+                  })
+              }
             }
             lastStoreRef.current = storeId
           })
@@ -166,7 +186,7 @@ const ViewPlaceDetail = () => {
   return (
     <div>
       {isLoading === true ? (
-        <div className="container max-w-5xl mx-auto text-center">
+        <div className="container max-w-5xl mx-auto text-center sm:min-h-screen">
           <p className="loading-jump">
             Loading
             <span className="jump-dots">
@@ -250,7 +270,7 @@ const ViewPlaceDetail = () => {
               <img
                 src={placeDetail.photos?.length > 0 ? placeDetail.photos[0] : Icon}
                 alt={`${placeDetail.photos?.length > 0 ? 'photos' : 'Icon'}`}
-                className="w-full h-[300px]"
+                className="w-full h-[300px] rounded-xl"
               />
             </div>
             {/* 주소지 */}
@@ -321,7 +341,7 @@ const ViewPlaceDetail = () => {
               </div>
             </div>
             {/* 다른 장소 추천 */}
-            <RecommandPlace placeDetail={placeDetail} />
+            <RecommandPlace placeDetail={placeDetail} setLoading={setRecommandLoading} loading={recommandLoading} />
           </div>
           <PlaceReview />
         </>
