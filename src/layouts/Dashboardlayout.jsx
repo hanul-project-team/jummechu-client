@@ -1,11 +1,12 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
-import Dashboard from '../features/Dashboard/Dashboard_Sidebar'
+import Dashboard from './sidebar/Sidebar'
 function Dashboardlayout() {
-  return (<>
-  <Dashboard />
-          <Outlet />
-  </>
+  return (
+    <>
+      <Dashboard />
+      <Outlet />
+    </>
   )
 }
 

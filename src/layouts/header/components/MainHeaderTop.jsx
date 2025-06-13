@@ -71,7 +71,7 @@ const MainHeaderTop = () => {
                 마이페이지
               </button>
             </NavLink>}
-            {user.role === 'business' && <NavLink to="#">
+            {user.role === 'business' && <NavLink to="/business">
               <button className="w-full hover:cursor-pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
                 대시보드
               </button>

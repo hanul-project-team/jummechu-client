@@ -1,10 +1,10 @@
 import React from 'react'
-import RequestPage from '../../features/Dashboard/component/Request'
+import Request from '../../features/business/components/Request'
 
 function MyRequestPage() {
   return (
     <>
-        <RequestPage />
+        <Request />
     </>
   )
 }

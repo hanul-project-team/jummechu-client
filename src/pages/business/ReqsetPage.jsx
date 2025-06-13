@@ -1,5 +1,5 @@
 import React from 'react'
-import Reqset from '../../features/Dashboard/component/ReqSet'
+import Reqset from '../../features/business/components/ReqSet'
 function ReqsetPage() {
   return (
     <>
