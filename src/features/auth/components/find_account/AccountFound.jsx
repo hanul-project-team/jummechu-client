@@ -2,13 +2,13 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
-import axios from 'axios'
+import { API } from '../../../../app/api'
 
 const AccountFound = ({ type }) => {
   const user = useSelector(state => state.findAccount.user)
   const sendLink = async () => {
     try {
-      await axios.post('http://localhost:3000/auth/send_link', user)
+      await API.post('/auth/send_link', user)
       toast.success(
         <div className="Toastify__toast-body cursor-default">재설정 링크가 전송 되었습니다</div>,
         {
