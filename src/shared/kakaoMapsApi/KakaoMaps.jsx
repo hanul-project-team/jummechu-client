@@ -165,6 +165,13 @@ const KakaoMaps = () => {
           const data = res.data
           // console.log(data)
           setSearchData(data)
+          axios.post('http://localhost:3000/store/save', data)
+          .then((res) => {
+            console.log(res)
+          })
+          .catch((err) => {
+            console.error(err)
+          })
           setFormData({
             place: '',
           })
@@ -257,7 +264,7 @@ const KakaoMaps = () => {
               </fieldset>
             </form>
           </div>
-          <div className="container mx-auto max-w-7xl max-xl:m-3">
+          <div className="container mx-auto sm:max-w-5xl max-w-5xl max-sm:p-3">
             <KakaoNearPlace />
           </div>
         </>
