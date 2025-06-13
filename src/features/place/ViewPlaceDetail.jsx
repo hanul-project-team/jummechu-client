@@ -49,7 +49,7 @@ const ViewPlaceDetail = () => {
                 lng: placeDetail.longitude,
               },
             }),
-          ]).then(([revRes , searchRes]) => {
+          ]).then(([revRes, searchRes]) => {
             if (revRes.statusText === 'OK' || revRes.status === 200) {
               const data = revRes.data
               // console.log(data)
@@ -88,7 +88,7 @@ const ViewPlaceDetail = () => {
           console.log(err)
         })
     }
-  }, [location.pathname, placeDetail])
+  }, [location.pathname, placeDetail, setPlaceDetail])
 
   const handleBookmark = () => {
     if (!user.role) {
@@ -166,20 +166,22 @@ const ViewPlaceDetail = () => {
   return (
     <div>
       {isLoading === true ? (
-        <p className="loading-jump">
-          Loading
-          <span className="jump-dots">
-            <span>.</span>
-            <span>.</span>
-            <span>.</span>
-          </span>
-        </p>
+        <div className="container max-w-5xl mx-auto text-center">
+          <p className="loading-jump">
+            Loading
+            <span className="jump-dots">
+              <span>.</span>
+              <span>.</span>
+              <span>.</span>
+            </span>
+          </p>
+        </div>
       ) : (
         <>
           <KakaoMaps />
           <div className="container md:max-w-5xl px-6 mx-auto p-3 m-3">
             {/* 타이틀 & 북마크 영역 */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between my-2">
               <h1 className="text-3xl font-bold">{placeDetail.name}</h1>
               <div className="flex items-center gap-1">
                 {/* 북마크 */}

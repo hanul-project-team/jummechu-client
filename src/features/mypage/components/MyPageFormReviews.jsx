@@ -205,7 +205,23 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
     setOpenTabId(null)
   }
   const handleNavigateStore = rv => {
-    navigate(`/place/${rv.store._id}`)
+    if (rv.store) {
+      axios
+        .post('http://localhost:3000/store/storeInfo', rv.store)
+        .then(res => {
+          const data = res.data
+          // console.log(data)
+          navigate(`/place/${data._id}`, { state: data })
+        })
+        .catch(err => {
+          toast.error(
+            <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
+            {
+              position: 'top-center',
+            },
+          )
+        })
+    }
   }
   return (
     <div className="h-full">

@@ -3,6 +3,7 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import Icon from '../../assets/images/icon.png'
 import axios from 'axios'
 import 'swiper/css'
+import { toast } from 'react-toastify'
 import { Link, useNavigate } from 'react-router-dom'
 import zustandStore from '../../app/zustandStore.js'
 
@@ -17,16 +18,89 @@ const HomeRecommand = () => {
   const intervalRef = useRef(null)
   const [countDown, setCountDown] = useState(60)
 
+  const defaultCategories = [
+    '패스트푸드',
+    '치킨',
+    '피자',
+    '햄버거',
+    '스테이크',
+    '샤브샤브',
+    '초밥',
+    '갈비',
+    '비빔밥',
+    '커피',
+    '디저트',
+    '라면',
+    '김밥',
+    '전골',
+    '샌드위치',
+    '도시락',
+    '삼계탕',
+    '핫도그',
+    '국수',
+    '스테이크 하우스',
+    '레스토랑',
+    '커피숍',
+    '호프',
+    '감자탕',
+    '술집',
+    '고기집',
+    '도넛',
+    '회',
+    '분식',
+    '국밥',
+    '찜닭',
+    '파스타',
+    '기사식당',
+    '수제버거',
+    '닭강정',
+    '돈까스',
+    '비빔국수',
+    '회덮밥',
+    '샐러드',
+    '덮밥',
+    '닭꼬치',
+    '떡갈비',
+    '돼지불백',
+    '한식',
+    '일식',
+    '양식',
+    '중식',
+    '삼겹살',
+    '김치찌개',
+    '닭갈비',
+    '불고기',
+    '보쌈',
+    '조개',
+    '해장국',
+    '갈비찜',
+    '설렁탕',
+    '매운탕',
+    '빵',
+    '떡볶이',
+    '부대찌개',
+    '짜장면',
+    '탕수육',
+    '아이스크림',
+    '떡',
+  ]
   useEffect(() => {
     const fetchReviews = (isFromInterval = false) => {
       // setIsLoading(true) // {/* interval 1번 */}
       if (userNearPlace && userNearPlace.length > 0) {
-        const categories = userNearPlace.map(unp => unp.category_name)
-
-        const setCategory = categories.reduce((acc, cts) => {
-          const item = cts.split('>')[1].trim()
-          if (!acc.includes(item)) {
-            acc.push(item)
+        const categories = userNearPlace.map(unp => unp.keywords[0])
+        const filteredUserCategories = categories.reduce((acc, cts) => {
+          const item1 = cts.split(',')[0].trim()
+          if (!acc.includes(item1)) {
+            acc.push(item1)
+          }
+          const item2 = cts.split(',')[1].trim()
+          if (!acc.includes(item2)) {
+            acc.push(item2)
+          }
+          const item3 = cts.split(',')[2].trim()
+          if (!acc.includes(item3)) {
+            acc.push(item3)
           }
           return acc
         }, [])
@@ -45,15 +119,15 @@ const HomeRecommand = () => {
               })
               .then(res => {
                 const data = res.data.data
-                const reviews = data.allReivews
-                const stores = data.allStores
+                const reviews = data?.allReivews
                 // console.log(data)
-                setNearPlaceReviews(reviews)
+                setNearPlaceReviews(reviews?.length > 0 ? reviews : [])
                 setIsLoading(false)
                 setCountDown(60)
               })
           }
-          setTag(setCategory)
+          const results = matchingCategories(defaultCategories, filteredUserCategories)
+          setTag(results)
         } catch (err) {
           console.log(err)
         }
@@ -80,22 +154,18 @@ const HomeRecommand = () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
     }
   }, [userNearPlace])
-
-  const handleNavigate = unp => {
-    // console.log('HomeRecommand')
-    try {
-      axios
-        .post('http://localhost:3000/store/save', unp)
-        .then(res => {
-          const place = res.data
-          // console.log(place)
-          navigate(`/place/${place._id}`, { state: place })
-        })
-        .catch(err => {
-          console.log('axios 요청 실패', err)
-        })
-    } catch (err) {
-      console.log('try 실패', err)
+  const matchingCategories = (def, user) => {
+    return def.filter(cate => user.includes(cate))
+  }
+  const handleNavigate = fps => {
+    console.log(fps)
+    if (fps) {
+      axios.post('http://localhost:3000/store/storeInfo', fps).then(res => {
+        const data = res.data
+        if (data) {
+          navigate(`/place/${data._id}`, { state: data })
+        }
+      })
     }
   }
 
@@ -148,60 +218,69 @@ const HomeRecommand = () => {
         </p>
       ) : (
         <>
-          <Link to="#" className="flex justify-between">
+          <div className="flex justify-between">
             <span className="text-xl font-bold">추천 태그</span>
             {/* <span>{countDown > 0 ? `review 최신화까지 ${countDown}초 남음` : `리뷰 정보 갱신 중...`}</span> */}
-          </Link>
-          {tag.map((t, i) => (
-            <div key={i} className="container shadow-lg/20 max-w-full p-3 my-3 overflow-auto">
-              <p className="text-lg">&#35; {t}</p>
-              <Swiper spaceBetween={50} slidesPerView={3}>
-                {userNearPlace &&
-                  userNearPlace.length > 0 &&
-                  userNearPlace.map((unp, idx) => {
-                    if (!unp.category_name.includes(t)) return null
-                    return (
-                      <SwiperSlide key={idx} className="!mr-0 max-w-full">
-                        <img
-                          src={Icon}
-                          alt="picsum"
-                          className="min-h-[200px] hover:cursor-pointer"
-                          onClick={() => handleNavigate(unp)}
-                        />
-                        <p
-                          className="text-sm hover:cursor-pointer"
-                          onClick={() => handleNavigate(unp)}
-                        >
-                          가게명: <strong>{unp.place_name}</strong>
-                        </p>
-                        <div className="text-sm flex gap-3 items-center">
-                          {
-                            <div className="flex items-center cursor-default">
-                              {handleAvgRating(nearPlaceReviews, unp)}
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={1.5}
-                                stroke="currentColor"
-                                className="size-4"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
-                                />
-                              </svg>
-                            </div>
-                          }
-                          <span className='cursor-default'>리뷰수&#40;{handleCountReviews(nearPlaceReviews, unp)}&#41;</span>
-                        </div>
-                      </SwiperSlide>
-                    )
-                  })}
-              </Swiper>
-            </div>
-          ))}
+          </div>
+          {tag.length > 0 ? (
+            tag.map((t, i) => {
+              const filteredPlaces = userNearPlace?.filter(unp =>
+                unp.keywords?.some(kw => kw?.split(',').includes(t)),
+              )
+              if (!filteredPlaces || filteredPlaces?.length === 0) return null
+              return (
+                <div key={i} className="container shadow-lg/20 max-w-full p-3 my-3 overflow-auto">
+                  <p className="text-lg">&#35; {t}</p>
+                  <Swiper spaceBetween={50} slidesPerView={3}>
+                    {filteredPlaces.map((fps, idx) => {
+                      return (
+                        <SwiperSlide key={idx} className="!mr-0 max-w-full">
+                          <img
+                            src={fps.photos.length > 0 ? fps.photos : Icon}
+                            alt="picsum"
+                            className="sm:h-[200px] hover:cursor-pointer"
+                            onClick={() => handleNavigate(fps)}
+                          />
+                          <p
+                            className="text-sm hover:cursor-pointer"
+                            onClick={() => handleNavigate(fps)}
+                          >
+                            가게명: <strong>{fps.name}</strong>
+                          </p>
+                          <div className="text-sm flex gap-3 items-center">
+                            {
+                              <div className="flex items-center cursor-default">
+                                {handleAvgRating(nearPlaceReviews, fps)}
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth={1.5}
+                                  stroke="currentColor"
+                                  className="size-4"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
+                                  />
+                                </svg>
+                              </div>
+                            }
+                            <span className="cursor-default">
+                              리뷰수&#40;{handleCountReviews(nearPlaceReviews, fps)}&#41;
+                            </span>
+                          </div>
+                        </SwiperSlide>
+                      )
+                    })}
+                  </Swiper>
+                </div>
+              )
+            })
+          ) : (
+            <p>점검중</p>
+          )}
         </>
       )}
     </div>
