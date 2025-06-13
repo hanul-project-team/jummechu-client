@@ -11,11 +11,15 @@ const KakaoNearPlace = () => {
 
   const handleSaveAndNavigate = unp => {
     if (unp) {
-      axios.post('http://localhost:3000/store/storeInfo', unp).then(res => {
+      axios.post('http://localhost:3000/store/storeInfo', unp)
+      .then(res => {
         const data = res.data
         if (data) {
           navigate(`/place/${data._id}`, { state: data })
         }
+      })
+      .catch((err) => {
+        console.error("navigate 에러", err)
       })
     }
   }
@@ -31,7 +35,7 @@ const KakaoNearPlace = () => {
             userNearPlace.map((unp, i) => (
               <SwiperSlide
                 key={`place-${i}`}
-                className="md:max-w-full !mr-0 ml-1"
+                className="md:max-w-full sm:!mr-1 sm:ml-1 !mr-2 ml-2"
                 style={{ margin: '0px' }}
               >
                 <div onClick={() => handleSaveAndNavigate(unp)} className="hover:cursor-pointer">
@@ -42,7 +46,7 @@ const KakaoNearPlace = () => {
                         : `https://picsum.photos/200/150?random=${Math.floor(Math.random() * 1000)}`
                     }
                     alt="lorem picture"
-                    className="sm:w-[200px] sm:h-[150px]"
+                    className="sm:w-[200px] sm:h-[150px] rounded-xl"
                   />
                 </div>
                 <div onClick={() => handleSaveAndNavigate(unp)} className="hover:cursor-pointer">
