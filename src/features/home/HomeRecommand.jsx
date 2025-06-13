@@ -230,7 +230,7 @@ const HomeRecommand = () => {
               if (!filteredPlaces || filteredPlaces?.length === 0) return null
               return (
                 <div key={i} className="container shadow-lg/20 max-w-full p-3 my-3 overflow-auto">
-                  <p className="text-lg">&#35; {t}</p>
+                  <p className="text-lg font-bold">&#35; {t}</p>
                   <Swiper spaceBetween={50} slidesPerView={3}>
                     {filteredPlaces.map((fps, idx) => {
                       return (
@@ -238,7 +238,7 @@ const HomeRecommand = () => {
                           <img
                             src={fps.photos.length > 0 ? fps.photos : Icon}
                             alt="picsum"
-                            className="sm:h-[200px] hover:cursor-pointer"
+                            className="sm:h-[200px] hover:cursor-pointer rounded-xl"
                             onClick={() => handleNavigate(fps)}
                           />
                           <p
