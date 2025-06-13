@@ -10,11 +10,15 @@ import { useSelector } from 'react-redux';
 const ViewPlace = () => {
   const location = useLocation();
   const setPlaceDetail = zustandStore(state => state.setPlaceDetail);
+  const placeDetail = zustandStore(state => state.placeDetail); // Zustand에서 현재 placeDetail 상태 가져오기
+
+  const { id: storeId } = useParams(); // URL에서 가게 ID 가져오기
 
   const user = useSelector(state => state.auth.user);
-  const userId = user?.id;
+  const userId = user?.id; // Redux 스토어에서 사용자 ID 가져오기
 
-  // --- 1. location.state에 데이터가 있을 경우 Zustand 스토어에 placeDetail을 설정합니다. ---
+  // --- 1. placeDetail 데이터 로딩 useEffect ---
+  // 이 useEffect는 URL의 storeId가 변경될 때마다 실행되어 올바른 placeDetail을 보장합니다.
   useEffect(() => {
     // placeDetail이 이미 Zustand 스토어에 있고, 현재 location.state의 _id와 같다면 업데이트를 건너뜜
     const currentPlaceDetailInStore = zustandStore.getState().placeDetail;
@@ -32,12 +36,14 @@ const ViewPlace = () => {
     }
   }, [location.state, setPlaceDetail]);
 
-  // --- 2. 페이지 로드 또는 경로 변경 시 항상 페이지 상단으로 스크롤합니다. ---
+  // --- 2. 페이지 상단으로 스크롤 ---
   useEffect(() => {
     window.scrollTo({ top: 0 });
   }, [location.pathname]);
+  }, [location.pathname]);
 
-  // --- 3. 최근 본 가게 기록을 백엔드에 추가하는 useEffect ---
+  // --- 3. 최근 본 가게 기록 추가 useEffect ---
+  // 이 이펙트는 userId, storeId, 그리고 placeDetail이 Zustand에 유효하게 로드되었을 때만 실행됩니다.
   useEffect(() => {
     const addRecentViewToHistory = async () => {
       const currentPlaceData = zustandStore.getState().placeDetail; // Zustand 스토어에서 최신 placeDetail 가져오기
@@ -73,6 +79,7 @@ const ViewPlace = () => {
           rating: currentPlaceData.rating,
           address: currentPlaceData.address,
         }, {
+          withCredentials: true
           withCredentials: true
         });
         console.log('ViewPlace: 최근 기록 백엔드에 추가 성공:', response.data);
