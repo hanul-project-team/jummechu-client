@@ -13,6 +13,10 @@ import LoginPage from '../pages/auth/LoginPage'
 import FindAccountPage from '../pages/auth/FindAccountPage'
 import FindAccountResultPage from '../pages/auth/FindAccountResultPage'
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage.jsx'
+import Dashboard from '../layouts/Dashboardlayout.jsx'
+import MyJobpage from '../pages/dashboard/MyJobpage.jsx'
+import MyRequestPage from '../pages/dashboard/MyRequestPage.jsx'
+import ReqsetPage from '../pages/dashboard/ReqsetPage.jsx'
 
 const App = () => {
   const dispatch = useDispatch()
@@ -36,6 +40,11 @@ const App = () => {
         <Route path="find_account/reset" element={<ResetPasswordPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
+      <Route element={<Dashboard/>}>
+          <Route path='Dashboard/' element={<MyJobpage />}/>
+          <Route path='Dashboard/Request' element={<MyRequestPage />}/>
+          <Route path='Dashboard/Reqset' element={<ReqsetPage />}/>
+          </Route>
     </Routes>
   )
 }
