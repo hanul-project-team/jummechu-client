@@ -8,7 +8,7 @@ import { CSSTransition } from 'react-transition-group'
 import { find } from '../../slice/findAccountSlice'
 import { verifySchema } from '../../schema/verifySchema'
 import Timer from '../../../../shared/Timer'
-import axios from 'axios'
+import { API } from '../../../../app/api'
 
 const FindAccountVerifyForm = ({ type }) => {
   const [isPhone, setIsPhone] = useState(false)
@@ -41,7 +41,7 @@ const FindAccountVerifyForm = ({ type }) => {
   })
   useEffect(() => {
     setFocus('name')
-  },[setFocus])
+  }, [setFocus])
   useEffect(() => {
     const isValid = /^01[016789][0-9]{8}$/.test(phoneValue)
     setIsPhone(!!isValid)
@@ -62,11 +62,7 @@ const FindAccountVerifyForm = ({ type }) => {
     if (isValid) {
       try {
         const phone = getValues('phone')
-        // await axios.post(
-        //   'http://localhost:3000/auth/send_code',
-        //   { phone },
-        //   { withCredentials: true },
-        // )
+        // await API.post('/auth/send_code', { phone })
         setIsRequested(true)
         resetField('code')
         setFocus('code')
@@ -83,13 +79,9 @@ const FindAccountVerifyForm = ({ type }) => {
   }
   const onSubmit = async data => {
     try {
-      // await axios.post(
-      //   'http://localhost:3000/auth/verify_code',
-      //   { code: data.code },
-      //   { withCredentials: true },
-      // )
+      // await API.post('/auth/verify_code', { code: data.code })
       const submitData = { name: data.name, phone: data.phone }
-      const response = await axios.post('http://localhost:3000/auth/find_account', submitData)
+      const response = await API.post('/auth/find_account', submitData)
       dispatch(find(response.data))
       navigate(`/find_account/result?type=${type}`)
     } catch (e) {

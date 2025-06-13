@@ -3,7 +3,7 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import axios from 'axios'
+import { API } from '../../../../app/api'
 import { Field, Label } from '@headlessui/react'
 import { toast } from 'react-toastify'
 import { CSSTransition } from 'react-transition-group'
@@ -60,9 +60,7 @@ const LoginForm = ({ returnUrl }) => {
   }, [passwordValue])
   const onSubmit = async data => {
     try {
-      const response = await axios.post('http://localhost:3000/auth/login', data, {
-        withCredentials: true,
-      })
+      const response = await API.post('/auth/login', data)
       reset()
       dispatch(login(response.data))
       if (returnUrl) {

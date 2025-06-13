@@ -6,7 +6,7 @@ import { resetPasswordSchema } from '../../schema/resetPasswordSchema'
 import { toast } from 'react-toastify'
 import { CSSTransition } from 'react-transition-group'
 import VisibleBtn from '../../../../shared/VisibleBtn'
-import axios from 'axios'
+import { API } from '../../../../app/api'
 
 const ResetPasswordForm = ({ resetToken }) => {
   const [passwordState, setPasswordState] = useState({
@@ -63,7 +63,7 @@ const ResetPasswordForm = ({ resetToken }) => {
   const onSubmit = async data => {
     const submitData = { password: data.password, resetToken: resetToken }
     try {
-      await axios.post('http://localhost:3000/auth/reset_password', submitData)
+      await API.post('/auth/reset_password', submitData)
       reset()
       navigate('/login')
     } catch (e) {
