@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import zustandStore from '../../app/zustandStore.js'
 import axios from 'axios'
+import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
 import SearchResultPageList from '../../features/search/SearchResultPageList.jsx'
@@ -77,20 +78,53 @@ const SearchResult = () => {
     } else return 0
   }
   const handleNavigate = sd => {
-    // console.log(sd)
-    try {
+    if (sd) {
       axios
-        .post('http://localhost:3000/store/save', sd)
+        .post('http://localhost:3000/store/storeInfo', sd)
         .then(res => {
-          const place = res.data
-          // console.log(place)
-          navigate(`/place/${place._id}`, { state: place })
+          const data = res.data
+          if (data !== null && data._id) {
+            console.log('1-2 데이터 있음')
+            console.log(data)
+            // console.log(data._id)
+            try {
+              navigate(`/place/${data._id}`, { state: data })
+            } catch (err) {
+              console.error(`data 아이디 에러 ${data._id}`)
+            }
+          } else if (data === null) {
+            setIsLoading(true)
+            window.scrollTo({ top: 0 })
+            console.log('2-1 데이터 없음, 등록 실행')
+            axios
+              .post('http://localhost:3000/store/save', sd)
+              .then(res => {
+                const place = res.data
+                // console.log(place)
+                if (Array.isArray(place)) {
+                  navigate(`/place/${place[0]._id}`, { state: place[0] })
+                } else {
+                  navigate(`/place/${place._id}`, { state: place })
+                }
+              })
+              .catch(err => {
+                toast.error(
+                  <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
+                  {
+                    position: 'top-center',
+                  },
+                )
+              })
+          }
         })
         .catch(err => {
-          console.log('axios 요청 실패', err)
+          toast.error(
+            <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
+            {
+              position: 'top-center',
+            },
+          )
         })
-    } catch (err) {
-      console.log('try 실패', err)
     }
   }
   const extractCategory = categories => {
@@ -125,7 +159,7 @@ const SearchResult = () => {
           {/* <div className='flex-1'>
             <SearchResultPageFilter search={searchData} />
           </div> */}
-          <div className='flex-4'>
+          <div className="flex-4">
             <SearchResultPageList
               npr={nearPlaceReviews}
               filter={filterKeyword}

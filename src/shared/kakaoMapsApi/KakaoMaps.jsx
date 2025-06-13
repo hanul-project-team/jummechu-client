@@ -95,7 +95,40 @@ const KakaoMaps = () => {
         .then(res => {
           const data = res.data
           // console.log(data)
-          setUserNearPlace(data)
+          // setUserNearPlace(data)
+          if (data) {
+            axios
+              .post('http://localhost:3000/store/storeInfo', data)
+              .then(res => {
+                const existPlaces = res.data
+                // console.log(res)
+                if (existPlaces) {
+                  setUserNearPlace(existPlaces)
+                } else if(existPlaces?.length === 0 || !existPlaces){
+                  axios
+                    .post('http://localhost:3000/store/save', data)
+                    .then(res => {
+                      const places = res.data
+                      if (places) {
+                        // console.log('등록완료')
+                        if (Array.isArray(places)) {
+                          // console.log('배열로 반환', places)
+                          setUserNearPlace(places)
+                        } else {
+                          // console.log('미배열 반환', places)
+                          setUserNearPlace(places)
+                        }
+                      }
+                    })
+                    .catch(err => {
+                      console.log(err)
+                    })
+                }
+              })
+              .catch(err => {
+                console.log(err)
+              })
+          }
           retryCountRef.current = 0
         })
         .catch(err => {

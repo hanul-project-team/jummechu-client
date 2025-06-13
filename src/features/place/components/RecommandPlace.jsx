@@ -12,32 +12,55 @@ const RecommandPlace = ({ placeDetail }) => {
   const userNearPlace = zustandStore(state => state.userNearPlace)
   const searchNearData = zustandStore(state => state.searchNearData)
   const navigate = useNavigate()
+  
   const handleNavigate = snd => {
-    console.log(snd)
     if (snd) {
-      axios.post('http://localhost:3000/store/storeInfo', snd).then(res => {
-        if (res.status === 200) {
+      axios
+        .post('http://localhost:3000/store/storeInfo', snd)
+        .then(res => {
           const data = res.data
-          navigate(`/place/${data._id}`, { state: data })
-        } else if (res.status === 400) {
-          setIsLoading(true)
-          axios
-            .post('http://localhost:3000/store/save', snd)
-            .then(res => {
-              const data = res.data
+          if (data !== null && data._id) {
+            console.log('1-2 데이터 있음')
+            console.log(data)
+            // console.log(data._id)
+            try {
               navigate(`/place/${data._id}`, { state: data })
-              setIsLoading(false)
-            })
-            .catch(err => {
-              toast.error(
-                <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
-                {
-                  position: 'top-center',
-                },
-              )
-            })
-        }
-      })
+            } catch (err) {
+              console.error(`data 아이디 에러 ${data._id}`)
+            }
+          } else if (data === null) {
+            setIsLoading(true)
+            window.scrollTo({ top: 0 })
+            console.log('2-1 데이터 없음, 등록 실행')
+            axios
+              .post('http://localhost:3000/store/save', snd)
+              .then(res => {
+                const place = res.data
+                // console.log(place)
+                if (Array.isArray(place)) {
+                  navigate(`/place/${place[0]._id}`, { state: place[0] })
+                } else {
+                  navigate(`/place/${place._id}`, { state: place })
+                }
+              })
+              .catch(err => {
+                toast.error(
+                  <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
+                  {
+                    position: 'top-center',
+                  },
+                )
+              })
+          }
+        })
+        .catch(err => {
+          toast.error(
+            <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
+            {
+              position: 'top-center',
+            },
+          )
+        })
     }
   }
 
