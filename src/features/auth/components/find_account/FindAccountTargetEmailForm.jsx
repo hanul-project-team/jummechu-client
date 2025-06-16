@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { targetEmailSchema } from '../../schema/targetEmailSchema'
 import { toast } from 'react-toastify'
 import { CSSTransition } from 'react-transition-group'
-import axios from 'axios'
+import { API } from '../../../../app/api'
 
 const FindAccountTargetEmailForm = ({ nextStep }) => {
   const [showError, setShowError] = useState(false)
@@ -27,7 +27,7 @@ const FindAccountTargetEmailForm = ({ nextStep }) => {
   }, [errors.email])
   const onSubmit = async data => {
     try {
-      await axios.post('http://localhost:3000/auth/target', data)
+      await API.post('/auth/target', data)
       reset()
       nextStep()
     } catch (e) {

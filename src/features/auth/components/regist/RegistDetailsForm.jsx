@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { registScheam } from '../../schema/registSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import axios from 'axios'
+import { API } from '../../../../app/api'
 import { toast } from 'react-toastify'
 import { CSSTransition } from 'react-transition-group'
 import VisibleBtn from '../../../../shared/VisibleBtn'
@@ -57,7 +57,7 @@ const RegistDetailsForm = () => {
   })
   useEffect(() => {
     setFocus('email')
-  },[setFocus])
+  }, [setFocus])
   useEffect(() => {
     const isValid = /^01[016789][0-9]{8}$/.test(phoneValue)
     setIsPhone(!!isValid)
@@ -93,11 +93,7 @@ const RegistDetailsForm = () => {
     if (isValid) {
       try {
         const phone = getValues('phone')
-        // await axios.post(
-        //   'http://localhost:3000/auth/send_code',
-        //   { phone },
-        //   { withCredentials: true },
-        // )
+        // await API.post('/auth/send_code', { phone })
         setIsRequested(true)
         resetField('code')
         setFocus('code')
@@ -117,11 +113,7 @@ const RegistDetailsForm = () => {
     if (isValid) {
       const code = getValues('code')
       try {
-        // await axios.post(
-        //   'http://localhost:3000/auth/verify_code',
-        //   { code },
-        //   { withCredentials: true },
-        // )
+        // await API.post('/auth/verify_code', { code })
         toast.success(
           <div className="Toastify__toast-body cursor-default">인증에 성공하였습니다</div>,
           {
@@ -156,7 +148,7 @@ const RegistDetailsForm = () => {
     const { passwordCheck: _passwordCheck, code: _code, ...rest } = data
     const submitData = { ...role, termsAgreement, ...rest }
     try {
-      await axios.post('http://localhost:3000/auth/regist', submitData)
+      await API.post('/auth/regist', submitData)
       toast.success(
         <div className="Toastify__toast-body cursor-default">회원가입에 성공하였습니다</div>,
         {

@@ -77,20 +77,16 @@ const MainHeaderTop = () => {
             className={`absolute left-0 top-11 w-fit z-10 bg-gray-100 rounded-b-xl overflow-hidden transition-all duration-300 ease-in-out shadow-lg
           ${open ? 'max-h-60 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95'}`}
           >
-            {user.role === 'member' && (
-              <NavLink to="/mypage">
-                <button className="w-full hover:cursor-pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
-                  마이페이지
-                </button>
-              </NavLink>
-            )}
-            {user.role === 'business' && (
-              <NavLink to="#">
-                <button className="w-full hover:cursor-pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
-                  대시보드
-                </button>
-              </NavLink>
-            )}
+            {user.role === 'member' && <NavLink to="/mypage">
+              <button className="w-full hover:cursor-pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
+                마이페이지
+              </button>
+            </NavLink>}
+            {user.role === 'business' && <NavLink to="/business">
+              <button className="w-full hover:cursor-pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
+                대시보드
+              </button>
+            </NavLink>}
             <button
               className="w-full hover:cursor-pointer text-center underline underline-offset-8 p-2 py-3 bg-red-500 text-white hover:bg-red-600 active:bg-red-700"
               onClick={setLogout}
