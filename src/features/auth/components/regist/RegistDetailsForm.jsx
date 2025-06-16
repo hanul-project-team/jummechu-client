@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, createRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { useForm, FormProvider } from 'react-hook-form'
 import { registScheam } from '../../schema/registSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { API } from '../../../../app/api'
 import { toast } from 'react-toastify'
 import { CSSTransition } from 'react-transition-group'
+import TermsBox from './TermsBox'
 import VisibleBtn from '../../../../shared/VisibleBtn'
 import Timer from '../../../../shared/Timer'
 
@@ -14,6 +15,7 @@ const RegistDetailsForm = () => {
   const [isRequested, setIsRequested] = useState(false)
   const [isCode, setIsCode] = useState(false)
   const [isSMSAuthenticated, setIsSMSAuthenticated] = useState(false)
+  const [isAgreement, setIsAgreement] = useState(false)
   const [timerKey, setTimerKey] = useState(0)
   const [passwordState, setPasswordState] = useState({
     hasValue: false,
@@ -39,9 +41,16 @@ const RegistDetailsForm = () => {
     getValues,
     resetField,
     reset,
+    control,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(registScheam),
+    defaultValues: {
+      service: false,
+      privacy: false,
+      business: false,
+    },
   })
   const navigate = useNavigate()
   const phoneValue = watch('phone')
@@ -144,9 +153,8 @@ const RegistDetailsForm = () => {
   }
   const onSubmit = async data => {
     const role = JSON.parse(localStorage.getItem('role'))
-    const termsAgreement = JSON.parse(localStorage.getItem('termsAgreement'))
     const { passwordCheck: _passwordCheck, code: _code, ...rest } = data
-    const submitData = { ...role, termsAgreement, ...rest }
+    const submitData = { ...role, ...rest }
     try {
       await API.post('/auth/regist', submitData)
       toast.success(
@@ -156,8 +164,6 @@ const RegistDetailsForm = () => {
         },
       )
       reset()
-      localStorage.removeItem('role')
-      localStorage.removeItem('termsAgreement')
       navigate('/login')
     } catch (e) {
       if (e.response.status === 400) {
@@ -202,213 +208,216 @@ const RegistDetailsForm = () => {
     setIsRequested(false)
   }
   return (
-    <form autoComplete="off" onSubmit={handleSubmit(onSubmit, onIsvalid)}>
-      <fieldset className="flex flex-col gap-3">
-        <legend className="hidden">상세정보 입력 폼</legend>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="font-semibold">
-            이메일<span className="ps-0.5 text-color-red-500">*</span>
-          </label>
-          <input
-            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
-            type="text"
-            id="email"
-            placeholder="이메일"
-            {...register('email')}
-          />
-          <CSSTransition
-            nodeRef={errorRefs.current.email}
-            timeout={300}
-            in={showError.email}
-            classNames="fade"
-          >
-            <span
-              ref={errorRefs.current.email}
-              className="text-xs sm:text-sm text-color-red-700 cursor-default"
-            >
-              {errors.email?.message}
-            </span>
-          </CSSTransition>
-        </div>
-        <div className="relative flex flex-col gap-1.5">
-          <div className="flex justify-between items-center">
-            <label htmlFor="password" className="font-semibold">
-              비밀번호<span className="ps-0.5 text-color-red-500">*</span>
+    <FormProvider control={control} setValue={setValue} watch={watch}>
+      <form autoComplete="off" onSubmit={handleSubmit(onSubmit, onIsvalid)}>
+        <fieldset className="flex flex-col gap-3">
+          <legend className="hidden">상세정보 입력 폼</legend>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="email" className="font-semibold">
+              이메일<span className="ps-0.5 text-color-red-500">*</span>
             </label>
-            <span className="text-color-gray-700 text-xs cursor-default">
-              영문/숫자/특수문자(~!@#^*_=+-) 포함 8자 이상
-            </span>
-          </div>
-          <input
-            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
-            type={passwordState.visible ? 'text' : 'password'}
-            id="password"
-            placeholder="비밀번호"
-            {...register('password')}
-          />
-          <VisibleBtn
-            changeVisible={changeVisible}
-            setter={setPasswordState}
-            visible={passwordState.visible}
-            hasValue={passwordState.hasValue}
-            className="absolute top-[51px] right-3 "
-          />
-          <CSSTransition
-            nodeRef={errorRefs.current.password}
-            timeout={300}
-            in={showError.password}
-            classNames="fade"
-          >
-            <span
-              ref={errorRefs.current.password}
-              className="text-xs sm:text-sm text-color-red-700 cursor-default"
-            >
-              {errors.password?.message}
-            </span>
-          </CSSTransition>
-        </div>
-        <div className="relative flex flex-col gap-1.5">
-          <input
-            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
-            type={passwordCheckState.visible ? 'text' : 'password'}
-            id="passwordCheck"
-            placeholder="비밀번호 확인"
-            {...register('passwordCheck')}
-          />
-          <VisibleBtn
-            changeVisible={changeVisible}
-            setter={setPasswordCheckState}
-            visible={passwordCheckState.visible}
-            hasValue={passwordCheckState.hasValue}
-            className="absolute top-[21px] right-3 "
-          />
-          <CSSTransition
-            nodeRef={errorRefs.current.passwordCheck}
-            timeout={300}
-            in={showError.passwordCheck}
-            classNames="fade"
-          >
-            <span
-              ref={errorRefs.current.passwordCheck}
-              className="text-xs sm:text-sm text-color-red-700 cursor-default"
-            >
-              {errors.passwordCheck?.message}
-            </span>
-          </CSSTransition>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="name" className="font-semibold">
-            이름<span className="ps-0.5 text-color-red-500">*</span>
-          </label>
-          <input
-            className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
-            type="text"
-            id="name"
-            placeholder="이름"
-            {...register('name')}
-          />
-          <CSSTransition
-            nodeRef={errorRefs.current.name}
-            timeout={300}
-            in={showError.name}
-            classNames="fade"
-          >
-            <span
-              ref={errorRefs.current.name}
-              className="text-xs sm:text-sm text-color-red-700 cursor-default"
-            >
-              {errors.name?.message}
-            </span>
-          </CSSTransition>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="phone" className="font-semibold">
-            전화번호<span className="ps-0.5 text-color-red-500">*</span>
-          </label>
-          <div className="flex gap-3">
             <input
               className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
               type="text"
-              id="phone"
-              placeholder="'-'제외 숫자만 입력해주세요"
-              maxLength={11}
-              {...register('phone')}
-              onInput={e => {
-                e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 11)
-              }}
+              id="email"
+              placeholder="이메일"
+              {...register('email')}
             />
-            {!isRequested && !isSMSAuthenticated && (
-              <button
-                type="button"
-                onClick={phoneSubmit}
-                disabled={!isPhone}
-                className="font-semibold bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
-              >
-                인증하기
-              </button>
-            )}
-            {isRequested && !isSMSAuthenticated && (
-              <button
-                type="button"
-                onClick={phoneSubmit}
-                disabled={!isPhone}
-                className="font-semibold bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
-              >
-                재전송하기
-              </button>
-            )}
-          </div>
-          <CSSTransition
-            nodeRef={errorRefs.current.phone}
-            timeout={300}
-            in={showError.phone}
-            classNames="fade"
-          >
-            <span
-              ref={errorRefs.current.phone}
-              className="text-xs sm:text-sm text-color-red-700 cursor-default"
+            <CSSTransition
+              nodeRef={errorRefs.current.email}
+              timeout={300}
+              in={showError.email}
+              classNames="fade"
             >
-              {errors.phone?.message}
-            </span>
-          </CSSTransition>
-        </div>
-        {isRequested && !isSMSAuthenticated && (
+              <span
+                ref={errorRefs.current.email}
+                className="text-xs sm:text-sm text-color-red-700 cursor-default"
+              >
+                {errors.email?.message}
+              </span>
+            </CSSTransition>
+          </div>
+          <div className="relative flex flex-col gap-1.5">
+            <div className="flex justify-between items-center">
+              <label htmlFor="password" className="font-semibold">
+                비밀번호<span className="ps-0.5 text-color-red-500">*</span>
+              </label>
+              <span className="text-color-gray-700 text-xs cursor-default">
+                영문/숫자/특수문자(~!@#^*_=+-) 포함 8자 이상
+              </span>
+            </div>
+            <input
+              className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
+              type={passwordState.visible ? 'text' : 'password'}
+              id="password"
+              placeholder="비밀번호"
+              {...register('password')}
+            />
+            <VisibleBtn
+              changeVisible={changeVisible}
+              setter={setPasswordState}
+              visible={passwordState.visible}
+              hasValue={passwordState.hasValue}
+              className="absolute top-[51px] right-3 "
+            />
+            <CSSTransition
+              nodeRef={errorRefs.current.password}
+              timeout={300}
+              in={showError.password}
+              classNames="fade"
+            >
+              <span
+                ref={errorRefs.current.password}
+                className="text-xs sm:text-sm text-color-red-700 cursor-default"
+              >
+                {errors.password?.message}
+              </span>
+            </CSSTransition>
+          </div>
+          <div className="relative flex flex-col gap-1.5">
+            <input
+              className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
+              type={passwordCheckState.visible ? 'text' : 'password'}
+              id="passwordCheck"
+              placeholder="비밀번호 확인"
+              {...register('passwordCheck')}
+            />
+            <VisibleBtn
+              changeVisible={changeVisible}
+              setter={setPasswordCheckState}
+              visible={passwordCheckState.visible}
+              hasValue={passwordCheckState.hasValue}
+              className="absolute top-[21px] right-3 "
+            />
+            <CSSTransition
+              nodeRef={errorRefs.current.passwordCheck}
+              timeout={300}
+              in={showError.passwordCheck}
+              classNames="fade"
+            >
+              <span
+                ref={errorRefs.current.passwordCheck}
+                className="text-xs sm:text-sm text-color-red-700 cursor-default"
+              >
+                {errors.passwordCheck?.message}
+              </span>
+            </CSSTransition>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="name" className="font-semibold">
+              이름<span className="ps-0.5 text-color-red-500">*</span>
+            </label>
+            <input
+              className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
+              type="text"
+              id="name"
+              placeholder="이름"
+              {...register('name')}
+            />
+            <CSSTransition
+              nodeRef={errorRefs.current.name}
+              timeout={300}
+              in={showError.name}
+              classNames="fade"
+            >
+              <span
+                ref={errorRefs.current.name}
+                className="text-xs sm:text-sm text-color-red-700 cursor-default"
+              >
+                {errors.name?.message}
+              </span>
+            </CSSTransition>
+          </div>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="phone" className="font-semibold">
-              <Timer key={timerKey} duration={180} onExpire={onExpire} />
+              전화번호<span className="ps-0.5 text-color-red-500">*</span>
             </label>
             <div className="flex gap-3">
               <input
                 className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
                 type="text"
-                id="code"
-                placeholder="인증번호 6자리"
-                maxLength={6}
-                {...register('code')}
+                id="phone"
+                placeholder="'-'제외 숫자만 입력해주세요"
+                maxLength={11}
+                {...register('phone')}
                 onInput={e => {
-                  e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 6)
+                  e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 11)
                 }}
               />
-              <button
-                type="button"
-                onClick={codeSubmit}
-                disabled={!isCode}
-                className="font-semibold bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
-              >
-                확인
-              </button>
+              {!isRequested && !isSMSAuthenticated && (
+                <button
+                  type="button"
+                  onClick={phoneSubmit}
+                  disabled={!isPhone}
+                  className="font-semibold bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
+                >
+                  인증하기
+                </button>
+              )}
+              {isRequested && !isSMSAuthenticated && (
+                <button
+                  type="button"
+                  onClick={phoneSubmit}
+                  disabled={!isPhone}
+                  className="font-semibold bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
+                >
+                  재전송하기
+                </button>
+              )}
             </div>
+            <CSSTransition
+              nodeRef={errorRefs.current.phone}
+              timeout={300}
+              in={showError.phone}
+              classNames="fade"
+            >
+              <span
+                ref={errorRefs.current.phone}
+                className="text-xs sm:text-sm text-color-red-700 cursor-default"
+              >
+                {errors.phone?.message}
+              </span>
+            </CSSTransition>
           </div>
-        )}
-        <button
-          type="submit"
-          disabled={!isSMSAuthenticated}
-          className="font-semibold border border-color-gray-900 p-3 bg-color-gray-900 text-white rounded-lg outline-hidden disabled:border-color-gray-700 disabled:bg-color-gray-700 cursor-pointer disabled:cursor-default"
-        >
-          가입하기
-        </button>
-      </fieldset>
-    </form>
+          {isRequested && !isSMSAuthenticated && (
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="phone" className="font-semibold">
+                <Timer key={timerKey} duration={180} onExpire={onExpire} />
+              </label>
+              <div className="flex gap-3">
+                <input
+                  className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
+                  type="text"
+                  id="code"
+                  placeholder="인증번호 6자리"
+                  maxLength={6}
+                  {...register('code')}
+                  onInput={e => {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 6)
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={codeSubmit}
+                  disabled={!isCode}
+                  className="font-semibold bg-color-gray-900 disabled:bg-color-gray-700 rounded-lg text-white min-w-24 cursor-pointer disabled:cursor-default"
+                >
+                  확인
+                </button>
+              </div>
+            </div>
+          )}
+          <TermsBox setIsAgreement={setIsAgreement} />
+          <button
+            type="submit"
+            disabled={!(isSMSAuthenticated && isAgreement)}
+            className="font-semibold border border-color-gray-900 p-3 bg-color-gray-900 text-white rounded-lg outline-hidden disabled:border-color-gray-700 disabled:bg-color-gray-700 cursor-pointer disabled:cursor-default"
+          >
+            가입하기
+          </button>
+        </fieldset>
+      </form>
+    </FormProvider>
   )
 }
 
