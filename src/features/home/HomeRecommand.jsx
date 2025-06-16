@@ -4,7 +4,7 @@ import Icon from '../../assets/images/icon.png'
 import axios from 'axios'
 import 'swiper/css'
 import { toast } from 'react-toastify'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import zustandStore from '../../app/zustandStore.js'
 
 const HomeRecommand = () => {
@@ -17,6 +17,7 @@ const HomeRecommand = () => {
   const lastPlacesRef = useRef([])
   const intervalRef = useRef(null)
   const [countDown, setCountDown] = useState(60)
+  const [otherPlaces, setOtherPlaces] = useState([])
 
   const defaultCategories = [
     '패스트푸드',
@@ -88,27 +89,31 @@ const HomeRecommand = () => {
     const fetchReviews = (isFromInterval = false) => {
       // setIsLoading(true) // {/* interval 1번 */}
       if (userNearPlace && userNearPlace.length > 0) {
-        const categories = userNearPlace.map(unp => unp.keywords[0])
-        const filteredUserCategories = categories.reduce((acc, cts) => {
-          const item1 = cts.split(',')[0].trim()
+        const categories = userNearPlace.map(unp => {
+          return unp.keywords[0]
+        })
+        const reducedCategories = categories.reduce((acc, cts) => {
+          const item1 = cts.split(',')[0]?.trim()
           if (!acc.includes(item1)) {
             acc.push(item1)
           }
-          const item2 = cts.split(',')[1].trim()
+          const item2 = cts.split(',')[1]?.trim()
           if (!acc.includes(item2)) {
             acc.push(item2)
           }
-          const item3 = cts.split(',')[2].trim()
+          const item3 = cts.split(',')[2]?.trim()
           if (!acc.includes(item3)) {
             acc.push(item3)
           }
           return acc
         }, [])
 
+        const filteredCategories = reducedCategories?.filter(tag => tag?.length > 0)
         const places = userNearPlace.map(place => ({
           name: place?.place_name,
           address: place?.address_name,
         }))
+
         try {
           // {/*interval 2번*/}
           if (isFromInterval || !nearPlaceReviews || isSamePlaces(lastPlacesRef.current, places)) {
@@ -126,7 +131,27 @@ const HomeRecommand = () => {
                 setCountDown(60)
               })
           }
-          const results = matchingCategories(defaultCategories, filteredUserCategories)
+          // console.log(filteredCategories)
+          const results = matchingCategories(defaultCategories, filteredCategories)
+          // console.log(results)
+          if (results) {
+            axios
+              .post('http://localhost:3000/store/tag/match', results)
+              .then(res => {
+                const data = res.data
+                if (data?.length > 0) {
+                  setOtherPlaces(data)
+                }
+              })
+              .catch(err => {
+                toast.error(
+                  <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
+                  {
+                    position: 'top-center',
+                  },
+                )
+              })
+          }
           setTag(results)
         } catch (err) {
           console.log(err)
@@ -155,10 +180,14 @@ const HomeRecommand = () => {
     }
   }, [userNearPlace])
   const matchingCategories = (def, user) => {
-    return def.filter(cate => user.includes(cate))
+    const filtered = user?.filter(use => {
+      return def?.some(de => use.includes(de))
+    })
+    // console.log(filtered)
+    return filtered
   }
   const handleNavigate = fps => {
-    console.log(fps)
+    // console.log(fps)
     if (fps) {
       axios.post('http://localhost:3000/store/storeInfo', fps).then(res => {
         const data = res.data
@@ -204,7 +233,8 @@ const HomeRecommand = () => {
       return 0
     }
   }
-
+  // console.log(tag)
+  // console.log(userNearPlace)
   return (
     <div className="max-xl:m-3">
       {isLoading === true ? (
@@ -222,11 +252,15 @@ const HomeRecommand = () => {
             <span className="text-xl font-bold">추천 태그</span>
             {/* <span>{countDown > 0 ? `review 최신화까지 ${countDown}초 남음` : `리뷰 정보 갱신 중...`}</span> */}
           </div>
-          {tag.length > 0 ? (
+          {tag?.length > 0 ? (
             tag.map((t, i) => {
-              const filteredPlaces = userNearPlace?.filter(unp =>
-                unp.keywords?.some(kw => kw?.split(',').includes(t)),
-              )
+              const filteredPlaces = otherPlaces?.filter(other => {
+                const tagList = other.keywords[0]
+                  .split(',')
+                  .map(str => str.trim())
+                  .filter(str => str.length > 0)
+                return tagList.some(str => str.includes(t) && !other.name.includes(str))
+              })
               if (!filteredPlaces || filteredPlaces?.length === 0) return null
               return (
                 <div key={i} className="container shadow-lg/20 max-w-full p-3 my-3 overflow-auto">
@@ -270,6 +304,7 @@ const HomeRecommand = () => {
                             <span className="cursor-default">
                               리뷰수&#40;{handleCountReviews(nearPlaceReviews, fps)}&#41;
                             </span>
+                            <span className="cursor-default">{fps.address}</span>
                           </div>
                         </SwiperSlide>
                       )
