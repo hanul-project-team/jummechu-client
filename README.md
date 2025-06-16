@@ -62,6 +62,7 @@ jummechu-client/
 3. .env.development 파일 생성 및 환경변수 설정
     ```env
     VITE_API_BASE_URL=http://localhost:3000
+    VITE_KAKAO_KEY=309f2ffc2063a30e72e2d932a424458b
     ```
 
 4. 서버 실행
