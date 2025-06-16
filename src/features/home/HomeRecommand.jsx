@@ -109,34 +109,22 @@ const HomeRecommand = () => {
         }, [])
 
         const filteredCategories = reducedCategories?.filter(tag => tag?.length > 0)
-        const places = userNearPlace.map(place => ({
-          name: place?.place_name,
-          address: place?.address_name,
-        }))
 
         try {
-          // {/*interval 2번*/}
-          if (isFromInterval || !nearPlaceReviews || isSamePlaces(lastPlacesRef.current, places)) {
-            lastPlacesRef.current = places
-            axios
-              .post('http://localhost:3000/review/readall', {
-                places: places,
-              })
-              .then(res => {
-                const data = res.data.data
-                const reviews = data?.allReivews
-                // console.log(data)
-                setNearPlaceReviews(reviews?.length > 0 ? reviews : [])
-                setIsLoading(false)
-                setCountDown(60)
-              })
-          }
           // console.log(filteredCategories)
           const results = matchingCategories(defaultCategories, filteredCategories)
+          const center = {
+            latitude: userNearPlace[0].latitude,
+            longitude: userNearPlace[0].longitude,
+          }
+          // console.log(center)
           // console.log(results)
           if (results) {
             axios
-              .post('http://localhost:3000/store/tag/match', results)
+              .post('http://localhost:3000/store/tag/match', {
+                results: results,
+                center: center,
+              })
               .then(res => {
                 const data = res.data
                 if (data?.length > 0) {
@@ -153,6 +141,28 @@ const HomeRecommand = () => {
               })
           }
           setTag(results)
+
+          const places = otherPlaces.map(place => ({
+            name: place?.name,
+            address: place?.address,
+          }))
+          // {/*interval 2번*/}
+          if (isFromInterval || !nearPlaceReviews || isSamePlaces(lastPlacesRef.current, places)) {
+            lastPlacesRef.current = places
+            axios
+              .post('http://localhost:3000/review/readall', {
+                places: places,
+              })
+              .then(res => {
+                const data = res.data.data
+                const reviews = data?.allReviews
+                // console.log(data)
+                // console.log(reviews)
+                setNearPlaceReviews(reviews?.length > 0 ? reviews : [])
+                setIsLoading(false)
+                setCountDown(60)
+              })
+          }
         } catch (err) {
           console.log(err)
         }
@@ -214,7 +224,7 @@ const HomeRecommand = () => {
   }
   const handleAvgRating = (reviews, place) => {
     if (reviews?.length > 0) {
-      const matchedReviews = reviews.filter(review => review.store?.name === place.place_name)
+      const matchedReviews = reviews.filter(review => review.store?.name === place.name)
       const avgRating =
         matchedReviews?.length > 0
           ? matchedReviews.reduce((acc, cur) => acc + cur.rating, 0) / matchedReviews.length
@@ -227,7 +237,7 @@ const HomeRecommand = () => {
   }
   const handleCountReviews = (reviews, place) => {
     if (reviews?.length > 0) {
-      const matchedReviews = reviews.filter(review => review.store?.name === place.place_name)
+      const matchedReviews = reviews.filter(review => review.store?.name === place.name)
       return matchedReviews.length
     } else {
       return 0
@@ -252,19 +262,19 @@ const HomeRecommand = () => {
             <span className="text-xl font-bold">추천 태그</span>
             {/* <span>{countDown > 0 ? `review 최신화까지 ${countDown}초 남음` : `리뷰 정보 갱신 중...`}</span> */}
           </div>
-          {tag?.length > 0 ? (
-            tag.map((t, i) => {
-              const filteredPlaces = otherPlaces?.filter(other => {
-                const tagList = other.keywords[0]
-                  .split(',')
-                  .map(str => str.trim())
-                  .filter(str => str.length > 0)
-                return tagList.some(str => str.includes(t) && !other.name.includes(str))
+          {otherPlaces?.length > 0 ? (
+            otherPlaces.map((group, i) => {
+              const { tag, stores } = group
+              const filteredPlaces = stores.filter(store => {
+                return !store.name.includes(tag)
               })
               if (!filteredPlaces || filteredPlaces?.length === 0) return null
               return (
-                <div key={i} className="container shadow-lg/20 max-w-full p-3 my-3 overflow-auto">
-                  <p className="text-lg font-bold">&#35; {t}</p>
+                <div
+                  key={`tag-${i}`}
+                  className="container shadow-lg/20 max-w-full p-3 my-3 overflow-auto"
+                >
+                  <p className="text-lg font-bold">&#35; {tag}</p>
                   <Swiper spaceBetween={50} slidesPerView={3}>
                     {filteredPlaces.map((fps, idx) => {
                       return (
@@ -281,7 +291,7 @@ const HomeRecommand = () => {
                           >
                             가게명: <strong>{fps.name}</strong>
                           </p>
-                          <div className="text-sm flex gap-3 items-center">
+                          <div className="text-sm flex gap-1 items-center">
                             {
                               <div className="flex items-center cursor-default">
                                 {handleAvgRating(nearPlaceReviews, fps)}
