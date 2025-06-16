@@ -92,7 +92,7 @@ const MainHeaderTop = () => {
           >
             로그인
           </Link>
-          <Link to="/regist/type" className="font-semibold bg-color-teal-400 text-sm sm:text-base text-white  rounded-2xl p-2">
+          <Link to="/regist/method" className="font-semibold bg-color-teal-400 text-sm sm:text-base text-white  rounded-2xl p-2">
             회원가입
           </Link>
         </div>
