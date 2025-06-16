@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import axios from 'axios'
+import { API } from '../../../../app/api'
 import zustandStore from '../../../../app/zustandStore'
 import Rating from 'react-rating'
 import StarGray from '../../../../assets/images/star-gray.png'
@@ -56,10 +56,8 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
       //   console.log(pair[0], pair[1])
       // }
       if (confirm('리뷰 등록을 완료하시겠습니까?')) {
-        axios
-          .post('http://localhost:3000/review/regist', newFormData, {
-            withCredentials: true,
-          })
+        API
+          .post('/review/regist', newFormData)
           .then(
             /* async */ res => {
               // const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))

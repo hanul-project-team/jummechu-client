@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import zustandStore from '../../app/zustandStore.js'
-import axios from 'axios'
+import { API } from '../../app/api.js'
 import { useLocation, useNavigate } from 'react-router-dom'
 import KakaoNearPlace from './KakaoNearPlace.jsx'
 
@@ -79,17 +79,14 @@ const KakaoMaps = () => {
       return
     }
     if (isLoading === false && (userNearPlace?.length === 0 || !userNearPlace)) {
-      axios
+      API
         .post(
-          'http://localhost:3000/api/kakao/user/nearplace',
+          '/api/kakao/user/nearplace',
           {
             location: {
               lat: center.lat,
               lng: center.lng,
             },
-          },
-          {
-            withCredentials: true,
           },
         )
         .then(res => {
@@ -97,16 +94,16 @@ const KakaoMaps = () => {
           // console.log(data)
           // setUserNearPlace(data)
           if (data) {
-            axios
-              .post('http://localhost:3000/store/storeInfo', data)
+            API
+              .post('/store/storeInfo', data)
               .then(res => {
                 const existPlaces = res.data
                 // console.log(res)
                 if (existPlaces) {
                   setUserNearPlace(existPlaces)
                 } else if(existPlaces?.length === 0 || !existPlaces){
-                  axios
-                    .post('http://localhost:3000/store/save', data)
+                  API
+                    .post('/store/save', data)
                     .then(res => {
                       const places = res.data
                       if (places) {
@@ -150,22 +147,19 @@ const KakaoMaps = () => {
     if (formData.place.startsWith('#')) {
       const sliced = formData.place.slice(1)
       navigate(`/search/${sliced}`)
-      axios
+      API
         .post(
-          'http://localhost:3000/api/kakao/search',
+          '/api/kakao/search',
           {
             place: sliced,
             center: center,
-          },
-          {
-            withCredentials: true,
           },
         )
         .then(res => {
           const data = res.data
           // console.log(data)
           setSearchData(data)
-          axios.post('http://localhost:3000/store/save', data)
+          API.post('/store/save', data)
           .then((res) => {
             console.log(res)
           })
@@ -181,15 +175,12 @@ const KakaoMaps = () => {
         })
     } else {
       navigate(`/search/${formData.place}`)
-      axios
+      API
         .post(
-          'http://localhost:3000/api/kakao/search',
+          '/api/kakao/search',
           {
             place: formData.place,
             center: center,
-          },
-          {
-            withCredentials: true,
           },
         )
         .then(res => {

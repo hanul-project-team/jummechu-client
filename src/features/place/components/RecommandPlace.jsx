@@ -1,7 +1,6 @@
-import React from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import Icon from '../../../assets/images/icon.png'
-import axios from 'axios'
+import { API } from '../../../app/api.js'
 import 'swiper/css'
 import { toast } from 'react-toastify'
 import zustandStore from '../../../app/zustandStore.js'
@@ -13,8 +12,8 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
 
   const handleNavigate = snd => {
     if (snd) {
-      axios
-        .post('http://localhost:3000/store/storeInfo', snd)
+      API
+        .post('/store/storeInfo', snd)
         .then(res => {
           const data = res.data
           if (data !== null && data._id) {
@@ -28,8 +27,8 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
             setLoading(true)
             window.scrollTo({ top: 0 })
             console.log('2-1 데이터 없음, 등록 실행')
-            axios
-              .post('http://localhost:3000/store/save', snd)
+            API
+              .post('/store/save', snd)
               .then(res => {
                 const place = res.data
                 // console.log(place)

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import zustandStore from '../../app/zustandStore.js'
-import axios from 'axios'
+import { API } from '../../app/api.js'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
@@ -37,8 +37,8 @@ const SearchResult = () => {
       }, [])
       setTag(visualCategories)
       try {
-        axios
-          .post('http://localhost:3000/review/readall', {
+        API
+          .post('/review/readall', {
             places: places,
           })
           .then(res => {
@@ -79,8 +79,8 @@ const SearchResult = () => {
   }
   const handleNavigate = sd => {
     if (sd) {
-      axios
-        .post('http://localhost:3000/store/storeInfo', sd)
+      API
+        .post('/store/storeInfo', sd)
         .then(res => {
           const data = res.data
           if (data !== null && data._id) {
@@ -96,8 +96,8 @@ const SearchResult = () => {
             setIsLoading(true)
             window.scrollTo({ top: 0 })
             console.log('2-1 데이터 없음, 등록 실행')
-            axios
-              .post('http://localhost:3000/store/save', sd)
+            API
+              .post('/store/save', sd)
               .then(res => {
                 const place = res.data
                 // console.log(place)

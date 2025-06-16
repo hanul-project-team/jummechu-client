@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import Icon from '../../assets/images/icon.png'
 import '../../assets/styles/global.css'
-import axios from 'axios'
+import { API } from '../../app/api.js'
 import zustandStore from '../../app/zustandStore.js'
 import zustandUser from '../../app/zustandUser.js'
 import { useSelector } from 'react-redux'
@@ -44,8 +44,8 @@ const ViewPlaceDetail = () => {
       if (isDifferentStore || renewReviewInfo) {
         try {
           Promise.all([
-            axios.get(`http://localhost:3000/review/read/store/${placeDetail._id}`),
-            axios.post(`http://localhost:3000/api/kakao/search/${placeDetail._id}`, {
+            API.get(`/review/read/store/${placeDetail._id}`),
+            API.post(`/api/kakao/search/${placeDetail._id}`, {
               headers: {
                 lat: placeDetail.latitude,
                 lng: placeDetail.longitude,
@@ -64,8 +64,7 @@ const ViewPlaceDetail = () => {
               // console.log(data)
               if (data?.length > 0) {
                 setRecommandLoading(true)
-                axios
-                  .post('http://localhost:3000/store/save', data)
+                API.post('/store/save', data)
                   .then(res => {
                     const nearPlaces = res.data
                     // console.log(nearPlaces)
@@ -74,7 +73,9 @@ const ViewPlaceDetail = () => {
                   })
                   .catch(err => {
                     toast.error(
-                      <div className="Toastify__toast-body cursor-default">주변 정보를 불러오지 못했습니다.</div>,
+                      <div className="Toastify__toast-body cursor-default">
+                        주변 정보를 불러오지 못했습니다.
+                      </div>,
                       {
                         position: 'top-center',
                       },
@@ -96,10 +97,7 @@ const ViewPlaceDetail = () => {
     if (placeDetail?.length < 1) {
       const placeLink = location.pathname
       const placeId = placeLink.split('/')[2]
-      axios
-        .get(`http://localhost:3000/store/read/${placeId}`, {
-          withCredentials: true,
-        })
+      API.get(`/store/read/${placeId}`)
         .then(res => {
           const data = res.data
           setPlaceDetail(data)
@@ -120,13 +118,11 @@ const ViewPlaceDetail = () => {
       const storeId = placeDetail?._id
       if (isBookmarked === true) {
         if (confirm('북마크를 해제하시겠습니까?')) {
-          axios
-            .delete(`http://localhost:3000/bookmark/delete/${storeId}`, {
-              withCredentials: true,
-              headers: {
-                user: userId,
-              },
-            })
+          API.delete(`/bookmark/delete/${storeId}`, {
+            headers: {
+              user: userId,
+            },
+          })
             .then(res => {
               const data = res.data
               // console.log(data)
@@ -138,13 +134,11 @@ const ViewPlaceDetail = () => {
         }
       } else {
         if (confirm('북마크에 추가하시겠습니까?')) {
-          axios
-            .post(`http://localhost:3000/bookmark/regist/${storeId}`, {
-              withCredentials: true,
-              headers: {
-                user: userId,
-              },
-            })
+          API.post(`/bookmark/regist/${storeId}`, {
+            headers: {
+              user: userId,
+            },
+          })
             .then(res => {
               const data = res.data
               // console.log(data)
@@ -341,7 +335,11 @@ const ViewPlaceDetail = () => {
               </div>
             </div>
             {/* 다른 장소 추천 */}
-            <RecommandPlace placeDetail={placeDetail} setLoading={setRecommandLoading} loading={recommandLoading} />
+            <RecommandPlace
+              placeDetail={placeDetail}
+              setLoading={setRecommandLoading}
+              loading={recommandLoading}
+            />
           </div>
           <PlaceReview />
         </>

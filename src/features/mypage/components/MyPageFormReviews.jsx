@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import axios from 'axios'
+import { API } from '../../../app/api.js'
 import Icon from '../../../assets/images/icon.png'
 import StarGray from '../../../assets/images/star-gray.png'
 import StarYellow from '../../../assets/images/star-yellow.png'
@@ -25,10 +25,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   const dropdownRef = useRef(null)
 
   const initialFetchFromDB = () => {
-    axios
-      .get(`http://localhost:3000/review/read/user/${user.id}`, {
-        withCredentials: true,
-      })
+    API.get(`/review/read/user/${user.id}`)
       .then(res => {
         const data = res.data
         if (data.length < 1 && userReviewRef.current) {
@@ -122,13 +119,11 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
     const userId = user.id
     if (userId) {
       if (confirm('리뷰를 삭제하시겠습니까?')) {
-        axios
-          .delete(`http://localhost:3000/review/delete/${rv._id}`, {
-            withCredentials: true,
-            headers: {
-              user: userId,
-            },
-          })
+        API.delete(`/review/delete/${rv._id}`, {
+          headers: {
+            user: userId,
+          },
+        })
           .then(res => {
             if (res.status === 200) {
               //   console.log('리뷰 삭제 정보', res)
@@ -143,6 +138,12 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                 }
                 return updated
               })
+              toast.success(
+                <div className="Toastify__toast-body cursor-default">리뷰가 삭제되었습니다.</div>,
+                {
+                  position: 'top-center',
+                },
+              )
             }
           })
           .catch(err => {
@@ -206,8 +207,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   }
   const handleNavigateStore = rv => {
     if (rv.store) {
-      axios
-        .post('http://localhost:3000/store/storeInfo', rv.store)
+      API.post('/store/storeInfo', rv.store)
         .then(res => {
           const data = res.data
           // console.log(data)

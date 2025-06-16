@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import Icon from '../../assets/images/icon.png'
-import axios from 'axios'
+import { API } from '../../app/api.js'
 import 'swiper/css'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
@@ -120,8 +120,8 @@ const HomeRecommand = () => {
           // console.log(center)
           // console.log(results)
           if (results) {
-            axios
-              .post('http://localhost:3000/store/tag/match', {
+            API
+              .post('/store/tag/match', {
                 results: results,
                 center: center,
               })
@@ -149,8 +149,8 @@ const HomeRecommand = () => {
           // {/*interval 2번*/}
           if (isFromInterval || !nearPlaceReviews || isSamePlaces(lastPlacesRef.current, places)) {
             lastPlacesRef.current = places
-            axios
-              .post('http://localhost:3000/review/readall', {
+            API
+              .post('/review/readall', {
                 places: places,
               })
               .then(res => {
@@ -199,7 +199,7 @@ const HomeRecommand = () => {
   const handleNavigate = fps => {
     // console.log(fps)
     if (fps) {
-      axios.post('http://localhost:3000/store/storeInfo', fps).then(res => {
+      API.post('/store/storeInfo', fps).then(res => {
         const data = res.data
         if (data) {
           navigate(`/place/${data._id}`, { state: data })

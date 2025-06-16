@@ -1,9 +1,9 @@
 import usePlaceStore from '../../app/zustandStore.js'
-import axios from 'axios'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import 'swiper/css'
 import '../../assets/styles/global.css'
 import { useNavigate } from 'react-router-dom'
+import { API } from '../../app/api.js'
 
 const KakaoNearPlace = () => {
   const userNearPlace = usePlaceStore(state => state.userNearPlace)
@@ -11,7 +11,7 @@ const KakaoNearPlace = () => {
 
   const handleSaveAndNavigate = unp => {
     if (unp) {
-      axios.post('http://localhost:3000/store/storeInfo', unp)
+      API.post('/store/storeInfo', unp)
       .then(res => {
         const data = res.data
         if (data) {

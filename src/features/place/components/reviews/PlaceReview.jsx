@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import zustandStore from '../../../../app/zustandStore.js'
-import axios from 'axios'
+import { API } from '../../../../app/api.js'
 import { useSelector } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
 import Icon from '../../../../assets/images/icon.png'
@@ -186,13 +186,11 @@ const PlaceReview = () => {
     const userId = user.id
     if (userId) {
       if (confirm('리뷰를 삭제하시겠습니까?')) {
-        axios
-          .delete(`http://localhost:3000/review/delete/${rv._id}`, {
-            withCredentials: true,
-            headers: {
-              user: userId,
-            },
-          })
+        API.delete(`/review/delete/${rv._id}`, {
+          headers: {
+            user: userId,
+          },
+        })
           .then(res => {
             // console.log('리뷰 삭제 정보', res)
             setReviewInfo(prev => prev.filter(review => review._id !== rv?._id))

@@ -1,5 +1,5 @@
 import react, { useEffect, useRef } from 'react'
-import axios from 'axios'
+import { API } from '../../../app/api.js'
 import zustandUser from '../../../app/zustandUser.js'
 import { useSelector } from 'react-redux'
 import zustandStore from '../../../app/zustandStore.js'
@@ -27,12 +27,12 @@ const CheckBookmarks = () => {
   }
 
   useEffect(() => {
-    if (user.role.length !== 0) {
+    if (user?.role.length !== 0) {
       if (!userBookmark || userBookmark !== bookmarkRef.current) {
         getUserBookmark()
       }
     }
-    if (user.role.length > 0 && userBookmark && placeDetail) {
+    if (user?.role.length > 0 && userBookmark && placeDetail) {
       handleCheckBookmarked(location.state, userBookmark)
     }
 
@@ -43,10 +43,8 @@ const CheckBookmarks = () => {
   }, [userBookmark, placeDetail, location.state])
 
   const getUserBookmark = () => {
-    axios
-      .get(`http://localhost:3000/bookmark/read/${user.id}`, {
-        withCredentials: true,
-      })
+    API
+      .get(`/bookmark/read/${user?.id}`)
       .then(res => {
         const data = res.data
         // console.log(data)
