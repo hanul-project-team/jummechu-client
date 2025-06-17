@@ -84,21 +84,26 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
             </div>
             {searchNearData && (
               <Swiper
-                spaceBetween={50}
+                spaceBetween={0}
                 slidesPerView={3}
-                className="border-t-1 border-gray-700 flex"
+                breakpoints={{
+                  426: {
+                    slidesPerView: 5
+                  }
+                }}
+                className="border-t-1 border-gray-700"
               >
                 {searchNearData
                   .filter(snd => snd._id !== placeDetail._id)
                   .map((snd, i) => {
                     return (
-                      <SwiperSlide key={i} className="gap-3 p-2 sm:max-w-[14rem] text-center !mr-0">
+                      <SwiperSlide key={i} className="gap-3 p-2 sm:max-w-[14rem] max-w-[10rem] text-center !mr-0">
                         <div key={i}>
                           <div className="hover:cursor-pointer" onClick={() => handleNavigate(snd)}>
                             <img
                               src={snd.photos[0] ? snd.photos[0] : Icon}
                               alt="icon"
-                              className="sm:w-[150px] sm:h-[150px] mx-auto rounded-xl"
+                              className="sm:w-[150px] sm:h-[150px] h-[80px] w-[80px] mx-auto rounded-xl"
                             />
                           </div>
                           <div>

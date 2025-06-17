@@ -229,9 +229,12 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
         {/* 정렬 버튼 */}
         <div>
           {sortedReviews?.length > 0 && (
-            <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3" ref={dropdownRef}>
+            <div
+              className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative"
+              ref={dropdownRef}
+            >
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
+                className="bg-blue-500 text-white sm:px-4 sm:py-2 px-2 py-1 sm:text-md text-sm rounded-full shadow hover:bg-blue-600 transition"
                 onClick={() => setShowSort(!showSort)}
               >
                 정렬
@@ -246,31 +249,39 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
             sortedReviews.slice(0, count).map((rv, i) => (
               <div
                 key={i}
-                className="sm:max-w-4/5 max-w-full pl-5 border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto h-full"
+                className="sm:max-w-4/5 max-w-full sm:pl-5 border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto h-full"
               >
                 <div className="w-full h-full flex justify-between items-start">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-start sm:gap-3 gap-1">
                     <img
                       src={rv?.store.photos ? rv?.store.photos : Icon}
                       alt="icon"
-                      className="sm:max-h-[80px] max-h-[40px] rounded-xl"
+                      className="sm:h-[80px] h-[40px] rounded-xl"
                     />
                     {/* 가게명, 별점 */}
                     <div>
-                      <p onClick={() => handleNavigateStore(rv)} className="hover:cursor-pointer">
-                        <strong>{rv?.store?.name}</strong>
+                      <p className="hover:cursor-pointer sm:text-lg text-sm max-[325px]:text-xs">
+                        <strong onClick={() => handleNavigateStore(rv)}>{rv?.store?.name}</strong>
                       </p>
                       <Rating
                         initialRating={rv.rating}
-                        emptySymbol={<img src={StarGray} alt="gray-star" className="w-6 h-6" />}
-                        fullSymbol={<img src={StarYellow} alt="yellow-star" className="w-6 h-6" />}
+                        emptySymbol={
+                          <img src={StarGray} alt="gray-star" className="sm:w-6 sm:h-6 w-3 h-3" />
+                        }
+                        fullSymbol={
+                          <img
+                            src={StarYellow}
+                            alt="yellow-star"
+                            className="sm:w-6 sm:h-6 w-3 h-3"
+                          />
+                        }
                         readonly={true}
                       />
                     </div>
                   </div>
                   {/* 작성일, 더보기 메뉴 */}
                   <div
-                    className="flex items-center gap-3 top-0 relative"
+                    className="flex items-center sm:gap-3 gap-1 top-0 relative"
                     ref={el => {
                       if (el) {
                         wrappers.current[rv._id] = el
@@ -279,7 +290,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                       }
                     }}
                   >
-                    <p>{rv?.createdAt?.split('T')[0]}</p>
+                    <p className="sm:text-md max-[325px]:text-xs text-sm">{rv?.createdAt?.split('T')[0]}</p>
                     {/* 드랍다운 아이콘 / 버튼 */}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -288,7 +299,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                       strokeWidth={1.5}
                       stroke="currentColor"
                       onClick={() => handleShowUserTap(rv)}
-                      className={`size-8 mt-1 relative sm:p-[2px] active:bg-gray-300 sm:hover:bg-color-gray-300 rounded-3xl`}
+                      className={`sm:size-8 size-6 relative sm:p-[2px] active:bg-gray-300 sm:hover:bg-color-gray-300 rounded-3xl`}
                     >
                       <path
                         strokeLinecap="round"
@@ -320,7 +331,9 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                 {/* 리뷰 내용 */}
                 <div className="h-full">
                   <div className="flex items-end my-1">
-                    <p className={`indent-2 max-w-9/10 break-all`}>{rv?.comment}</p>
+                    <p className={`indent-2 max-w-9/10 sm:text-md text-sm break-all`}>
+                      {rv?.comment}
+                    </p>
                   </div>
                   <div className="flex items-center gap-1">
                     {rv.attachments?.length > 0 &&
@@ -330,7 +343,9 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                         </div>
                       ))}
                   </div>
-                  <div className="flex justify-end">{handleReviewDate(rv?.createdAt)}</div>
+                  <div className="flex justify-end sm:text-md text-xs">
+                    {handleReviewDate(rv?.createdAt)}
+                  </div>
                 </div>
               </div>
             ))

@@ -30,12 +30,16 @@ const KakaoNearPlace = () => {
         <h3 className="text-2xl">가까운 장소</h3>
       </div>
       <div className="container max-w-full py-2 px-5 shadow-lg/20">
-        <Swiper spaceBetween={50} slidesPerView={3}>
+        <Swiper spaceBetween={0} slidesPerView={2} breakpoints={{
+          426: {
+            slidesPerView: 4
+          }
+        }}>
           {userNearPlace &&
             userNearPlace.map((unp, i) => (
               <SwiperSlide
                 key={`place-${i}`}
-                className="md:max-w-full sm:!mr-1 sm:ml-1 !mr-2 ml-2"
+                className="md:max-w-full sm:mr-1 sm:ml-1 mr-2 ml-2"
                 style={{ margin: '0px' }}
               >
                 <div onClick={() => handleSaveAndNavigate(unp)} className="hover:cursor-pointer">

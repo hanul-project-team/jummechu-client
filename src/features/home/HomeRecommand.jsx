@@ -295,10 +295,21 @@ const HomeRecommand = () => {
                   className="container shadow-lg/20 max-w-full p-3 my-3 overflow-auto"
                 >
                   <p className="text-lg font-bold">&#35; {tag}</p>
-                  <Swiper spaceBetween={50} slidesPerView={3}>
+                  <Swiper
+                    spaceBetween={0}
+                    slidesPerView={2}
+                    breakpoints={{
+                      425: {
+                        slidesPerView: 3,
+                      },
+                      426: {
+                        slidesPerView: 4,
+                      },
+                    }}
+                  >
                     {filteredPlaces.map((fps, idx) => {
                       return (
-                        <SwiperSlide key={idx} className="!mr-0 max-w-full">
+                        <SwiperSlide key={idx} className="max-w-full mr-3">
                           <img
                             src={fps.photos.length > 0 ? fps.photos : Icon}
                             alt="picsum"
@@ -306,7 +317,7 @@ const HomeRecommand = () => {
                             onClick={() => handleNavigate(fps)}
                           />
                           <div className="flex flex-col">
-                            <p className="text-md">
+                            <p className="sm:text-md text-sm">
                               <strong
                                 onClick={() => handleNavigate(fps)}
                                 className="hover:cursor-pointer"
@@ -314,7 +325,7 @@ const HomeRecommand = () => {
                                 {fps.name}
                               </strong>
                             </p>
-                            <div className="text-sm flex gap-1 items-center">
+                            <div className="sm:flex sm:flex-justify gap-1 items-center">
                               {
                                 <div className="flex items-center cursor-default">
                                   {handleAvgRating(nearPlaceReviews, fps)}
@@ -334,12 +345,12 @@ const HomeRecommand = () => {
                                   </svg>
                                 </div>
                               }
-                              <span className="cursor-default">
+                              <span className="cursor-default sm:text-md text-sm">
                                 리뷰수&#40;{handleCountReviews(nearPlaceReviews, fps)}&#41;
                               </span>
                             </div>
                           </div>
-                          <span className="cursor-default text-sm">{fps.address}</span>
+                          <span className="cursor-default sm:text-md text-sm">{fps.address}</span>
                         </SwiperSlide>
                       )
                     })}

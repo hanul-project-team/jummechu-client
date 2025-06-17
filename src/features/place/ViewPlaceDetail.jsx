@@ -268,11 +268,11 @@ const ViewPlaceDetail = () => {
           <div className="container md:max-w-5xl px-6 mx-auto p-3 m-3">
             {/* 타이틀 & 북마크 영역 */}
             <div className="flex items-center justify-between my-2">
-              <h1 className="text-3xl font-bold">{placeDetail.name}</h1>
+              <h1 className="sm:text-3xl text-xl font-bold">{placeDetail.name}</h1>
               <div className="flex items-center gap-1">
                 {/* 북마크 */}
                 <div
-                  className="flex border-1 py-2 px-3 rounded-3xl hover:cursor-pointer"
+                  className="flex border-1 sm:py-2 sm:px-3 py-1 px-2 rounded-3xl hover:cursor-pointer"
                   onClick={handleBookmark}
                 >
                   <svg
@@ -281,7 +281,7 @@ const ViewPlaceDetail = () => {
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className={`size-6 transition-all duration-300 ${isBookmarked ? 'text-red-500 scale-120' : 'text-black/80 scale-100'}`}
+                    className={`sm:size-6 size-5 transition-all duration-300 ${isBookmarked ? 'text-red-500 scale-120' : 'text-black/80 scale-100'}`}
                   >
                     <path
                       strokeLinecap="round"
@@ -290,11 +290,11 @@ const ViewPlaceDetail = () => {
                     />
                   </svg>
                   {/* 북마크 하트 아이콘 */}
-                  <p className="font-bold">저장</p>
+                  <p className="font-bold sm:text-md text-sm">저장</p>
                 </div>
                 {/* 링크 공유 */}
                 <div
-                  className="flex border-1 py-2 px-3 rounded-3xl hover:cursor-pointer"
+                  className="flex border-1 sm:py-2 sm:px-3 py-1 px-2 rounded-3xl hover:cursor-pointer"
                   onClick={handleCopyClipBoard}
                 >
                   {linkCopied === false ? (
@@ -304,7 +304,7 @@ const ViewPlaceDetail = () => {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="size-5"
+                      className="sm:size-5 size-4"
                     >
                       <path
                         strokeLinecap="round"
@@ -328,7 +328,7 @@ const ViewPlaceDetail = () => {
                       />
                     </svg>
                   )}
-                  <p className="font-bold">공유</p>
+                  <p className="font-bold sm:text-md text-sm">공유</p>
                 </div>
               </div>
             </div>
@@ -341,16 +341,16 @@ const ViewPlaceDetail = () => {
                   className="mx-auto sm:w-[400px] sm:h-[300px] w-[150px] h-[150px]"
                 ></div>
                 {/* 상세정보 */}
-                <div className="sm:w-[400px] mx-auto">
+                <div className="sm:w-[400px] mx-auto my-2">
                   {/* 주소지 */}
-                  <div className="flex items-center gap-2 relative my-2">
+                  <div className="flex items-center gap-2 relative sm:text-md text-sm">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="size-6"
+                      className="sm:size-6 size-4"
                     >
                       <path
                         strokeLinecap="round"
@@ -366,14 +366,14 @@ const ViewPlaceDetail = () => {
                     <p>{placeDetail.address}</p>
                   </div>
                   {/* 전화 */}
-                  <div className="flex items-center gap-2 my-2">
+                  <div className="flex items-center gap-2 my-2 sm:text-md text-sm">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="size-6"
+                      className="sm:size-6 size-4"
                     >
                       <path
                         strokeLinecap="round"
@@ -391,7 +391,7 @@ const ViewPlaceDetail = () => {
                       viewBox="0 0 24 24"
                       strokeWidth={1.5}
                       stroke="currentColor"
-                      className="size-6"
+                      className="sm:size-6 size-4"
                     >
                       <path
                         strokeLinecap="round"
@@ -399,7 +399,7 @@ const ViewPlaceDetail = () => {
                         d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
                       />
                     </svg>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 sm:text-md text-sm">
                       <Link>
                         <p>폐업 신고</p>
                       </Link>
