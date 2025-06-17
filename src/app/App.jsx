@@ -34,7 +34,7 @@ const App = () => {
       </Route>
       <Route element={<Simplelayout />}>
         <Route path="login" element={<LoginPage />} />
-        <Route path="regist" element={<Navigate to="/regist/type" replace />} />
+        <Route path="regist" element={<Navigate to="/regist/method" replace />} />
         <Route path="regist/:step" element={<RegistPage />} />
         <Route path="find_account" element={<FindAccountPage />} />
         <Route path="find_account/result" element={<FindAccountResultPage />} />
