@@ -13,8 +13,8 @@ const KakaoMaps = () => {
   const isLoading = zustandStore(state => state.isLoading)
 
   const intervalRef = useRef(null)
-  const [lat, setLat] = useState('')
-  const [lng, setLng] = useState('')
+  const [lat, setLat] = useState(null)
+  const [lng, setLng] = useState(null)
   const navigate = useNavigate()
   const retryCountRef = useRef(0)
   const [formData, setFormData] = useState({
