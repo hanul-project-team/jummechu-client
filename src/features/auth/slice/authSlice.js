@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { API } from '../../../app/api'
+import { _email } from 'zod/v4/core'
 
 export const restoreLogin = createAsyncThunk(
   'auth/restoreLogin',
@@ -21,9 +22,11 @@ const initialState = {
   isAuthenticated: undefined,
   user: {
     id: '',
+    email: '',
     name: '',
     profileImage: '',
     role: '',
+    isAccountSetting: undefined,
   },
   error: '',
 }
