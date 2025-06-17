@@ -143,7 +143,7 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
     }, 500)
   }
   return (
-    <div className="sm:w-3/7 w-6/7 h-3/4 bg-white sm:pt-5 pt-10 py-2 px-[1px] rounded-2xl sm:mb-30 mb-10">
+    <div className="sm:w-3/7 max-[769px]:w-6/7 max-[321px]:w-5/7 h-3/4 bg-white sm:pt-5 pt-10 py-2 px-[1px] rounded-2xl sm:mb-30 mb-10">
       <div className="mx-auto h-full overflow-auto custom-scrollbar">
         <div className="flex flex-col p-2">
           {/* 정보 부분 */}

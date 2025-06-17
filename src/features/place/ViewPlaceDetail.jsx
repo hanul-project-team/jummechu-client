@@ -268,7 +268,7 @@ const ViewPlaceDetail = () => {
           <div className="container md:max-w-5xl px-6 mx-auto p-3 m-3">
             {/* 타이틀 & 북마크 영역 */}
             <div className="flex items-center justify-between my-2">
-              <h1 className="sm:text-3xl text-xl font-bold">{placeDetail.name}</h1>
+              <h1 className="sm:text-3xl text-xl font-bold max-w-1/2">{placeDetail.name}</h1>
               <div className="flex items-center gap-1">
                 {/* 북마크 */}
                 <div
@@ -333,15 +333,15 @@ const ViewPlaceDetail = () => {
               </div>
             </div>
             {/* 가게 정보란 */}
-            <div className="flex items-start justify-around mt-5">
-              <div className="flex-1 w-full">
+            <div className="flex items-start justify-center mt-5">
+              <div className="flex-1 min-lg:pl-3">
                 {/* 지도 */}
                 <div
                   id="map"
-                  className="mx-auto sm:w-[400px] sm:h-[300px] w-[150px] h-[150px]"
+                  className="min-lg:w-[400px] min-lg:h-[300px] max-lg:w-[300px] max-lg:h-[220px] max-sm:w-full max-sm:max-h-[130px]"
                 ></div>
                 {/* 상세정보 */}
-                <div className="sm:w-[400px] mx-auto my-2">
+                <div className="sm:w-[400px] my-2">
                   {/* 주소지 */}
                   <div className="flex items-center gap-2 relative sm:text-md text-sm">
                     <svg
@@ -416,7 +416,7 @@ const ViewPlaceDetail = () => {
                 <img
                   src={placeDetail.photos?.length > 0 ? placeDetail.photos[0] : Icon}
                   alt={`${placeDetail.photos?.length > 0 ? 'photos' : 'Icon'}`}
-                  className="sm:w-[450px] sm:h-auto w-[150px] rounded-xl"
+                  className="sm:w-[450px] sm:h-auto w-[150px] rounded-xl  max-sm:ml-1"
                 />
               </div>
             </div>

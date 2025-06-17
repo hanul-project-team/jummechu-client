@@ -299,9 +299,6 @@ const HomeRecommand = () => {
                     spaceBetween={0}
                     slidesPerView={2}
                     breakpoints={{
-                      425: {
-                        slidesPerView: 3,
-                      },
                       426: {
                         slidesPerView: 4,
                       },
@@ -313,7 +310,7 @@ const HomeRecommand = () => {
                           <img
                             src={fps.photos.length > 0 ? fps.photos : Icon}
                             alt="picsum"
-                            className="sm:h-[200px] hover:cursor-pointer rounded-xl"
+                            className="max-[376px]:h-[110px] max-[426px]:h-[150px] max-[769px]:h-[150px] min-[769px]:h-[200px] hover:cursor-pointer rounded-xl"
                             onClick={() => handleNavigate(fps)}
                           />
                           <div className="flex flex-col">

@@ -85,9 +85,15 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
             {searchNearData && (
               <Swiper
                 spaceBetween={0}
-                slidesPerView={3}
+                slidesPerView={2}
                 breakpoints={{
+                  376: {
+                    slidesPerView: 3
+                  },
                   426: {
+                    slidesPerView: 4
+                  },
+                  769: {
                     slidesPerView: 5
                   }
                 }}
