@@ -250,10 +250,16 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
               >
                 <div className="w-full h-full flex justify-between items-start">
                   <div className="flex items-center gap-3">
-                    <img src={Icon} alt="icon" className="sm:max-h-[80px] max-h-[40px]" />
-                    {/* 사용자명, 별점 */}
+                    <img
+                      src={rv?.store.photos ? rv?.store.photos : Icon}
+                      alt="icon"
+                      className="sm:max-h-[80px] max-h-[40px] rounded-xl"
+                    />
+                    {/* 가게명, 별점 */}
                     <div>
-                      <p>{rv?.user?.name}</p>
+                      <p onClick={() => handleNavigateStore(rv)} className="hover:cursor-pointer">
+                        <strong>{rv?.store?.name}</strong>
+                      </p>
                       <Rating
                         initialRating={rv.rating}
                         emptySymbol={<img src={StarGray} alt="gray-star" className="w-6 h-6" />}
@@ -262,7 +268,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                       />
                     </div>
                   </div>
-                  {/* 날짜, 가게명, 더보기 메뉴 */}
+                  {/* 작성일, 더보기 메뉴 */}
                   <div
                     className="flex items-center gap-3 top-0 relative"
                     ref={el => {
@@ -273,10 +279,8 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                       }
                     }}
                   >
-                    <p onClick={() => handleNavigateStore(rv)} className="hover:cursor-pointer">
-                      <strong>{rv?.store?.name}</strong>
-                    </p>
                     <p>{rv?.createdAt?.split('T')[0]}</p>
+                    {/* 드랍다운 아이콘 / 버튼 */}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -315,7 +319,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                 </div>
                 {/* 리뷰 내용 */}
                 <div className="h-full">
-                  <div className="flex items-end">
+                  <div className="flex items-end my-1">
                     <p className={`indent-2 max-w-9/10 break-all`}>{rv?.comment}</p>
                   </div>
                   <div className="flex items-center gap-1">
