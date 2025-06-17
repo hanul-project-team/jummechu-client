@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link, NavLink } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { logout } from '../../../features/auth/slice/authSlice'
+import { logout } from '../../../features/auth/slice/authSlice.js'
 import zustandStore from '../../../app/zustandStore.js'
 import zustandUser from '../../../app/zustandUser.js'
+import { toast } from 'react-toastify'
 import { API } from '../../../app/api.js'
 import Logo from '../../../assets/images/logo.png'
 
@@ -41,6 +42,12 @@ const MainHeaderTop = () => {
         } catch (error) {
           console.log('zustand persist 제거 실패', error)
         }
+        toast.success(
+          <div className="Toastify__toast-body cursor-default">로그아웃 되셨습니다. 안녕히 가십시오.</div>,
+          {
+            position: 'top-center',
+          },
+        )
         navigate('/')
       }
     } catch (err) {
