@@ -12,15 +12,15 @@ const KakaoNearPlace = () => {
   const handleSaveAndNavigate = unp => {
     if (unp) {
       API.post('/store/storeInfo', unp)
-      .then(res => {
-        const data = res.data
-        if (data) {
-          navigate(`/place/${data._id}`, { state: data })
-        }
-      })
-      .catch((err) => {
-        console.error("navigate 에러", err)
-      })
+        .then(res => {
+          const data = res.data
+          if (data) {
+            navigate(`/place/${data._id}`, { state: data })
+          }
+        })
+        .catch(err => {
+          console.error('navigate 에러', err)
+        })
     }
   }
 
@@ -49,8 +49,15 @@ const KakaoNearPlace = () => {
                     className="sm:w-[200px] sm:h-[150px] rounded-xl"
                   />
                 </div>
-                <div onClick={() => handleSaveAndNavigate(unp)} className="hover:cursor-pointer">
-                  <p className="font-bold max-[426px]:text-sm">{unp.name}</p>
+                <div>
+                  <p className="font-bold max-[426px]:text-sm">
+                    <span
+                      onClick={() => handleSaveAndNavigate(unp)}
+                      className="hover:cursor-pointer"
+                    >
+                      {unp.name}
+                    </span>
+                  </p>
                 </div>
                 <p className="max-[426px]:text-sm">소재지:{unp.address}</p>
               </SwiperSlide>

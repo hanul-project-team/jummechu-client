@@ -1,5 +1,5 @@
 import { Swiper, SwiperSlide } from 'swiper/react'
-import Icon from '../../../assets/images/icon.png'
+import Icon from '../../../assets/images/default2.png'
 import { API } from '../../../app/api.js'
 import 'swiper/css'
 import { toast } from 'react-toastify'
@@ -98,7 +98,7 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
                             <img
                               src={snd.photos[0] ? snd.photos[0] : Icon}
                               alt="icon"
-                              className="w-[150px] h-[150px] mx-auto rounded-xl"
+                              className="sm:w-[150px] sm:h-[150px] mx-auto rounded-xl"
                             />
                           </div>
                           <div>

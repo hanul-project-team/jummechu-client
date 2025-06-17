@@ -4,7 +4,7 @@ import zustandStore from '../../../../app/zustandStore'
 import Rating from 'react-rating'
 import StarGray from '../../../../assets/images/star-gray.png'
 import StarYellow from '../../../../assets/images/star-yellow.png'
-import Icon from '../../../../assets/images/Icon.png'
+import Icon from '../../../../assets/images/default2.png'
 import { toast } from 'react-toastify'
 
 const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSort }) => {

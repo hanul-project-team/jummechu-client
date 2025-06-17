@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { API } from '../../../app/api.js'
-import Icon from '../../../assets/images/icon.png'
+import Icon from '../../../assets/images/default2.png'
 import StarGray from '../../../assets/images/star-gray.png'
 import StarYellow from '../../../assets/images/star-yellow.png'
 import { toast } from 'react-toastify'
