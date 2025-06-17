@@ -87,7 +87,7 @@ const HomeRecommand = () => {
   ]
   useEffect(() => {
     const fetchReviews = (isFromInterval = false) => {
-      // setIsLoading(true) // {/* interval 1번 */}
+      setIsLoading(true) // {/* interval 1번 */}
       if (userNearPlace && userNearPlace.length > 0) {
         const categories = userNearPlace.map(unp => {
           return unp.keywords[0]
@@ -120,15 +120,16 @@ const HomeRecommand = () => {
           // console.log(center)
           // console.log(results)
           if (results) {
-            API
-              .post('/store/tag/match', {
-                results: results,
-                center: center,
-              })
+            API.post('/store/tag/match', {
+              results: results,
+              center: center,
+            })
               .then(res => {
                 const data = res.data
                 if (data?.length > 0) {
                   setOtherPlaces(data)
+                  const places = data.map(list => list.stores)
+                  handleHomeReviews(places)
                 }
               })
               .catch(err => {
@@ -141,27 +142,12 @@ const HomeRecommand = () => {
               })
           }
           setTag(results)
-
-          const places = otherPlaces.map(place => ({
-            name: place?.name,
-            address: place?.address,
-          }))
           // {/*interval 2번*/}
-          if (isFromInterval || !nearPlaceReviews || isSamePlaces(lastPlacesRef.current, places)) {
-            lastPlacesRef.current = places
-            API
-              .post('/review/readall', {
-                places: places,
-              })
-              .then(res => {
-                const data = res.data.data
-                const reviews = data?.allReviews
-                // console.log(data)
-                // console.log(reviews)
-                setNearPlaceReviews(reviews?.length > 0 ? reviews : [])
-                setIsLoading(false)
-                setCountDown(60)
-              })
+          if (otherPlaces?.length > 0 && lastPlacesRef.current) {
+            if (isFromInterval || isSamePlaces(lastPlacesRef.current, otherPlaces)) {
+              const places = otherPlaces.map(place => place.stores)
+              handleHomeReviews(places)
+            }
           }
         } catch (err) {
           console.log(err)
@@ -207,7 +193,39 @@ const HomeRecommand = () => {
       })
     }
   }
-
+  const handleHomeReviews = places => {
+    if (places?.length > 0) {
+      API.post('/review/readall', {
+        places: places,
+      })
+        .then(res => {
+          const data = res.data
+          const reviews = data
+          // console.log(data)
+          // console.log(reviews)
+          setNearPlaceReviews(reviews?.length > 0 ? reviews : [])
+          setIsLoading(false)
+          setCountDown(60)
+        })
+        .catch(err => {
+          toast.error(
+            <div className="Toastify__toast-body cursor-default">
+              리뷰 정보를 불러올 수 없습니다.
+            </div>,
+            {
+              position: 'top-center',
+            },
+          )
+        })
+    } else {
+      return toast.error(
+        <div className="Toastify__toast-body cursor-default">위치 정보를 갱신해주세요.</div>,
+        {
+          position: 'top-center',
+        },
+      )
+    }
+  }
   const isSamePlaces = (prevPlaces, newPlaces) => {
     if (!prevPlaces || !newPlaces) return false
     if (prevPlaces?.length !== newPlaces?.length) return false
@@ -224,7 +242,7 @@ const HomeRecommand = () => {
   }
   const handleAvgRating = (reviews, place) => {
     if (reviews?.length > 0) {
-      const matchedReviews = reviews.filter(review => review.store?.name === place.name)
+      const matchedReviews = reviews.filter(review => review.store?._id === place._id)
       const avgRating =
         matchedReviews?.length > 0
           ? matchedReviews.reduce((acc, cur) => acc + cur.rating, 0) / matchedReviews.length
@@ -237,7 +255,7 @@ const HomeRecommand = () => {
   }
   const handleCountReviews = (reviews, place) => {
     if (reviews?.length > 0) {
-      const matchedReviews = reviews.filter(review => review.store?.name === place.name)
+      const matchedReviews = reviews.filter(review => review.store?._id === place._id)
       return matchedReviews.length
     } else {
       return 0
@@ -260,7 +278,9 @@ const HomeRecommand = () => {
         <>
           <div className="flex justify-between">
             <span className="text-xl font-bold">추천 태그</span>
-            {/* <span>{countDown > 0 ? `review 최신화까지 ${countDown}초 남음` : `리뷰 정보 갱신 중...`}</span> */}
+            {/* <span>
+              {countDown > 0 ? `review 갱신까지 ${countDown}초 남음` : `리뷰 정보 갱신 중...`}
+            </span> */}
           </div>
           {otherPlaces?.length > 0 ? (
             otherPlaces.map((group, i) => {
