@@ -143,12 +143,12 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
     }, 500)
   }
   return (
-    <div className="sm:w-3/7 max-[769px]:w-6/7 max-[321px]:w-5/7 h-3/4 bg-white sm:pt-5 pt-10 py-2 px-[1px] rounded-2xl sm:mb-30 mb-10">
+    <div className="min-xl:w-3/7 max-xl:w-4/7 max-lg:w-5/7 max-[321px]:w-5/7 h-3/4 bg-white sm:pt-5 pt-10 py-2 px-[1px] rounded-2xl sm:mb-30 mb-10">
       <div className="mx-auto h-full overflow-auto custom-scrollbar">
         <div className="flex flex-col p-2">
           {/* 정보 부분 */}
           <div className="w-full flex items-center justify-center">
-            <img src={Icon} alt="가게 아이콘" className="sm:w-25 w-20" />
+            <img src={Icon} alt="가게 아이콘" className="sm:w-25 w-20 mr-1" />
             <div>
               <div className="text-center sm:text-xl text-sm">
                 <p>{placeDetail.name}</p>
