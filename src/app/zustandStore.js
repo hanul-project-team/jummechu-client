@@ -68,8 +68,8 @@ const zustandStore = create(
           reviewInfo: [],
           searchData: [],
           center: null,
-          userNearPlace: [],
-          nearPlaceReviews: null,
+          // userNearPlace: [],
+          // nearPlaceReviews: null,
           isLoading: true,
           searchNearData: [],
         })
