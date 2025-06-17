@@ -38,9 +38,14 @@ const ResetPasswordPage = () => {
         }
       }
       verifyResetToken()
+    } else {
+      toast.error(<div className="Toastify__toast-body cursor-default">잘못된 접근입니다</div>, {
+        position: 'top-center',
+      })
+      navigate('/find_account?type=password')
     }
   }, [resetToken, navigate])
-
+  if (!resetToken) return <main className="min-h-[400px]"></main>
   return (
     <main className="container mx-auto max-w-5xl flex justify-center px-6">
       <section className="max-w-sm w-full flex flex-col gap-10">
