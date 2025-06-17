@@ -254,7 +254,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                 <div className="w-full h-full flex justify-between items-start">
                   <div className="flex items-start sm:gap-3 gap-1">
                     <img
-                      src={rv?.store.photos ? rv?.store.photos : Icon}
+                      src={(rv?.store.photos && rv?.store.photos.length > 0) ? rv?.store.photos : Icon}
                       alt="icon"
                       className="sm:h-[80px] h-[40px] rounded-xl"
                     />
@@ -263,8 +263,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                       <p className="hover:cursor-pointer sm:text-lg text-sm max-[325px]:text-xs">
                         <strong onClick={() => handleNavigateStore(rv)}>{rv?.store?.name}</strong>
                       </p>
-                      <Rating
-                        initialRating={rv.rating}
+                      <Rating initialRating={rv.rating}
                         emptySymbol={
                           <img src={StarGray} alt="gray-star" className="sm:w-6 sm:h-6 w-3 h-3" />
                         }
