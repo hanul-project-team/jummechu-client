@@ -4,6 +4,7 @@ import 'swiper/css'
 import '../../assets/styles/global.css'
 import { useNavigate } from 'react-router-dom'
 import { API } from '../../app/api.js'
+import Icon from '../../assets/images/default2.png'
 
 const KakaoNearPlace = () => {
   const userNearPlace = usePlaceStore(state => state.userNearPlace)
@@ -30,11 +31,15 @@ const KakaoNearPlace = () => {
         <h3 className="text-2xl">가까운 장소</h3>
       </div>
       <div className="container max-w-full py-2 px-5 shadow-lg/20">
-        <Swiper spaceBetween={0} slidesPerView={2} breakpoints={{
-          426: {
-            slidesPerView: 4
-          }
-        }}>
+        <Swiper
+          spaceBetween={0}
+          slidesPerView={2}
+          breakpoints={{
+            426: {
+              slidesPerView: 4,
+            },
+          }}
+        >
           {userNearPlace &&
             userNearPlace.map((unp, i) => (
               <SwiperSlide
@@ -44,11 +49,7 @@ const KakaoNearPlace = () => {
               >
                 <div onClick={() => handleSaveAndNavigate(unp)} className="hover:cursor-pointer">
                   <img
-                    src={
-                      unp.photos?.length > 0
-                        ? unp.photos
-                        : `https://picsum.photos/200/150?random=${Math.floor(Math.random() * 1000)}`
-                    }
+                    src={unp.photos?.length > 0 ? unp.photos : Icon}
                     alt="lorem picture"
                     className="sm:w-[200px] sm:h-[150px] rounded-xl"
                   />
