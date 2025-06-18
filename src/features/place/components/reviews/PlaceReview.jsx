@@ -222,8 +222,8 @@ const PlaceReview = () => {
           <span className="text-2xl italic">고객 리뷰</span>
         </div>
         {/* 리뷰 통계 */}
-        <div className="flex justify-between sm:max-w-5xl sm:px-6 px-3 max-sm:flex-col mx-auto items-center">
-          <div>
+        <div className="flex justify-evenly sm:max-w-5xl sm:px-6 px-3 max-sm:flex-col mx-auto items-center">
+          <div className='sm:max-w-1/2'>
             <p className="font-bold text-3xl">{handleTotalRating(reviewInfo)}</p>
             <div className="flex items-center">
               <div className="relative w-fit text-2xl leading-none my-2">
