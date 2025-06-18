@@ -45,6 +45,18 @@
   .disabled\:bg-color-red-500:disabled  { background-color: var(--color-red-500); }
   .disabled\:bg-color-red-50:disabled   { background-color: var(--color-red-50); }
 
+  /* bg-color-opacity*/
+  .bg-color-gray-900\/10  { background-color: rgba(var(--color-gray-900-rgb), 0.1); }
+  .bg-color-gray-900\/20  { background-color: rgba(var(--color-gray-900-rgb), 0.2); }
+  .bg-color-gray-900\/30  { background-color: rgba(var(--color-gray-900-rgb), 0.3); }
+  .bg-color-gray-900\/40  { background-color: rgba(var(--color-gray-900-rgb), 0.4); }
+  .bg-color-gray-900\/50  { background-color: rgba(var(--color-gray-900-rgb), 0.5); }
+  .bg-color-gray-900\/60  { background-color: rgba(var(--color-gray-900-rgb), 0.6); }
+  .bg-color-gray-900\/70  { background-color: rgba(var(--color-gray-900-rgb), 0.7); }
+  .bg-color-gray-900\/80  { background-color: rgba(var(--color-gray-900-rgb), 0.8); }
+  .bg-color-gray-900\/90  { background-color: rgba(var(--color-gray-900-rgb), 0.9); }
+  .bg-color-gray-900\/100 { background-color: rgba(var(--color-gray-900-rgb), 1); }
+
   /* bg-gradient */
   .bg-gradient-teal { background: linear-gradient(90deg, var(--color-teal-400), #00C6FF); }
   /* text-color */
