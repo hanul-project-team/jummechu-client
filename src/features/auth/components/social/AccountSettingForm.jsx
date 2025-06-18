@@ -1,34 +1,24 @@
 import React, { useState, useEffect, useRef, createRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm, FormProvider } from 'react-hook-form'
-import { registScheam } from '../../schema/registSchema'
+import { useSelector, useDispatch } from 'react-redux'
+import { restoreLogin } from '../../slice/authSlice'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { accountSettingSchema } from '../../schema/accountSettingSchema'
 import { API } from '../../../../app/api'
 import { toast } from 'react-toastify'
 import { CSSTransition } from 'react-transition-group'
-import TermsBox from './TermsBox'
-import VisibleBtn from '../../../../shared/VisibleBtn'
+import TermsBox from '../regist/TermsBox'
 import Timer from '../../../../shared/Timer'
 
-const RegistDetailsForm = () => {
+const AccountSettingForm = ({ returnUrl }) => {
   const [isPhone, setIsPhone] = useState(false)
   const [isRequested, setIsRequested] = useState(false)
   const [isCode, setIsCode] = useState(false)
   const [isSMSAuthenticated, setIsSMSAuthenticated] = useState(false)
   const [isAgreement, setIsAgreement] = useState(false)
   const [timerKey, setTimerKey] = useState(0)
-  const [passwordState, setPasswordState] = useState({
-    hasValue: false,
-    visible: false,
-  })
-  const [passwordCheckState, setPasswordCheckState] = useState({
-    hasValue: false,
-    visible: false,
-  })
   const [showError, setShowError] = useState({
-    email: false,
-    password: false,
-    passwordCheck: false,
     name: false,
     phone: false,
   })
@@ -45,27 +35,24 @@ const RegistDetailsForm = () => {
     setValue,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(registScheam),
+    resolver: zodResolver(accountSettingSchema),
     defaultValues: {
       service: false,
       privacy: false,
       business: false,
     },
   })
+  const user = useSelector(state => state.auth.user)
+  const dispatch = useDispatch()
   const navigate = useNavigate()
   const phoneValue = watch('phone')
   const codeValue = watch('code')
-  const passwordValue = watch('password')
-  const passwordCheckValue = watch('passwordCheck')
   const errorRefs = useRef({
-    email: createRef(null),
-    password: createRef(null),
-    passwordCheck: createRef(null),
     name: createRef(null),
     phone: createRef(null),
   })
   useEffect(() => {
-    setFocus('email')
+    setFocus('name')
   }, [setFocus])
   useEffect(() => {
     const isValid = /^01[016789][0-9]{8}$/.test(phoneValue)
@@ -76,27 +63,12 @@ const RegistDetailsForm = () => {
     setIsCode(!!isValid)
   }, [codeValue])
   useEffect(() => {
-    setPasswordState(prev => ({
-      ...prev,
-      hasValue: !!passwordValue,
-    }))
-  }, [passwordValue])
-  useEffect(() => {
-    setPasswordCheckState(prev => ({
-      ...prev,
-      hasValue: !!passwordCheckValue,
-    }))
-  }, [passwordCheckValue])
-  useEffect(() => {
     setShowError(prev => ({
       ...prev,
-      email: !!errors.email,
-      password: !!errors.password,
-      passwordCheck: !!errors.passwordCheck,
       name: !!errors.name,
       phone: !!errors.phone,
     }))
-  }, [errors.email, errors.password, errors.passwordCheck, errors.name, errors.phone])
+  }, [errors.name, errors.phone])
   const phoneSubmit = async () => {
     const isValid = await trigger('phone')
     if (isValid) {
@@ -152,57 +124,38 @@ const RegistDetailsForm = () => {
     }
   }
   const onSubmit = async data => {
-    const role = JSON.parse(localStorage.getItem('role'))
-    const { passwordCheck: _passwordCheck, code: _code, ...rest } = data
-    const submitData = { ...role, ...rest }
+    const { code: _code, ...rest } = data
+    const submitData = { ...rest }
     try {
-      await API.post('/auth/regist', submitData)
+      await API.put(`/auth/account_setting/${user.id}`, submitData)
+      if(returnUrl) {
+        navigate(`${returnUrl}`)
+      } else {
+        navigate('/')
+      }
       toast.success(
-        <div className="Toastify__toast-body cursor-default">회원가입에 성공하였습니다</div>,
+        <div className="Toastify__toast-body cursor-default">계정설정에 성공하였습니다</div>,
         {
           position: 'top-center',
         },
       )
       reset()
-      navigate('/login')
-    } catch (e) {
-      if (e.response.status === 400) {
-        toast.error(
-          <div className="Toastify__toast-body cursor-default">사용 중인 이메일입니다</div>,
-          {
-            position: 'top-center',
-          },
-        )
-        resetField('email')
-        setFocus('email')
-      } else {
-        toast.error(
-          <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
-          {
-            position: 'top-center',
-          },
-        )
-      }
+      dispatch(restoreLogin())
+    } catch {
+      toast.error(
+        <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
+        {
+          position: 'top-center',
+        },
+      )
     }
   }
   const onIsvalid = errors => {
-    if (errors.email) {
-      setFocus('email')
-    } else if (errors.password) {
-      setFocus('password')
-    } else if (errors.passwordCheck) {
-      setFocus('passwordCheck')
-    } else if (errors.name) {
+    if (errors.name) {
       setFocus('name')
     } else if (errors.phone) {
       setFocus('phone')
     }
-  }
-  const changeVisible = setter => {
-    setter(prev => ({
-      ...prev,
-      visible: !prev.visible,
-    }))
   }
   const onExpire = () => {
     setIsRequested(false)
@@ -211,97 +164,16 @@ const RegistDetailsForm = () => {
     <FormProvider control={control} setValue={setValue} watch={watch}>
       <form autoComplete="off" onSubmit={handleSubmit(onSubmit, onIsvalid)}>
         <fieldset className="flex flex-col gap-3">
-          <legend className="hidden">상세정보 입력 폼</legend>
+          <legend className="hidden">계정설정 폼</legend>
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="email" className="font-semibold">
-              이메일<span className="ps-0.5 text-color-red-500">*</span>
-            </label>
-            <input
-              className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
-              type="text"
-              id="email"
-              placeholder="이메일"
-              {...register('email')}
-            />
-            <CSSTransition
-              nodeRef={errorRefs.current.email}
-              timeout={300}
-              in={showError.email}
-              classNames="fade"
-            >
-              <span
-                ref={errorRefs.current.email}
-                className="text-xs sm:text-sm text-color-red-700 cursor-default"
-              >
-                {errors.email?.message}
-              </span>
-            </CSSTransition>
-          </div>
-          <div className="relative flex flex-col gap-1.5">
-            <div className="flex justify-between items-center">
-              <label htmlFor="password" className="font-semibold">
-                비밀번호<span className="ps-0.5 text-color-red-500">*</span>
-              </label>
-              <span className="text-color-gray-700 text-xs cursor-default">
-                영문/숫자/특수문자(~!@#^*_=+-) 포함 8자 이상
-              </span>
+            <label className="font-semibold">이메일</label>
+            <div className="flex justify-center gap-2 border-color-gray-300 border bg-color-gray-50 rounded-lg grow py-4 px-3 outline-hidden font-semibold cursor-default">
+              <img
+                alt="구글로고"
+                src="data:image/svg+xml,%3csvg%20width='20'%20height='20'%20viewBox='0%200%2020%2020'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M17.75%2010.178C17.75%209.6512%2017.7064%209.12154%2017.6135%208.60326H10.1561V11.5876H14.4266C14.2494%2012.5501%2013.68%2013.4016%2012.8462%2013.9426V15.879H15.394C16.8901%2014.5292%2017.75%2012.5359%2017.75%2010.178Z'%20fill='%234285F4'/%3e%3cpath%20d='M10.1562%2017.75C12.2886%2017.75%2014.0868%2017.0637%2015.397%2015.8791L12.8492%2013.9427C12.1404%2014.4154%2011.2253%2014.6831%2010.1591%2014.6831C8.09651%2014.6831%206.34764%2013.319%205.72014%2011.4851H3.09103V13.4814C4.43318%2016.0984%207.16688%2017.75%2010.1562%2017.75Z'%20fill='%2334A853'/%3e%3cpath%20d='M5.71723%2011.4854C5.38605%2010.5229%205.38605%209.48067%205.71723%208.51816V6.52195H3.09102C1.96965%208.7118%201.96966%2011.2915%203.09103%2013.4814L5.71723%2011.4854Z'%20fill='%23FBBC05'/%3e%3cpath%20d='M10.1562%205.31745C11.2834%205.30037%2012.3728%205.71612%2013.1891%206.4793L15.4464%204.26667C14.0171%202.95105%2012.1201%202.22774%2010.1562%202.25052C7.16688%202.25052%204.43318%203.9021%203.09102%206.52195L5.71723%208.51816C6.34183%206.68142%208.09361%205.31745%2010.1562%205.31745Z'%20fill='%23EA4335'/%3e%3c/svg%3e"
+              ></img>
+              {user.email}
             </div>
-            <input
-              className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
-              type={passwordState.visible ? 'text' : 'password'}
-              id="password"
-              placeholder="비밀번호"
-              {...register('password')}
-            />
-            <VisibleBtn
-              changeVisible={changeVisible}
-              setter={setPasswordState}
-              visible={passwordState.visible}
-              hasValue={passwordState.hasValue}
-              className="absolute top-[51px] right-3 "
-            />
-            <CSSTransition
-              nodeRef={errorRefs.current.password}
-              timeout={300}
-              in={showError.password}
-              classNames="fade"
-            >
-              <span
-                ref={errorRefs.current.password}
-                className="text-xs sm:text-sm text-color-red-700 cursor-default"
-              >
-                {errors.password?.message}
-              </span>
-            </CSSTransition>
-          </div>
-          <div className="relative flex flex-col gap-1.5">
-            <input
-              className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
-              type={passwordCheckState.visible ? 'text' : 'password'}
-              id="passwordCheck"
-              placeholder="비밀번호 확인"
-              {...register('passwordCheck')}
-            />
-            <VisibleBtn
-              changeVisible={changeVisible}
-              setter={setPasswordCheckState}
-              visible={passwordCheckState.visible}
-              hasValue={passwordCheckState.hasValue}
-              className="absolute top-[21px] right-3 "
-            />
-            <CSSTransition
-              nodeRef={errorRefs.current.passwordCheck}
-              timeout={300}
-              in={showError.passwordCheck}
-              classNames="fade"
-            >
-              <span
-                ref={errorRefs.current.passwordCheck}
-                className="text-xs sm:text-sm text-color-red-700 cursor-default"
-              >
-                {errors.passwordCheck?.message}
-              </span>
-            </CSSTransition>
           </div>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="name" className="font-semibold">
@@ -421,4 +293,4 @@ const RegistDetailsForm = () => {
   )
 }
 
-export default RegistDetailsForm
+export default AccountSettingForm

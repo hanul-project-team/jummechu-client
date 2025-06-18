@@ -63,7 +63,7 @@ const ResetPasswordForm = ({ resetToken }) => {
   const onSubmit = async data => {
     const submitData = { password: data.password, resetToken: resetToken }
     try {
-      await API.post('/auth/reset_password', submitData)
+      await API.put('/auth/reset_password', submitData)
       reset()
       navigate('/login')
     } catch (e) {

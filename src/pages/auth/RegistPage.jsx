@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import SelectMethod from '../../features/auth/components/regist/SelectMethod'
 import RegistTypeForm from '../../features/auth/components/regist/RegistTypeForm'
-import TermsForm from '../../features/auth/components/regist/TermsForm'
 import RegistDetailsForm from '../../features/auth/components/regist/RegistDetailsForm'
 import RegistAction from '../../features/auth/components/regist/RegistAction'
 
@@ -11,52 +11,43 @@ const RegistPage = () => {
   const { step } = useParams()
   useEffect(() => {
     if (!step) {
-      navigate('/regist/type')
-    } else if (step === 'terms' && !localStorage.getItem('role')) {
+      navigate('/regist/method')
+    } else if (step === 'details' && !localStorage.getItem('role')) {
       toast.error(<div className="Toastify__toast-body cursor-default">잘못된 접근입니다</div>, {
         position: 'top-center',
       })
-      navigate('/regist/type')
-    } else if (step === 'details' && !localStorage.getItem('termsAgreement')) {
-      toast.error(<div className="Toastify__toast-body cursor-default">잘못된 접근입니다</div>, {
-        position: 'top-center',
-      })
-      navigate('/regist/type')
+      navigate('/regist/method')
     }
   }, [step, navigate])
   useEffect(() => {
     return () => {
       localStorage.removeItem('role')
-      localStorage.removeItem('termsAgreement')
     }
   }, [])
   const nextStep = () => {
-    if (step === 'type') navigate('/regist/terms')
-    else if (step === 'terms') navigate('/regist/details')
+    if (step === 'type') navigate('/regist/details')
   }
-  if(step === 'terms' && !localStorage.getItem('role')) return null
-  if(step === 'details' && !localStorage.getItem('termsAgreement')) return null
+  if (step === 'details' && !localStorage.getItem('role'))
+    return <main className="min-h-[340px]"></main>
   return (
-    <main className="container mx-auto max-w-5xl flex justify-center px-6 ">
+    <main className="container mx-auto max-w-5xl flex justify-center px-6">
       <section className={`${!(step === 'type') && 'max-w-sm'} w-full flex flex-col`}>
+        {step === 'method' && (
+          <div className="flex flex-col gap-10">
+            <h2 className="text-center text-2xl font-semibold cursor-default">회원가입</h2>
+            <SelectMethod />
+            <RegistAction />
+          </div>
+        )}
         {step === 'type' && (
           <div className="flex flex-col gap-10">
             <div className="flex flex-col items-center gap-2 cursor-default">
               <h2 className="font-semibold max-w-52 leading-tight sm:max-w-fit text-center text-2xl">
                 맛집을 찾으시나요? 운영하시나요?
               </h2>
-              <p className="text-sm text-color-gray-800">원하는 유형으로 지금 시작해보세요</p>
+              <p className="text-sm text-color-gray-800">원하는 유형을 선택해주세요</p>
             </div>
             <RegistTypeForm nextStep={nextStep} />
-            <RegistAction />
-          </div>
-        )}
-        {step === 'terms' && (
-          <div className="flex flex-col gap-10">
-            <h2 className="text-center text-2xl font-semibold cursor-default">
-              서비스 이용을 위해 <br /> 약관에 동의해주세요
-            </h2>
-            <TermsForm nextStep={nextStep} />
           </div>
         )}
         {step === 'details' && (
