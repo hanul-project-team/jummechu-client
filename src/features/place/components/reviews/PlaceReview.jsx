@@ -174,12 +174,20 @@ const PlaceReview = () => {
     }
   }
   const handleReviewWrite = () => {
-    if (user.name?.length === 0 || user.role?.length === 0) {
+    if (!user?.id || user.id?.length === 0) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니가?')) {
         navigate('/login', { state: { returnUrl } })
       }
     } else {
-      setShowReviewModal(prev => !prev)
+      if (user.isAccountSetting === false) {
+        if (confirm('계정 설정을 완료해야합니다. 설정 페이지로 이동하시겠습니까?')) {
+          navigate(`/social_setting`)
+        } else {
+          return
+        }
+      } else {
+        setShowReviewModal(prev => !prev)
+      }
     }
   }
   const handleDeleteMyReview = rv => {

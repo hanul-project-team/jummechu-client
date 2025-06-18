@@ -38,7 +38,6 @@ const ViewPlaceDetail = () => {
     lat: 37.3946622,
     lng: 127.1026676,
   })
-
   // console.log(placeDetail.keywords)
   /* 정보 호출 및 갱신 */
   useEffect(() => {
@@ -52,8 +51,8 @@ const ViewPlaceDetail = () => {
       if (isDifferentStore || renewReviewInfo) {
         try {
           Promise.all([
-            API.get(`/review/read/store/${placeDetail._id}`),
-            API.post(`/api/kakao/search/${placeDetail._id}`, {
+            API.get(`/review/read/store/${storeId}`),
+            API.post(`/api/kakao/search/${storeId}`, {
               headers: {
                 lat: placeDetail.latitude,
                 lng: placeDetail.longitude,
@@ -181,44 +180,52 @@ const ViewPlaceDetail = () => {
   }, [map, center, marker])
   // console.log(center.lat, center.lng)
   const handleBookmark = () => {
-    if (!user.role) {
+    if (!user.id) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 하시겠습니까?')) {
         navigate('/login')
       }
     } else {
-      const userId = user?.id
-      const storeId = placeDetail?._id
-      if (isBookmarked === true) {
-        if (confirm('북마크를 해제하시겠습니까?')) {
-          API.delete(`/bookmark/delete/${storeId}`, {
-            headers: {
-              user: userId,
-            },
-          })
-            .then(res => {
-              const data = res.data
-              // console.log(data)
-              setUserBookmark(prev => prev.filter(ubm => ubm?.store._id !== placeDetail._id))
-            })
-            .catch(err => {
-              console.error('북마크 해제 요청 실패!', err)
-            })
+      if (user.isAccountSetting === false) {
+        if (confirm('계정 설정을 완료해야합니다. 설정 페이지로 이동하시겠습니까?')) {
+          navigate(`/social_setting`)
+        } else {
+          return
         }
       } else {
-        if (confirm('북마크에 추가하시겠습니까?')) {
-          API.post(`/bookmark/regist/${storeId}`, {
-            headers: {
-              user: userId,
-            },
-          })
-            .then(res => {
-              const data = res.data
-              // console.log(data)
-              setUserBookmark(prev => [...prev, data])
+        const userId = user?.id
+        const storeId = placeDetail?._id
+        if (isBookmarked === true) {
+          if (confirm('북마크를 해제하시겠습니까?')) {
+            API.delete(`/bookmark/delete/${storeId}`, {
+              headers: {
+                user: userId,
+              },
             })
-            .catch(err => {
-              console.error('북마크 등록 요청 실패!', err)
+              .then(res => {
+                const data = res.data
+                // console.log(data)
+                setUserBookmark(prev => prev.filter(ubm => ubm?.store._id !== placeDetail._id))
+              })
+              .catch(err => {
+                console.error('북마크 해제 요청 실패!', err)
+              })
+          }
+        } else {
+          if (confirm('북마크에 추가하시겠습니까?')) {
+            API.post(`/bookmark/regist/${storeId}`, {
+              headers: {
+                user: userId,
+              },
             })
+              .then(res => {
+                const data = res.data
+                // console.log(data)
+                setUserBookmark(prev => [...prev, data])
+              })
+              .catch(err => {
+                console.error('북마크 등록 요청 실패!', err)
+              })
+          }
         }
       }
     }
