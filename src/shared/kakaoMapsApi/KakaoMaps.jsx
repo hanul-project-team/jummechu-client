@@ -273,7 +273,7 @@ const KakaoMaps = () => {
                         name="place"
                         value={formData.place}
                         onChange={handleChange}
-                        className="py-2 indent-5 w-full outline-none"
+                        className="py-2 min-sm:indent-5 max-sm:indent-1 w-full outline-none"
                         placeholder="검색어를 입력해주세요"
                       />
                     </div>

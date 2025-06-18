@@ -9,7 +9,7 @@ const SearchResultPageList = ({ searchData, searchResults, navi, avg, reviews, c
       {searchData.map((sd, i) => {
         // console.log(sd)
         return (
-          <div key={`${sd._id}-${i}`} className="flex gap-2 p-2 my-3">
+          <div key={`${sd._id}-${i}`} className="flex gap-2 p-2 my-3 max-sm:flex-col">
             <div className="md:min-w-[200px]">
               <img
                 src={`${searchResults[i]?.photos?.length > 0 ? searchResults[i]?.photos : Icon}`}
