@@ -289,7 +289,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                       }
                     }}
                   >
-                    <p className="sm:text-md max-[325px]:text-xs text-sm">{rv?.createdAt?.split('T')[0]}</p>
+                    <p className="min-sm:text-md max-sm:text-xs">{rv?.createdAt?.split('T')[0]}</p>
                     {/* 드랍다운 아이콘 / 버튼 */}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -342,7 +342,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                         </div>
                       ))}
                   </div>
-                  <div className="flex justify-end sm:text-md text-xs">
+                  <div className="flex justify-end min-sm:text-md max-sm:text-xs">
                     {handleReviewDate(rv?.createdAt)}
                   </div>
                 </div>
@@ -363,7 +363,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
         </div>
         {/* 더보기 버튼 */}
         {sortedReviews?.length > 0 && (
-          <div className="mx-auto max-w-fit my-2">
+          <div className="mx-auto max-w-fit my-2 min-sm:text-md max-sm:text-sm">
             <button
               type="button"
               className={`${sortedReviews?.length <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
