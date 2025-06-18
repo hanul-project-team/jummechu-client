@@ -222,7 +222,7 @@ const PlaceReview = () => {
           <span className="text-2xl italic">고객 리뷰</span>
         </div>
         {/* 리뷰 통계 */}
-        <div className="flex justify-between sm:max-w-5xl px-6 mx-auto items-center">
+        <div className="flex justify-between sm:max-w-5xl sm:px-6 px-3 max-sm:flex-col mx-auto items-center">
           <div>
             <p className="font-bold text-3xl">{handleTotalRating(reviewInfo)}</p>
             <div className="flex items-center">
@@ -261,7 +261,7 @@ const PlaceReview = () => {
               </div>
             </div>
           </div>
-          <div className="w-1/3 h-fit">
+          <div className="sm:w-2/5 w-full h-fit">
             <ReviewChart reviews={reviewInfo} />
           </div>
         </div>
@@ -286,7 +286,7 @@ const PlaceReview = () => {
             sortedReviews?.slice(0, count).map((rv, i) => (
               <div
                 key={i}
-                className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 pl-5 my-3 mx-auto relative"
+                className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 sm:pl-5 my-3 mx-auto relative"
               >
                 <div className="flex items-start justify-between">
                   {/* 작성자 정보, 별점 */}
@@ -296,8 +296,8 @@ const PlaceReview = () => {
                       <p>{rv?.user.name}</p>
                       <Rating
                         initialRating={rv.rating}
-                        emptySymbol={<img src={StarGray} alt="gray-star" className="w-6 h-6" />}
-                        fullSymbol={<img src={StarYellow} alt="yellow-star" className="w-6 h-6" />}
+                        emptySymbol={<img src={StarGray} alt="gray-star" className="w-6 h-6 max-sm:w-4 max-sm:h-4" />}
+                        fullSymbol={<img src={StarYellow} alt="yellow-star" className="w-6 h-6 max-sm:w-4 max-sm:h-4" />}
                         readonly={true}
                       />
                     </div>
@@ -307,7 +307,7 @@ const PlaceReview = () => {
                     className="text-end flex items-center gap-3 top-0"
                     ref={el => (tabRefs.current[i] = el)}
                   >
-                    <p>{rv?.createdAt.split('T')[0]}</p>
+                    <p className='max-sm:text-sm'>{rv?.createdAt.split('T')[0]}</p>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
