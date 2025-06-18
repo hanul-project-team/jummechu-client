@@ -223,15 +223,6 @@ const ViewPlaceDetail = () => {
       }
     }
   }
-  const handleTotalRating = data => {
-    if (data.length > 0) {
-      const result = data.reduce((acc, cur) => acc + cur.rating, 0) / data.length
-      const rounded = Math.round(result * 10) / 10
-      return rounded
-    } else {
-      return 0
-    }
-  }
   const handleCopyClipBoard = async () => {
     let shareLink = rootLocation + `${location.pathname}`
     try {
@@ -281,7 +272,7 @@ const ViewPlaceDetail = () => {
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className={`sm:size-6 size-5 transition-all duration-300 ${isBookmarked ? 'text-red-500 scale-120' : 'text-black/80 scale-100'}`}
+                    className={`sm:size-5 size-4 transition-all duration-300 ${isBookmarked ? 'text-red-500 scale-120' : 'text-black/80 scale-100'}`}
                   >
                     <path
                       strokeLinecap="round"
