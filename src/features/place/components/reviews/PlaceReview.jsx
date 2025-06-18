@@ -261,7 +261,7 @@ const PlaceReview = () => {
               </div>
             </div>
           </div>
-          <div className="sm:w-2/5 w-full h-fit">
+          <div className={`sm:w-2/5 w-full h-fit ${reviewInfo?.length > 0 ? 'max-sm:block' : "max-sm:hidden"}`}>
             <ReviewChart reviews={reviewInfo} />
           </div>
         </div>

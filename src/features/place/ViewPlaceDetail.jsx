@@ -270,7 +270,7 @@ const ViewPlaceDetail = () => {
               <div className="flex items-center gap-1">
                 {/* 북마크 */}
                 <div
-                  className="flex border-1 sm:py-2 sm:px-3 py-1 px-2 rounded-3xl hover:cursor-pointer"
+                  className="flex items-center border-1 sm:py-2 sm:px-3 py-1 px-2 rounded-3xl hover:cursor-pointer"
                   onClick={handleBookmark}
                 >
                   <svg
@@ -292,7 +292,7 @@ const ViewPlaceDetail = () => {
                 </div>
                 {/* 링크 공유 */}
                 <div
-                  className="flex border-1 sm:py-2 sm:px-3 py-1 px-2 rounded-3xl hover:cursor-pointer"
+                  className="flex items-center border-1 sm:py-2 sm:px-3 py-1 px-2 rounded-3xl hover:cursor-pointer"
                   onClick={handleCopyClipBoard}
                 >
                   {linkCopied === false ? (
