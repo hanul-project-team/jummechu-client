@@ -65,11 +65,8 @@ const zustandStore = create(
       reset: () => {
         set({
           placeDetail: [],
-          reviewInfo: [],
           searchData: [],
           center: null,
-          // userNearPlace: [],
-          // nearPlaceReviews: null,
           isLoading: true,
           searchNearData: [],
         })
