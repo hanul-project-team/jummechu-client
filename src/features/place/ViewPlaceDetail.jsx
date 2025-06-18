@@ -331,91 +331,91 @@ const ViewPlaceDetail = () => {
               </div>
             </div>
             {/* 가게 정보란 */}
-            <div className="flex items-start justify-center mt-5">
-              <div className="flex-1 min-lg:pl-3">
-                {/* 지도 */}
+            <div className="grid grid-cols-2 items-start justify-center mt-5">
+              {/* 지도 */}
+              <div className="min-lg:pl-3">
                 <div
                   id="map"
-                  className="min-lg:w-[400px] min-lg:h-[300px] max-lg:w-[300px] max-lg:h-[220px] max-sm:w-full max-sm:max-h-[130px]"
+                  className="w-full min-lg:h-[300px] max-lg:h-[200px] max-md:h-[130px]"
                 ></div>
-                {/* 상세정보 */}
-                <div className="sm:w-[400px] my-2">
-                  {/* 주소지 */}
-                  <div className="flex items-center gap-2 relative sm:text-md text-sm">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="sm:size-6 size-4"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
-                      />
-                    </svg>
-                    <p>{placeDetail.address}</p>
-                  </div>
-                  {/* 전화 */}
-                  <div className="flex items-center gap-2 my-2 sm:text-md text-sm">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="sm:size-6 size-4"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"
-                      />
-                    </svg>
-                    <p>{placeDetail?.phone ? placeDetail.phone : '연락처 미제공'}</p>
-                  </div>
-                  {/* 문의? */}
-                  <div className="flex items-center gap-2 my-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="sm:size-6 size-4"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
-                      />
-                    </svg>
-                    <div className="flex gap-2 sm:text-md text-sm">
-                      <Link>
-                        <p>폐업 신고</p>
-                      </Link>
-                      <span>&#183;</span>
-                      <Link>
-                        <p>정보수정 제안</p>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
               </div>
               {/* 가게 이미지 */}
-              <div className="flex-1 flex justify-center">
+              <div className="min-sm:row-span-2 px-2">
                 <img
                   src={placeDetail.photos?.length > 0 ? placeDetail.photos[0] : Icon}
                   alt={`${placeDetail.photos?.length > 0 ? 'photos' : 'Icon'}`}
-                  className="sm:w-[450px] sm:h-auto w-[150px] rounded-xl  max-sm:ml-1"
+                  className="sm:h-auto w-fit rounded-xl max-sm:mx-auto"
                 />
+              </div>
+              {/* 상세정보 */}
+              <div className="sm:w-full my-2 max-sm:col-span-2 min-lg:ml-3">
+                {/* 주소지 */}
+                <div className="flex items-center gap-2 relative sm:text-md text-sm">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="sm:size-6 size-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
+                    />
+                  </svg>
+                  <p>{placeDetail.address}</p>
+                </div>
+                {/* 전화 */}
+                <div className="flex items-center gap-2 my-2 sm:text-md text-sm">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="sm:size-6 size-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"
+                    />
+                  </svg>
+                  <p>{placeDetail?.phone ? placeDetail.phone : '연락처 미제공'}</p>
+                </div>
+                {/* 문의? */}
+                <div className="flex items-center gap-2 my-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="sm:size-6 size-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8.625 9.75a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 0 1 .778-.332 48.294 48.294 0 0 0 5.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
+                    />
+                  </svg>
+                  <div className="flex gap-2 sm:text-md text-sm">
+                    <Link>
+                      <p>폐업 신고</p>
+                    </Link>
+                    <span>&#183;</span>
+                    <Link>
+                      <p>정보수정 제안</p>
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
             {/* 다른 장소 추천 */}
