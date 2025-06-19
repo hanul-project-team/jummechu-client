@@ -1,25 +1,26 @@
 import React from 'react'
 import { useLocation } from 'react-router-dom'
 import MainHeaderTop from './components/MainHeaderTop.jsx'
-import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
+import CheckBookmarks from './components/CheckBookmarks.jsx'
 
 const MainHeader = () => {
   const location = useLocation()
   const isRoot = location.pathname === '/'
   return (
-    <header className="pb-5">
-      {isRoot === true ? (
-        <div className="container max-w-5xl mx-auto px-6">
-          <MainHeaderTop />
-          {/* <KakaoMaps /> */}
-        </div>
-      ) : (
-        <div className="container max-w-5xl mx-auto px-6 md:relative">
-          <MainHeaderTop />
-          {/* <KakaoMaps /> */}
-        </div>
-      )}
-    </header>
+    <>
+      <header className="pb-5">
+        {isRoot === true ? (
+          <div className="container max-w-5xl mx-auto px-6">
+            <MainHeaderTop />
+          </div>
+        ) : (
+          <div className="container max-w-5xl mx-auto px-6 md:relative">
+            <MainHeaderTop />
+          </div>
+        )}
+      </header>
+      <CheckBookmarks />
+    </>
   )
 }
 

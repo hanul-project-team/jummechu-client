@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link, NavLink } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { logout } from '../../../features/auth/slice/authSlice'
-import axios from 'axios'
+import { logout } from '../../../features/auth/slice/authSlice.js'
+import zustandStore from '../../../app/zustandStore.js'
+import zustandUser from '../../../app/zustandUser.js'
+import { toast } from 'react-toastify'
+import { API } from '../../../app/api.js'
 import Logo from '../../../assets/images/logo.png'
 
 const MainHeaderTop = () => {
@@ -29,13 +32,28 @@ const MainHeaderTop = () => {
   const setLogout = async () => {
     try {
       if (confirm('로그아웃 하시겠습니까?')) {
-        axios.get('http://localhost:3000/auth/logout', { withCredentials: true })
+        API.get('/auth/logout')
         dispatch(logout())
-        localStorage.removeItem('place-storage')
+        zustandStore.getState().reset()
+        zustandUser.getState().reset()
+        try {
+          zustandStore.persist?.clearStorage()
+          zustandUser.persist?.clearStorage()
+        } catch (error) {
+          console.log('zustand persist 제거 실패', error)
+        }
+        toast.success(
+          <div className="Toastify__toast-body cursor-default">로그아웃 되셨습니다. 안녕히 가십시오.</div>,
+          {
+            position: 'top-center',
+          },
+        )
         navigate('/')
       }
-    } catch {
+    } catch (err) {
+      console.error(err)
       alert('다시 시도해주세요')
+      navigate('/')
     }
   }
   return (

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import zustandStore from '../../app/zustandStore.js'
-import axios from 'axios'
+import { API } from '../../app/api.js'
 import { useLocation, useNavigate } from 'react-router-dom'
 import KakaoNearPlace from './KakaoNearPlace.jsx'
 
@@ -10,10 +10,12 @@ const KakaoMaps = () => {
   const setUserNearPlace = zustandStore(state => state.setUserNearPlace)
   const userNearPlace = zustandStore(state => state.userNearPlace)
   const setSearchData = zustandStore(state => state.setSearchData)
+  const isLoading = zustandStore(state => state.isLoading)
+  const setIsLoading = zustandStore(state => state.setIsLoading)
 
   const intervalRef = useRef(null)
-  const [lat, setLat] = useState('')
-  const [lng, setLng] = useState('')
+  const [lat, setLat] = useState(null)
+  const [lng, setLng] = useState(null)
   const navigate = useNavigate()
   const retryCountRef = useRef(0)
   const [formData, setFormData] = useState({
@@ -63,6 +65,9 @@ const KakaoMaps = () => {
           setTimeout(() => getNowLocation(retryCountRef, 1000))
         } else {
           console.log('위치 정보 획득 실패 및 재시도 실패')
+          if (err.code === 1) {
+            alert('위치 권한이 거부 되었습니다. 사용자 권한을 설정해주세요.')
+          }
         }
       },
       { enableHighAccuracy: true },
@@ -74,24 +79,48 @@ const KakaoMaps = () => {
       console.warn('유효하지 않은 center 값으로 getKakaoData 호출됨:', center)
       return
     }
-    if (userNearPlace?.length === 0 || !userNearPlace) {
-      axios
-        .post(
-          'http://localhost:3000/api/kakao/user/nearplace',
-          {
-            location: {
-              lat: center.lat,
-              lng: center.lng,
-            },
-          },
-          {
-            withCredentials: true,
-          },
-        )
+    if (isLoading === false && (userNearPlace?.length === 0 || !userNearPlace)) {
+      API.post('/api/kakao/user/nearplace', {
+        location: {
+          lat: center.lat,
+          lng: center.lng,
+        },
+      })
         .then(res => {
           const data = res.data
           // console.log(data)
-          setUserNearPlace(data)
+          // setUserNearPlace(data)
+          if (data) {
+            API.post('/store/storeInfo', data)
+              .then(res => {
+                const existPlaces = res.data
+                // console.log(res)
+                if (existPlaces) {
+                  setUserNearPlace(existPlaces)
+                } else if (existPlaces?.length === 0 || !existPlaces) {
+                  API.post('/store/save', data)
+                    .then(res => {
+                      const places = res.data
+                      if (places) {
+                        // console.log('등록완료')
+                        if (Array.isArray(places)) {
+                          // console.log('배열로 반환', places)
+                          setUserNearPlace(places)
+                        } else {
+                          // console.log('미배열 반환', places)
+                          setUserNearPlace(places)
+                        }
+                      }
+                    })
+                    .catch(err => {
+                      console.log(err)
+                    })
+                }
+              })
+              .catch(err => {
+                console.log(err)
+              })
+          }
           retryCountRef.current = 0
         })
         .catch(err => {
@@ -110,51 +139,58 @@ const KakaoMaps = () => {
   const handleSubmit = e => {
     e.preventDefault()
     setSearchData(null)
+    setIsLoading(true)
     if (formData.place.startsWith('#')) {
       const sliced = formData.place.slice(1)
       navigate(`/search/${sliced}`)
-      axios
-        .post(
-          'http://localhost:3000/api/kakao/search',
-          {
-            place: sliced,
-            center: center,
-          },
-          {
-            withCredentials: true,
-          },
-        )
+      API.post('/api/kakao/search', {
+        place: sliced,
+        center: center,
+      })
         .then(res => {
-          const data = res.data
-          // console.log(data)
-          setSearchData(data)
-          setFormData({
-            place: '',
-          })
+          if (res.status === 204) {
+            setIsLoading(false)
+          } else {
+            const data = res.data
+            // console.log(data)
+            setSearchData(data)
+            API.post('/store/save', data)
+              .then(res => {
+                const result = res.data
+                // console.log(result)
+                setSearchData(result)
+                setFormData({
+                  place: '',
+                })
+              })
+              .catch(err => {
+                console.error(err)
+              })
+            setFormData({
+              place: '',
+            })
+          }
         })
         .catch(err => {
           console.log(err)
         })
     } else {
       navigate(`/search/${formData.place}`)
-      axios
-        .post(
-          'http://localhost:3000/api/kakao/search',
-          {
-            place: formData.place,
-            center: center,
-          },
-          {
-            withCredentials: true,
-          },
-        )
+      API.post('/api/kakao/search', {
+        place: formData.place,
+        center: center,
+      })
         .then(res => {
-          const data = res.data
-          // console.log(data)
-          setSearchData(data)
-          setFormData({
-            place: '',
-          })
+          if (res.status === 204) {
+            setIsLoading(false)
+          } else {
+            const result = res.data
+            // console.log(result)
+            setSearchData(result)
+            setFormData({
+              place: '',
+            })
+          }
         })
         .catch(err => {
           console.log(err)
@@ -175,7 +211,7 @@ const KakaoMaps = () => {
       {isRoot === true ? (
         <>
           <div className="md:max-w-1/2 mx-auto">
-          <h1 className="text-center text-4xl sm:text-5xl font-bold">오늘 뭐 먹지?</h1>
+            <h1 className="text-center text-4xl sm:text-5xl font-bold">오늘 뭐 먹지?</h1>
             <form className="p-3 my-3" onSubmit={handleSubmit} autoComplete="off">
               <fieldset>
                 <legend className="hidden">kakao search</legend>
@@ -209,7 +245,7 @@ const KakaoMaps = () => {
                     </div>
                     <div className="flex-2 sm:flex-1 text-center">
                       <button
-                        className="button w-fit px-3 py-2 rounded-3xl sm:px-5 sm:py-2 bg-color-teal-400 focus:bg-teal-500 text-white hover:cursor-pointer"
+                        className="button w-fit px-3 py-2 rounded-3xl sm:px-5 sm:py-2 bg-color-teal-400 hover:bg-teal-400/90 active:bg-teal-500/80 text-white hover:cursor-pointer"
                         type="submit"
                       >
                         <p className="sm:w-max sm:text-sm text-xs">검색</p>
@@ -220,7 +256,7 @@ const KakaoMaps = () => {
               </fieldset>
             </form>
           </div>
-          <div className="container mx-auto max-w-7xl max-xl:m-3">
+          <div className="container mx-auto sm:max-w-5xl max-w-5xl max-sm:p-3">
             <KakaoNearPlace />
           </div>
         </>
@@ -238,7 +274,7 @@ const KakaoMaps = () => {
                         name="place"
                         value={formData.place}
                         onChange={handleChange}
-                        className="py-2 indent-5 w-full outline-none"
+                        className="py-2 min-sm:indent-5 max-sm:indent-1 w-full outline-none"
                         placeholder="검색어를 입력해주세요"
                       />
                     </div>

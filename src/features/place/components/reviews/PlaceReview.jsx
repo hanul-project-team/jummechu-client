@@ -1,42 +1,78 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import zustandStore from '../../../../app/zustandStore.js'
+import { API } from '../../../../app/api.js'
 import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
-import Icon from '../../../../assets/images/icon.png'
-import StarRatingComponent from 'react-star-rating-component'
+import { useNavigate, useLocation } from 'react-router-dom'
+import Icon from '../../../../assets/images/default2.png'
+import StarYellow from '../../../../assets/images/star-yellow.png'
+import StarGray from '../../../../assets/images/star-gray.png'
+import Rating from 'react-rating'
 import ReviewChart from './ReviewChart.jsx'
-import axios from 'axios'
+import ReviewWriteModal from './ReviewWriteModal.jsx'
+import SortDropdown from './sortButton/SortDropdown.jsx'
+import ReviewImageSrc from '../../../../shared/ReviewImageSrc.jsx'
 
 const PlaceReview = () => {
-  const [showMore, setShowMore] = useState(5)
-  const [isUser, setIsUser] = useState(false)
+  const [showReviewMore, setShowReviewMore] = useState(5)
+  const [openTabId, setOpenTabId] = useState(null)
+  const [showSort, setShowSort] = useState(false)
   const [prevResult, setPrevResult] = useState(null)
+  const [showReviewModal, setShowReviewModal] = useState(false)
   const user = useSelector(state => state.auth.user)
-  const [showReviewForm, setShowReviewForm] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-  let count = showMore
-  let MIN_LENGTH = 10
-  const setReviewInfo  = zustandStore(state => state.setReviewInfo)
+  let count = showReviewMore
+  const setReviewInfo = zustandStore(state => state.setReviewInfo)
   const reviewInfo = zustandStore(state => state.reviewInfo)
+  const [sortedReviews, setSortedReviews] = useState([])
   const placeDetail = zustandStore(state => state.placeDetail)
   const navigate = useNavigate()
-  const [starRating, setStarRating] = useState(0)
-  const [formData, setFormData] = useState({
-    user: '',
-    comment: '',
-    rating: 1,
-    store: '',
-  })
-
+  const location = useLocation()
+  const returnUrl = location.pathname + location?.search
   const [currentSort, setCurrentSort] = useState('none')
 
+  const tabRefs = useRef([])
+  const dropdownRef = useRef(null)
+  // 바깥 클릭시 버튼 fade out
   useEffect(() => {
-    if (user) {
-      setIsUser(true)
+    const handleClickOutside = e => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowSort(false)
+      }
+    }
+    if (showSort) {
+      document.addEventListener('mousedown', handleClickOutside)
     } else {
-      setIsUser(false)
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showSort])
+  useEffect(() => {
+    const handleClickOutside = e => {
+      const isOutside = tabRefs.current.every(ref => {
+        return ref && !ref.contains(e.target)
+      })
+      if (isOutside) {
+        setOpenTabId(null)
+      }
     }
 
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+  // 리뷰 작성중 외부 접근 금지
+  useEffect(() => {
+    if (showReviewModal === true) {
+      document.body.style.overflow = 'hidden'
+    } else if (showReviewModal === false) {
+      document.body.style.overflow = 'auto'
+    }
+  }, [showReviewModal])
+  // 정렬 관리
+  useEffect(() => {
+    if (sortedReviews !== reviewInfo) {
+      setSortedReviews(reviewInfo)
+    }
     let sorted = [...reviewInfo]
     // console.log(sorted)
     switch (currentSort) {
@@ -57,16 +93,16 @@ const PlaceReview = () => {
         sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
         break
     }
-    setReviewInfo(sorted)
+    setSortedReviews(sorted)
 
     const result = handleTotalRating(reviewInfo)
     if (typeof result == 'number' && prevResult !== result) {
       setPrevResult(result)
     }
-  }, [currentSort, isUser, placeDetail])
+  }, [currentSort, placeDetail, reviewInfo])
 
   const handleReviewDate = createdAt => {
-    const diff = new Date() - createdAt
+    const diff = new Date() - new Date(createdAt)
     const day = Math.round(diff / (1000 * 60 * 60 * 24))
     const minutes = Math.round(diff / (1000 * 60))
     if (day / 365 >= 1) {
@@ -111,101 +147,82 @@ const PlaceReview = () => {
       return 0
     }
   }
-  const handleReviewWrite = () => {
-    if (isUser === false) {
-      if (confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니가?')) {
-        navigate('/login')
+  const handleReviewshowReviewMore = () => {
+    if (reviewInfo?.length > 5) {
+      if (reviewInfo?.length - showReviewMore > 5) {
+        setShowReviewMore(prev => (prev += 5))
+        count = count + 5
+      } else if (
+        reviewInfo?.length - showReviewMore <= 5 &&
+        reviewInfo?.length - showReviewMore > 0
+      ) {
+        setShowReviewMore(reviewInfo?.length)
+        count = reviewInfo?.length
+      } else if (reviewInfo?.length === showReviewMore) {
+        setShowReviewMore(5)
+        count = 5
       }
-    } else {
-      setShowReviewForm(prev => !prev)
-      setFormData({
-        user: '',
-        comment: '',
-        rating: 1,
-        store: '',
-      })
-      setStarRating(0)
-    }
-  }
-  const handleReviewShowMore = () => {
-    if (reviewInfo.length - showMore > 5) {
-      setShowMore(prev => (prev += 5))
-      count = count + 5
-    } else if (reviewInfo.length - showMore <= 5 && reviewInfo.length - showMore > 0) {
-      setShowMore(prev => prev + (reviewInfo.length - prev))
-      count = count + showMore
-    } else if (reviewInfo.length - showMore === 0) {
-      setShowMore(5)
-      count = showMore
     }
   }
   const handleSortChange = sort => {
     if (currentSort !== sort) {
       setCurrentSort(sort)
+      setShowSort(!showSort)
     } else if (currentSort == sort) {
       setCurrentSort('none')
+      setShowSort(!showSort)
     }
   }
-  const handleSubmit = e => {
-    e.preventDefault()
-    if (user?.id && placeDetail?._id) {
-      const updatedFormData = {
-        ...formData,
-        user: user.id,
-        store: placeDetail._id,
+  const handleReviewWrite = () => {
+    if (!user?.id || user.id?.length === 0) {
+      if (confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니가?')) {
+        navigate('/login', { state: { returnUrl } })
       }
-      // console.log(updatedFormData)
-      try {
-        axios
-          .post('http://localhost:3000/review/regist', updatedFormData, {
-            withCredentials: true,
-          })
+    } else {
+      if (user.isAccountSetting === false) {
+        if (confirm('계정 설정을 완료해야합니다. 설정 페이지로 이동하시겠습니까?')) {
+          navigate(`/social_setting`)
+        } else {
+          return
+        }
+      } else {
+        setShowReviewModal(prev => !prev)
+      }
+    }
+  }
+  const handleDeleteMyReview = rv => {
+    const userId = user.id
+    if (userId) {
+      if (confirm('리뷰를 삭제하시겠습니까?')) {
+        API.delete(`/review/delete/${rv._id}`, {
+          headers: {
+            user: userId,
+          },
+        })
           .then(res => {
-            // console.log(res)
-            if (res.status === 201) {
-              alert('리뷰가 작성되었습니다.')
-              setFormData({
-                ...formData,
-                rating: 1,
-                comment: '',
-              })
-              setShowReviewForm(prev => !prev)
-              setReviewInfo(res.data.data)
-            }
+            // console.log('리뷰 삭제 정보', res)
+            setReviewInfo(prev => prev.filter(review => review._id !== rv?._id))
+            setSortedReviews(prev => prev.filter(review => review._id !== rv?._id))
           })
           .catch(err => {
-            console.log(err)
+            console.error('리뷰 삭제 실패 에러 발생', err)
           })
-      } catch (err) {
-        console.log(err)
       }
     }
   }
-  const handleChange = e => {
-    if (e.target.value.length === 0) {
-      setErrorMessage('내용을 입력해주세요.')
-    } else if (e.target.value.length < MIN_LENGTH) {
-      setErrorMessage(`최소 ${MIN_LENGTH}자 이상 입력해주세요. (현재 ${e.target.value.length}자)`)
-    } else {
-      setErrorMessage('')
-    }
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
+  const handleShowUserTap = rv => {
+    setOpenTabId(prev => (prev === rv._id ? null : rv._id))
   }
-  const onStarClick = (nextValue, prevValue, name) => {
-    setStarRating(nextValue)
-    setFormData({
-      ...formData,
-      rating: nextValue,
-    })
+  const total = sortedReviews?.length || 0
+  const remains = total - count
+  let buttonText = ''
+  if (remains > 5) {
+    buttonText = '5개 더보기'
+  } else if (remains > 0) {
+    buttonText = `${remains}개 더보기`
+  } else if (remains === 0 && total === count) {
+    buttonText = '접기'
   }
-  const handleSeeAllReviews = () => {
-    setShowMore(reviewInfo.length)
-  }
-  // console.log(reviewTrigger)
-  // console.log(reviewInfo)
   return (
     <div>
       {/* 리뷰 헤더 영역 */}
@@ -214,23 +231,26 @@ const PlaceReview = () => {
           <span className="text-2xl italic">고객 리뷰</span>
         </div>
         {/* 리뷰 통계 */}
-        <div className="flex justify-between max-w-3/5 mx-auto items-center">
-          <div>
+        <div className="flex justify-evenly sm:max-w-5xl sm:px-6 px-3 max-sm:flex-col mx-auto items-center">
+          <div className="sm:max-w-1/2">
             <p className="font-bold text-3xl">{handleTotalRating(reviewInfo)}</p>
-            <StarRatingComponent
-              name="rating1"
-              starCount={5}
-              value={handleTotalRating(reviewInfo)}
-            />
+            <div className="flex items-center">
+              <div className="relative w-fit text-2xl leading-none my-2">
+                <div className="text-color-gray-700">★★★★★</div>
+                <div
+                  className="absolute top-0 left-0 overflow-hidden text-yellow-400"
+                  style={{ width: `${(handleTotalRating(reviewInfo) / 5) * 100 + '%'}` }}
+                >
+                  ★★★★★
+                </div>
+              </div>
+            </div>
             {handleratingText(reviewInfo)}
             <p>
               총 <strong>{reviewInfo.length}</strong>분의 고객님이 리뷰를 남기셨습니다.
             </p>
-            {/* 리뷰 작성 토글 버튼 */}
+            {/* 리뷰 작성 모달 버튼 */}
             <div className="flex gap-3 my-2">
-              <div className="underline font-bold hover:cursor-pointer" onClick={handleSeeAllReviews}>
-                모든 리뷰
-              </div>
               <div className="flex hover:cursor-pointer" onClick={handleReviewWrite}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -250,126 +270,119 @@ const PlaceReview = () => {
               </div>
             </div>
           </div>
-          <div className="w-1/3 h-fit">
+          <div
+            className={`sm:w-2/5 w-full h-fit ${reviewInfo?.length > 0 ? 'max-sm:block' : 'max-sm:hidden'}`}
+          >
             <ReviewChart reviews={reviewInfo} />
           </div>
         </div>
-        {/* 리뷰 작성 폼 */}
-        {showReviewForm === true ? (
-          <div className="max-w-3/5 mx-auto">
-            <form onSubmit={handleSubmit} className="w-fit mx-auto p-2 text-center">
-              <div className="text-start my-1 bg-white p-2 w-fit rounded-3xl">
-                <span>작성자:{user.name}</span>
-              </div>
-              {/* 이하 textarea */}
-              <div>
-                <textarea
-                  type="text"
-                  name="comment"
-                  onChange={handleChange}
-                  value={formData.comment}
-                  rows={5}
-                  cols={50}
-                  className={`bg-white indent-1 max-h-auto max-w-fit min-w-1/5 resize-none mt-1 block w-full border rounded-md shadow-sm p-2 resize-none
-            ${errorMessage ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'}
-            focus:border-blue-500 focus:outline-none focus:ring-1`}
-                />
-                {errorMessage && <p className="mt-1 text-sm text-red-600">{errorMessage}</p>}
-              </div>
-              <div className="flex justify-between my-2">
-                {/* 이하 별점 매기기 */}
-                <div>
-                  <StarRatingComponent
-                    name="rating"
-                    starCount={5}
-                    onStarClick={onStarClick}
-                    value={starRating}
-                    renderStarIcon={(nextValue, prevValue, name) => {
-                      return <span>&#9733;</span>
-                    }}
-                    starColor="#ffb400"
-                    emptyStarColor="gray"
-                    className="text-xl"
-                  />
-                </div>
-                {/* 이하 버튼 */}
-                <div>
-                  <button
-                    type="button"
-                    className="bg-red-400 hover:cursor-pointer px-2 py-1 rounded-xl text-white mr-2"
-                    onClick={handleReviewWrite}
-                  >
-                    취소
-                  </button>
-                  <button
-                    type="submit"
-                    className="hover:cursor-pointer border-1 active:bg-gray-500 active:text-white rounded-xl px-2 py-1"
-                  >
-                    작성
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        ) : null}
       </div>
       {/* 리뷰 보이는곳 */}
-      <div className="container max-w-3/5 mx-auto">
+      <div className="container sm:max-w-5xl px-6 max-w-3xl mx-auto">
         {/* 정렬 버튼 */}
-        {reviewInfo.length > 0 && (
-          <div className="max-w-4/5 flex gap-3 mx-auto my-3">
+        {sortedReviews?.length > 0 && (
+          <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative" ref={dropdownRef}>
             <button
-              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
-              onClick={() => handleSortChange('recommand')}
+              className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
+              onClick={() => setShowSort(!showSort)}
             >
-              추천순
+              정렬
             </button>
-            <button
-              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
-              onClick={() => handleSortChange('latest')}
-            >
-              최신순
-            </button>
-            <button
-              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
-              onClick={() => handleSortChange('old')}
-            >
-              오래된순
-            </button>
-            <button
-              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
-              onClick={() => handleSortChange('rating-high')}
-            >
-              별점높은순
-            </button>
-            <button
-              className="bg-gray-300 p-2 rounded-3xl hover:cursor-pointer"
-              onClick={() => handleSortChange('rating-low')}
-            >
-              별점낮은순
-            </button>
+            <SortDropdown handleSortChange={handleSortChange} showSort={showSort} />
           </div>
         )}
         {/* 리뷰 영역 */}
         <div>
-          {reviewInfo.length > 0 ? (
-            reviewInfo.slice(0, count).map((rv, i) => (
+          {sortedReviews?.length > 0 ? (
+            sortedReviews?.slice(0, count).map((rv, i) => (
               <div
                 key={i}
-                className="max-w-4/5 border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto flex items-center"
+                className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 sm:pl-5 my-3 mx-auto relative"
               >
-                <div className="flex-2">
-                  <img src={Icon} alt="icon" className="md:max-h-[60px] sm:max-h-[40px]" />
-                  <p>{rv.user.name}</p>
-                  <div>
-                    <p>작성일: {rv.createdAt.split('T')[0]}</p>
-                    {handleReviewDate(rv.createdAt)}
-                    <StarRatingComponent name="rating1" starCount={5} value={rv.rating} />
+                <div className="flex items-start justify-between">
+                  {/* 작성자 정보, 별점 */}
+                  <div className="flex gap-3 items-center">
+                    <img src={Icon} alt="icon" className="sm:max-h-[80px] max-h-[40px]" />
+                    <div>
+                      <p>{rv?.user.name}</p>
+                      <Rating
+                        initialRating={rv.rating}
+                        emptySymbol={
+                          <img
+                            src={StarGray}
+                            alt="gray-star"
+                            className="w-6 h-6 max-sm:w-4 max-sm:h-4"
+                          />
+                        }
+                        fullSymbol={
+                          <img
+                            src={StarYellow}
+                            alt="yellow-star"
+                            className="w-6 h-6 max-sm:w-4 max-sm:h-4"
+                          />
+                        }
+                        readonly={true}
+                      />
+                    </div>
+                  </div>
+                  {/* 작성일, 더보기 메뉴 */}
+                  <div
+                    className="text-end flex items-center gap-3 top-0"
+                    ref={el => (tabRefs.current[i] = el)}
+                  >
+                    <p className="max-sm:text-sm">{rv?.createdAt.split('T')[0]}</p>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      onClick={() => handleShowUserTap(rv)}
+                      className={`size-8 relative sm:p-[2px] active:bg-gray-300 sm:hover:bg-color-gray-300 rounded-3xl`}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+                      />
+                    </svg>
+                    <div
+                      className={`absolute top-10 right-[-2.5rem] flex flex-col gap-2 max-w-fit p-3 bg-white transition-all duration-200 ease-in-out z-50 border-1 border-gray-300 rounded-xl ${openTabId === rv._id ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                    >
+                      <button className="hover:cursor-pointer transition ease-in-out sm:text-sm text-xs rounded-2xl active:bg-gray-300 sm:active:bg-gray-500 sm:active:text-white sm:hover:bg-gray-300 p-2">
+                        리뷰 신고하기
+                      </button>
+                      {rv?.user._id === user.id && (
+                        <button
+                          className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl sm:bg-red-600 sm:active:bg-red-700 text-white"
+                          onClick={e => {
+                            e.stopPropagation()
+                            handleDeleteMyReview(rv)
+                          }}
+                        >
+                          삭제
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="flex-4">
-                  <p className="indent-2">{rv.comment}</p>
-                  {/* <p className="text-xl">{i + 1}번</p> */}
+                <div>
+                  {/* 코멘트 */}
+                  <div>
+                    <p className="indent-2 my-5 max-w-9/10 break-all">{rv.comment}</p>
+                  </div>
+                  {/* 이미지 */}
+                  {rv.attachments?.length > 0 && (
+                    <div className="flex gap-1 items-center my-5">
+                      {rv.attachments.map((img, i) => (
+                        <div key={`img-${i}`}>
+                          <ReviewImageSrc src={img} alt={`img-${i}`} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {/* 작성일 D-day */}
+                  <div className="text-end">{handleReviewDate(rv?.createdAt)}</div>
                 </div>
               </div>
             ))
@@ -380,21 +393,28 @@ const PlaceReview = () => {
           )}
         </div>
         {/* 더보기 버튼 */}
-        {reviewInfo.length > 0 && (
+        {total > 0 && (
           <div className="mx-auto max-w-fit my-2">
             <button
               type="button"
-              className={`${reviewInfo.length <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
-              onClick={handleReviewShowMore}
+              className={`${total <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
+              onClick={handleReviewshowReviewMore}
             >
-              {reviewInfo.length - showMore > 5
-                ? '5개 더보기'
-                : reviewInfo.length - showMore <= 5 && reviewInfo.length - showMore > 0
-                  ? reviewInfo.length - count + '개 더보기'
-                  : reviewInfo.length > 5 && showMore - reviewInfo.length === 0 && '접기'}
+              {buttonText}
             </button>
           </div>
         )}
+      </div>
+      {/* 리뷰 작성 폼 -> 모달로 변경 */}
+      <div
+        className={`fixed inset-0 bg-black/30 z-50 flex justify-center items-center ${showReviewModal === true ? 'block' : 'hidden'}`}
+      >
+        <ReviewWriteModal
+          user={user}
+          placeDetail={placeDetail}
+          setShowReviewModal={setShowReviewModal}
+          setCurrentSort={setCurrentSort}
+        />
       </div>
     </div>
   )
