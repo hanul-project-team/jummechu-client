@@ -4,6 +4,7 @@ import zustandUser from '../../../app/zustandUser.js'
 import { useSelector } from 'react-redux'
 import zustandStore from '../../../app/zustandStore.js'
 import { useLocation } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 const CheckBookmarks = () => {
   const user = useSelector(state => state.auth.user)
@@ -25,7 +26,7 @@ const CheckBookmarks = () => {
     }
     return
   }
-
+  console.log(userBookmark)
   useEffect(() => {
     if (user.role.length !== 0) {
       if (!userBookmark || userBookmark !== bookmarkRef.current) {
