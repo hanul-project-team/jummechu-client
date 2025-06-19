@@ -121,4 +121,5 @@ VITE_API_BASE_URL=http://localhost:3000
 ###  아이디/비밀번호 찾기
 아이디나 비밀번호를 잊어버렸을 때, 재설정을 할 수 있는 화면
 
-![아이디 찾기](public/images/jummechu-find_account-1.png) ![비밀번호 찾기](public/images/jummechu-find_account-2.png) 
+![아이디 찾기](public/images/jummechu-find_account-1.png) 
+![비밀번호 찾기](public/images/jummechu-find_account-2.png) 
