@@ -268,6 +268,10 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                       src={rv?.store?.photos?.[0] || Icon}
                       alt="icon"
                       className="sm:h-[80px] h-[40px] rounded-xl"
+                      onError={e => {
+                        e.target.src = Icon
+                        e.target.onerror = null
+                      }}
                     />
                     {/* 가게명, 별점 */}
                     <div>

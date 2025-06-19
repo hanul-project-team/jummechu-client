@@ -49,9 +49,13 @@ const KakaoNearPlace = () => {
               >
                 <div onClick={() => handleSaveAndNavigate(unp)} className="hover:cursor-pointer">
                   <img
-                    src={unp.photos?.length > 0 ? unp.photos : Icon}
+                    src={unp?.photos?.[0] || Icon}
                     alt="lorem picture"
                     className="sm:w-[200px] sm:h-[150px] rounded-xl"
+                    onError={e => {
+                      e.target.src = Icon
+                      e.target.onerror = null
+                    }}
                   />
                 </div>
                 <div>

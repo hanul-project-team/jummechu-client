@@ -346,9 +346,13 @@ const ViewPlaceDetail = () => {
               {/* 가게 이미지 */}
               <div className="min-sm:row-span-2 px-2">
                 <img
-                  src={placeDetail.photos?.length > 0 ? placeDetail.photos[0] : Icon}
-                  alt={`${placeDetail.photos?.length > 0 ? 'photos' : 'Icon'}`}
+                  src={placeDetail?.photos?.[0] || Icon}
+                  alt={`${placeDetail?.photos?.[0] ? 'photos' : 'Icon'}`}
                   className="sm:h-auto w-fit rounded-xl max-sm:mx-auto"
+                  onError={e => {
+                    e.target.src = Icon
+                    e.target.onerror = null
+                  }}
                 />
               </div>
               {/* 상세정보 */}

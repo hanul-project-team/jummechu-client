@@ -12,8 +12,7 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
 
   const handleNavigate = snd => {
     if (snd) {
-      API
-        .post('/store/storeInfo', snd)
+      API.post('/store/storeInfo', snd)
         .then(res => {
           const data = res.data
           if (data !== null && data._id) {
@@ -27,8 +26,7 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
             setLoading(true)
             window.scrollTo({ top: 0 })
             console.log('2-1 데이터 없음, 등록 실행')
-            API
-              .post('/store/save', snd)
+            API.post('/store/save', snd)
               .then(res => {
                 const place = res.data
                 // console.log(place)
@@ -88,14 +86,14 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
                 slidesPerView={2}
                 breakpoints={{
                   376: {
-                    slidesPerView: 3
+                    slidesPerView: 3,
                   },
                   426: {
-                    slidesPerView: 4
+                    slidesPerView: 4,
                   },
                   769: {
-                    slidesPerView: 5
-                  }
+                    slidesPerView: 5,
+                  },
                 }}
                 className="border-t-1 border-gray-700"
               >
@@ -103,13 +101,20 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
                   .filter(snd => snd._id !== placeDetail._id)
                   .map((snd, i) => {
                     return (
-                      <SwiperSlide key={i} className="gap-3 p-2 sm:max-w-[14rem] max-w-[10rem] text-center !mr-0">
+                      <SwiperSlide
+                        key={i}
+                        className="gap-3 p-2 sm:max-w-[14rem] max-w-[10rem] text-center !mr-0"
+                      >
                         <div key={i}>
                           <div className="hover:cursor-pointer" onClick={() => handleNavigate(snd)}>
                             <img
-                              src={snd.photos[0] ? snd.photos[0] : Icon}
+                              src={snd?.photos?.[0] || Icon}
                               alt="icon"
                               className="sm:w-[150px] sm:h-[150px] h-[80px] w-[80px] mx-auto rounded-xl"
+                              onError={e => {
+                                e.target.src = Icon
+                                e.target.onerror = null
+                              }}
                             />
                           </div>
                           <div>
