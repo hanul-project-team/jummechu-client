@@ -213,7 +213,16 @@ const PlaceReview = () => {
   const handleShowUserTap = rv => {
     setOpenTabId(prev => (prev === rv._id ? null : rv._id))
   }
-  // console.log(reviewInfo)
+  const total = sortedReviews?.length || 0
+  const remains = total - count
+  let buttonText = ''
+  if (remains > 5) {
+    buttonText = '5개 더보기'
+  } else if (remains > 0) {
+    buttonText = `${remains}개 더보기`
+  } else if (remains === 0 && total === count) {
+    buttonText = '접기'
+  }
   return (
     <div>
       {/* 리뷰 헤더 영역 */}
@@ -223,7 +232,7 @@ const PlaceReview = () => {
         </div>
         {/* 리뷰 통계 */}
         <div className="flex justify-evenly sm:max-w-5xl sm:px-6 px-3 max-sm:flex-col mx-auto items-center">
-          <div className='sm:max-w-1/2'>
+          <div className="sm:max-w-1/2">
             <p className="font-bold text-3xl">{handleTotalRating(reviewInfo)}</p>
             <div className="flex items-center">
               <div className="relative w-fit text-2xl leading-none my-2">
@@ -261,7 +270,9 @@ const PlaceReview = () => {
               </div>
             </div>
           </div>
-          <div className={`sm:w-2/5 w-full h-fit ${reviewInfo?.length > 0 ? 'max-sm:block' : "max-sm:hidden"}`}>
+          <div
+            className={`sm:w-2/5 w-full h-fit ${reviewInfo?.length > 0 ? 'max-sm:block' : 'max-sm:hidden'}`}
+          >
             <ReviewChart reviews={reviewInfo} />
           </div>
         </div>
@@ -296,8 +307,20 @@ const PlaceReview = () => {
                       <p>{rv?.user.name}</p>
                       <Rating
                         initialRating={rv.rating}
-                        emptySymbol={<img src={StarGray} alt="gray-star" className="w-6 h-6 max-sm:w-4 max-sm:h-4" />}
-                        fullSymbol={<img src={StarYellow} alt="yellow-star" className="w-6 h-6 max-sm:w-4 max-sm:h-4" />}
+                        emptySymbol={
+                          <img
+                            src={StarGray}
+                            alt="gray-star"
+                            className="w-6 h-6 max-sm:w-4 max-sm:h-4"
+                          />
+                        }
+                        fullSymbol={
+                          <img
+                            src={StarYellow}
+                            alt="yellow-star"
+                            className="w-6 h-6 max-sm:w-4 max-sm:h-4"
+                          />
+                        }
                         readonly={true}
                       />
                     </div>
@@ -307,7 +330,7 @@ const PlaceReview = () => {
                     className="text-end flex items-center gap-3 top-0"
                     ref={el => (tabRefs.current[i] = el)}
                   >
-                    <p className='max-sm:text-sm'>{rv?.createdAt.split('T')[0]}</p>
+                    <p className="max-sm:text-sm">{rv?.createdAt.split('T')[0]}</p>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -370,18 +393,14 @@ const PlaceReview = () => {
           )}
         </div>
         {/* 더보기 버튼 */}
-        {sortedReviews?.length > 0 && (
+        {total > 0 && (
           <div className="mx-auto max-w-fit my-2">
             <button
               type="button"
-              className={`${sortedReviews?.length <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
+              className={`${total <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
               onClick={handleReviewshowReviewMore}
             >
-              {sortedReviews?.length > 5 && sortedReviews?.length - count > 5
-                ? '5개 더보기'
-                : sortedReviews?.length - count <= 5 && sortedReviews?.length - count > 0
-                  ? sortedReviews?.length - count + '개 더보기'
-                  : sortedReviews?.length > 5 && count - sortedReviews?.length === 0 && '접기'}
+              {buttonText}
             </button>
           </div>
         )}

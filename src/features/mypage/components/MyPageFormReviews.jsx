@@ -223,6 +223,17 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
         })
     }
   }
+  const total = sortedReviews?.length || 0
+  const remains = total - count
+  const isButtonHidden = total <= 5
+  let buttonText = ''
+  if (remains > 5) {
+    buttonText = '5개 더보기'
+  } else if (remains > 0) {
+    buttonText = `${remains}개 더보기`
+  } else if (remains === 0 && total === count) {
+    buttonText = '접기'
+  }
   return (
     <div className="h-full">
       <div className="h-full">
@@ -245,7 +256,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
         </div>
         {/* 리뷰 영역 */}
         <div>
-          {sortedReviews?.length > 0 ? (
+          {total > 0 ? (
             sortedReviews.slice(0, count).map((rv, i) => (
               <div
                 key={i}
@@ -254,7 +265,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                 <div className="w-full h-full flex justify-between items-start">
                   <div className="flex items-start sm:gap-3 gap-1">
                     <img
-                      src={(rv?.store.photos && rv?.store.photos.length > 0) ? rv?.store.photos : Icon}
+                      src={rv?.store?.photos?.[0] || Icon}
                       alt="icon"
                       className="sm:h-[80px] h-[40px] rounded-xl"
                     />
@@ -263,7 +274,8 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                       <p className="hover:cursor-pointer sm:text-lg text-sm max-[325px]:text-xs">
                         <strong onClick={() => handleNavigateStore(rv)}>{rv?.store?.name}</strong>
                       </p>
-                      <Rating initialRating={rv.rating}
+                      <Rating
+                        initialRating={rv.rating}
                         emptySymbol={
                           <img src={StarGray} alt="gray-star" className="sm:w-6 sm:h-6 w-3 h-3" />
                         }
@@ -362,18 +374,14 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
           )}
         </div>
         {/* 더보기 버튼 */}
-        {sortedReviews?.length > 0 && (
+        {total > 0 && (
           <div className="mx-auto max-w-fit my-2 min-sm:text-md max-sm:text-sm">
             <button
               type="button"
-              className={`${sortedReviews?.length <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
+              className={`${total <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
               onClick={handleReviewshowReviewMore}
             >
-              {sortedReviews?.length > 5 && sortedReviews?.length - count > 5
-                ? '5개 더보기'
-                : sortedReviews?.length - count <= 5 && sortedReviews?.length - count > 0
-                  ? sortedReviews?.length - count + '개 더보기'
-                  : sortedReviews?.length > 5 && count - sortedReviews?.length === 0 && '접기'}
+              {buttonText}
             </button>
           </div>
         )}
