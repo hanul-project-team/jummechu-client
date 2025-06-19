@@ -41,7 +41,7 @@ const ViewPlaceDetail = () => {
   // console.log(placeDetail.keywords)
   /* 정보 호출 및 갱신 */
   useEffect(() => {
-    if (placeDetail !== null && placeDetail !== undefined) {
+    if (placeDetail && placeDetail?._id) {
       const storeId = placeDetail._id
       const isDifferentStore = lastStoreRef.current !== placeDetail._id
       if (lastStoreRef.current === storeId) {
@@ -104,6 +104,10 @@ const ViewPlaceDetail = () => {
     if (placeDetail?.length < 1) {
       const placeLink = location.pathname
       const placeId = placeLink.split('/')[2]
+      if (!placeId || placeId === 'undefined') {
+        console.warn('잘못된 URL입니다. placeId:', placeId)
+        return
+      }
       API.get(`/store/read/${placeId}`)
         .then(res => {
           const data = res.data
