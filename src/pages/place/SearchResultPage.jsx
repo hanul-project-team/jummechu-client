@@ -105,7 +105,7 @@ const SearchResult = () => {
   }
   // console.log(searchData)
   return (
-    <div className="container max-w-3/5 mx-auto">
+    <div className="container max-w-5xl px-6 mx-auto">
       <KakaoMaps />
       {isLoading === true && searchData?.length === 0 ? (
         <p className="loading-jump text-center p-3 sm:mb-[1000px]">
@@ -118,8 +118,8 @@ const SearchResult = () => {
         </p>
       ) : !isLoading && searchData?.length === 0 ? (
         <div className="w-full mx-auto text-center min-h-screen">
-          <p className='font-bold text-xl'>검색결과 없음</p>
-          <p className='text-color-gray-700 text-md'>더 정확한 검색어를 입력해주세요!</p>
+          <p className="font-bold text-xl">검색결과 없음</p>
+          <p className="text-color-gray-700 text-md">더 정확한 검색어를 입력해주세요!</p>
         </div>
       ) : (
         <div>
