@@ -8,7 +8,7 @@ const HomeSearch = () => {
     <>
       <div className="w-full pb-5">
         <div className="max-w-5xl mx-auto px-6">
-          <div className='my-5'>
+          <div className="my-5">
             <KakaoMaps />
           </div>
           <HomeRecommand />

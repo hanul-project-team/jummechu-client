@@ -1,23 +1,29 @@
 import Rating from 'react-rating'
 import StarYellow from '../../assets/images/star-yellow.png'
+import Icon from '../../assets/images/default2.png'
 
-const SearchResultPageList = ({ search, navi, avg, npr, count, extract, tag, filter }) => {
+const SearchResultPageList = ({ searchData, searchResults, navi, avg, reviews, count, extract, tag, filter }) => {
   return (
     <>
-      <span className="ml-3 pointer-events-none select-none">{search.length} 개의 검색 결과</span>
-      {search.map((sd, i) => {
+      <span className="ml-3 pointer-events-none select-none">{searchData?.length} 개의 검색 결과</span>
+      {searchData.map((sd, i) => {
+        // console.log(sd)
         return (
-          <div key={i} className="flex gap-2 p-2 my-3">
+          <div key={`${sd._id}-${i}`} className="flex gap-2 p-2 my-3 max-sm:flex-col">
             <div className="md:min-w-[200px]">
               <img
-                src={`https://picsum.photos/200/200?random=${Math.floor(Math.random() * 1000)}`}
+                src={`${searchResults[i]?.photos?.[0] || Icon}`}
                 alt="picsum"
+                onError={e => {
+                  e.target.src = Icon
+                  e.target.onerror = null
+                }}
                 className="md:w-[200px] md:h-[200px] sm:w-[150px] sm:h-[150px] hover:cursor-pointer object-cover rounded-lg"
-                onClick={() => navi(sd)}
+                onClick={() => navi(searchResults[i])}
               />
             </div>
             <div className="md:max-h-[200px] overflow-y-auto">
-              <span className="hover:cursor-pointer text-2xl" onClick={() => navi(sd)}>
+              <span className="hover:cursor-pointer text-2xl" onClick={() => navi(searchResults[i])}>
                 <strong>{sd.place_name}</strong>
               </span>
               <p>
@@ -45,9 +51,9 @@ const SearchResultPageList = ({ search, navi, avg, npr, count, extract, tag, fil
                     stop={1}
                     readonly
                   />
-                  <p>{avg(npr, sd)}</p>&nbsp;
+                  <p>{avg(reviews, sd)}</p>&nbsp;
                 </span>
-                <span>&#40;{count(npr, sd)}&#41;</span>
+                <span>&#40;{count(reviews, sd)}&#41;</span>
               </div>
               <div className="flex gap-1 py-1">
                 {tag?.length > 0 && (

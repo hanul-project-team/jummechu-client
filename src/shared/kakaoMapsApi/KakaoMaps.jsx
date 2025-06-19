@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import zustandStore from '../../app/zustandStore.js'
-import axios from 'axios'
+import { API } from '../../app/api.js'
 import { useLocation, useNavigate } from 'react-router-dom'
 import KakaoNearPlace from './KakaoNearPlace.jsx'
 
@@ -11,10 +11,11 @@ const KakaoMaps = () => {
   const userNearPlace = zustandStore(state => state.userNearPlace)
   const setSearchData = zustandStore(state => state.setSearchData)
   const isLoading = zustandStore(state => state.isLoading)
+  const setIsLoading = zustandStore(state => state.setIsLoading)
 
   const intervalRef = useRef(null)
-  const [lat, setLat] = useState('')
-  const [lng, setLng] = useState('')
+  const [lat, setLat] = useState(null)
+  const [lng, setLng] = useState(null)
   const navigate = useNavigate()
   const retryCountRef = useRef(0)
   const [formData, setFormData] = useState({
@@ -79,34 +80,25 @@ const KakaoMaps = () => {
       return
     }
     if (isLoading === false && (userNearPlace?.length === 0 || !userNearPlace)) {
-      axios
-        .post(
-          'http://localhost:3000/api/kakao/user/nearplace',
-          {
-            location: {
-              lat: center.lat,
-              lng: center.lng,
-            },
-          },
-          {
-            withCredentials: true,
-          },
-        )
+      API.post('/api/kakao/user/nearplace', {
+        location: {
+          lat: center.lat,
+          lng: center.lng,
+        },
+      })
         .then(res => {
           const data = res.data
           // console.log(data)
           // setUserNearPlace(data)
           if (data) {
-            axios
-              .post('http://localhost:3000/store/storeInfo', data)
+            API.post('/store/storeInfo', data)
               .then(res => {
                 const existPlaces = res.data
                 // console.log(res)
                 if (existPlaces) {
                   setUserNearPlace(existPlaces)
-                } else if(existPlaces?.length === 0 || !existPlaces){
-                  axios
-                    .post('http://localhost:3000/store/save', data)
+                } else if (existPlaces?.length === 0 || !existPlaces) {
+                  API.post('/store/save', data)
                     .then(res => {
                       const places = res.data
                       if (places) {
@@ -147,51 +139,58 @@ const KakaoMaps = () => {
   const handleSubmit = e => {
     e.preventDefault()
     setSearchData(null)
+    setIsLoading(true)
     if (formData.place.startsWith('#')) {
       const sliced = formData.place.slice(1)
       navigate(`/search/${sliced}`)
-      axios
-        .post(
-          'http://localhost:3000/api/kakao/search',
-          {
-            place: sliced,
-            center: center,
-          },
-          {
-            withCredentials: true,
-          },
-        )
+      API.post('/api/kakao/search', {
+        place: sliced,
+        center: center,
+      })
         .then(res => {
-          const data = res.data
-          // console.log(data)
-          setSearchData(data)
-          setFormData({
-            place: '',
-          })
+          if (res.status === 204) {
+            setIsLoading(false)
+          } else {
+            const data = res.data
+            // console.log(data)
+            setSearchData(data)
+            API.post('/store/save', data)
+              .then(res => {
+                const result = res.data
+                // console.log(result)
+                setSearchData(result)
+                setFormData({
+                  place: '',
+                })
+              })
+              .catch(err => {
+                console.error(err)
+              })
+            setFormData({
+              place: '',
+            })
+          }
         })
         .catch(err => {
           console.log(err)
         })
     } else {
       navigate(`/search/${formData.place}`)
-      axios
-        .post(
-          'http://localhost:3000/api/kakao/search',
-          {
-            place: formData.place,
-            center: center,
-          },
-          {
-            withCredentials: true,
-          },
-        )
+      API.post('/api/kakao/search', {
+        place: formData.place,
+        center: center,
+      })
         .then(res => {
-          const data = res.data
-          // console.log(data)
-          setSearchData(data)
-          setFormData({
-            place: '',
-          })
+          if (res.status === 204) {
+            setIsLoading(false)
+          } else {
+            const result = res.data
+            // console.log(result)
+            setSearchData(result)
+            setFormData({
+              place: '',
+            })
+          }
         })
         .catch(err => {
           console.log(err)
@@ -257,7 +256,7 @@ const KakaoMaps = () => {
               </fieldset>
             </form>
           </div>
-          <div className="container mx-auto max-w-7xl max-xl:m-3">
+          <div className="container mx-auto sm:max-w-5xl max-w-5xl max-sm:p-3">
             <KakaoNearPlace />
           </div>
         </>
@@ -275,7 +274,7 @@ const KakaoMaps = () => {
                         name="place"
                         value={formData.place}
                         onChange={handleChange}
-                        className="py-2 indent-5 w-full outline-none"
+                        className="py-2 min-sm:indent-5 max-sm:indent-1 w-full outline-none"
                         placeholder="검색어를 입력해주세요"
                       />
                     </div>

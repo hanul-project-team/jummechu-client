@@ -22,7 +22,7 @@ const createTTLStorage = (baseStorage, ttl) => {
     },
     setItem: (name, value) => {
       const data = {
-        value,
+        value: value,
         expiredAt: Date.now() + ttl,
       }
       baseStorage.setItem(name, JSON.stringify(data))

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import zustandStore from '../../../../app/zustandStore.js'
-import axios from 'axios'
+import { API } from '../../../../app/api.js'
 import { useSelector } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
-import Icon from '../../../../assets/images/icon.png'
+import Icon from '../../../../assets/images/default2.png'
 import StarYellow from '../../../../assets/images/star-yellow.png'
 import StarGray from '../../../../assets/images/star-gray.png'
 import Rating from 'react-rating'
@@ -174,25 +174,31 @@ const PlaceReview = () => {
     }
   }
   const handleReviewWrite = () => {
-    if (user.name?.length === 0 || user.role?.length === 0) {
+    if (!user?.id || user.id?.length === 0) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니가?')) {
         navigate('/login', { state: { returnUrl } })
       }
     } else {
-      setShowReviewModal(prev => !prev)
+      if (user.isAccountSetting === false) {
+        if (confirm('계정 설정을 완료해야합니다. 설정 페이지로 이동하시겠습니까?')) {
+          navigate(`/social_setting`)
+        } else {
+          return
+        }
+      } else {
+        setShowReviewModal(prev => !prev)
+      }
     }
   }
   const handleDeleteMyReview = rv => {
     const userId = user.id
     if (userId) {
       if (confirm('리뷰를 삭제하시겠습니까?')) {
-        axios
-          .delete(`http://localhost:3000/review/delete/${rv._id}`, {
-            withCredentials: true,
-            headers: {
-              user: userId,
-            },
-          })
+        API.delete(`/review/delete/${rv._id}`, {
+          headers: {
+            user: userId,
+          },
+        })
           .then(res => {
             // console.log('리뷰 삭제 정보', res)
             setReviewInfo(prev => prev.filter(review => review._id !== rv?._id))
@@ -207,7 +213,16 @@ const PlaceReview = () => {
   const handleShowUserTap = rv => {
     setOpenTabId(prev => (prev === rv._id ? null : rv._id))
   }
-  // console.log(reviewInfo)
+  const total = sortedReviews?.length || 0
+  const remains = total - count
+  let buttonText = ''
+  if (remains > 5) {
+    buttonText = '5개 더보기'
+  } else if (remains > 0) {
+    buttonText = `${remains}개 더보기`
+  } else if (remains === 0 && total === count) {
+    buttonText = '접기'
+  }
   return (
     <div>
       {/* 리뷰 헤더 영역 */}
@@ -216,8 +231,8 @@ const PlaceReview = () => {
           <span className="text-2xl italic">고객 리뷰</span>
         </div>
         {/* 리뷰 통계 */}
-        <div className="flex justify-between sm:max-w-5xl px-6 mx-auto items-center">
-          <div>
+        <div className="flex justify-evenly sm:max-w-5xl sm:px-6 px-3 max-sm:flex-col mx-auto items-center">
+          <div className="sm:max-w-1/2">
             <p className="font-bold text-3xl">{handleTotalRating(reviewInfo)}</p>
             <div className="flex items-center">
               <div className="relative w-fit text-2xl leading-none my-2">
@@ -255,7 +270,9 @@ const PlaceReview = () => {
               </div>
             </div>
           </div>
-          <div className="w-1/3 h-fit">
+          <div
+            className={`sm:w-2/5 w-full h-fit ${reviewInfo?.length > 0 ? 'max-sm:block' : 'max-sm:hidden'}`}
+          >
             <ReviewChart reviews={reviewInfo} />
           </div>
         </div>
@@ -280,7 +297,7 @@ const PlaceReview = () => {
             sortedReviews?.slice(0, count).map((rv, i) => (
               <div
                 key={i}
-                className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 pl-5 my-3 mx-auto relative"
+                className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 sm:pl-5 my-3 mx-auto relative"
               >
                 <div className="flex items-start justify-between">
                   {/* 작성자 정보, 별점 */}
@@ -290,8 +307,20 @@ const PlaceReview = () => {
                       <p>{rv?.user.name}</p>
                       <Rating
                         initialRating={rv.rating}
-                        emptySymbol={<img src={StarGray} alt="gray-star" className="w-6 h-6" />}
-                        fullSymbol={<img src={StarYellow} alt="yellow-star" className="w-6 h-6" />}
+                        emptySymbol={
+                          <img
+                            src={StarGray}
+                            alt="gray-star"
+                            className="w-6 h-6 max-sm:w-4 max-sm:h-4"
+                          />
+                        }
+                        fullSymbol={
+                          <img
+                            src={StarYellow}
+                            alt="yellow-star"
+                            className="w-6 h-6 max-sm:w-4 max-sm:h-4"
+                          />
+                        }
                         readonly={true}
                       />
                     </div>
@@ -301,7 +330,7 @@ const PlaceReview = () => {
                     className="text-end flex items-center gap-3 top-0"
                     ref={el => (tabRefs.current[i] = el)}
                   >
-                    <p>{rv?.createdAt.split('T')[0]}</p>
+                    <p className="max-sm:text-sm">{rv?.createdAt.split('T')[0]}</p>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -364,18 +393,14 @@ const PlaceReview = () => {
           )}
         </div>
         {/* 더보기 버튼 */}
-        {sortedReviews?.length > 0 && (
+        {total > 0 && (
           <div className="mx-auto max-w-fit my-2">
             <button
               type="button"
-              className={`${sortedReviews?.length <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
+              className={`${total <= 5 ? 'hidden' : 'hover:cursor-pointer active:bg-gray-400 bg-gray-300 rounded-3xl p-2 my-1'}`}
               onClick={handleReviewshowReviewMore}
             >
-              {sortedReviews?.length > 5 && sortedReviews?.length - count > 5
-                ? '5개 더보기'
-                : sortedReviews?.length - count <= 5 && sortedReviews?.length - count > 0
-                  ? sortedReviews?.length - count + '개 더보기'
-                  : sortedReviews?.length > 5 && count - sortedReviews?.length === 0 && '접기'}
+              {buttonText}
             </button>
           </div>
         )}

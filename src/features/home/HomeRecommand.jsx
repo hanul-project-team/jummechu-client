@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import Icon from '../../assets/images/icon.png'
-import axios from 'axios'
+import Icon from '../../assets/images/default2.png'
+import { API } from '../../app/api.js'
 import 'swiper/css'
-// import { toast } from 'react-toastify'
-import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 import zustandStore from '../../app/zustandStore.js'
 
 const HomeRecommand = () => {
@@ -17,6 +17,7 @@ const HomeRecommand = () => {
   const lastPlacesRef = useRef([])
   const intervalRef = useRef(null)
   const [countDown, setCountDown] = useState(60)
+  const [otherPlaces, setOtherPlaces] = useState([])
 
   const defaultCategories = [
     '패스트푸드',
@@ -86,10 +87,12 @@ const HomeRecommand = () => {
   ]
   useEffect(() => {
     const fetchReviews = (isFromInterval = false) => {
-      // setIsLoading(true) // {/* interval 1번 */}
+      setIsLoading(true) // {/* interval 1번 */}
       if (userNearPlace && userNearPlace.length > 0) {
-        const categories = userNearPlace.map(unp => unp.keywords[0])
-        const filteredUserCategories = categories.reduce((acc, cts) => {
+        const categories = userNearPlace.map(unp => {
+          return unp.keywords[0]
+        })
+        const reducedCategories = categories.reduce((acc, cts) => {
           const item1 = cts.split(',')[0]?.trim()
           if (!acc.includes(item1)) {
             acc.push(item1)
@@ -105,29 +108,47 @@ const HomeRecommand = () => {
           return acc
         }, [])
 
-        const places = userNearPlace.map(place => ({
-          name: place?.place_name,
-          address: place?.address_name,
-        }))
+        const filteredCategories = reducedCategories?.filter(tag => tag?.length > 0)
+
         try {
-          // {/*interval 2번*/}
-          if (isFromInterval || !nearPlaceReviews || isSamePlaces(lastPlacesRef.current, places)) {
-            lastPlacesRef.current = places
-            axios
-              .post('http://localhost:3000/review/readall', {
-                places: places,
-              })
+          // console.log(filteredCategories)
+          const results = matchingCategories(defaultCategories, filteredCategories)
+          const center = {
+            latitude: userNearPlace[0].latitude,
+            longitude: userNearPlace[0].longitude,
+          }
+          // console.log(center)
+          // console.log(results)
+          if (results) {
+            API.post('/store/tag/match', {
+              results: results,
+              center: center,
+            })
               .then(res => {
-                const data = res.data.data
-                const reviews = data?.allReivews
-                // console.log(data)
-                setNearPlaceReviews(reviews?.length > 0 ? reviews : [])
-                setIsLoading(false)
-                setCountDown(60)
+                const data = res.data
+                if (data?.length > 0) {
+                  setOtherPlaces(data)
+                  const places = data.map(list => list.stores)
+                  handleHomeReviews(places)
+                }
+              })
+              .catch(err => {
+                toast.error(
+                  <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
+                  {
+                    position: 'top-center',
+                  },
+                )
               })
           }
-          const results = matchingCategories(defaultCategories, filteredUserCategories)
           setTag(results)
+          // {/*interval 2번*/}
+          if (otherPlaces?.length > 0 && lastPlacesRef.current) {
+            if (isFromInterval || isSamePlaces(lastPlacesRef.current, otherPlaces)) {
+              const places = otherPlaces.map(place => place.stores)
+              handleHomeReviews(places)
+            }
+          }
         } catch (err) {
           console.log(err)
         }
@@ -155,12 +176,16 @@ const HomeRecommand = () => {
     }
   }, [userNearPlace])
   const matchingCategories = (def, user) => {
-    return def.filter(cate => user.includes(cate))
+    const filtered = user?.filter(use => {
+      return def?.some(de => use.includes(de))
+    })
+    // console.log(filtered)
+    return filtered
   }
   const handleNavigate = fps => {
-    console.log(fps)
+    // console.log(fps)
     if (fps) {
-      axios.post('http://localhost:3000/store/storeInfo', fps).then(res => {
+      API.post('/store/storeInfo', fps).then(res => {
         const data = res.data
         if (data) {
           navigate(`/place/${data._id}`, { state: data })
@@ -168,7 +193,39 @@ const HomeRecommand = () => {
       })
     }
   }
-
+  const handleHomeReviews = places => {
+    if (places?.length > 0) {
+      API.post('/review/readall', {
+        places: places,
+      })
+        .then(res => {
+          const data = res.data
+          const reviews = data
+          // console.log(data)
+          // console.log(reviews)
+          setNearPlaceReviews(reviews?.length > 0 ? reviews : [])
+          setIsLoading(false)
+          setCountDown(60)
+        })
+        .catch(err => {
+          toast.error(
+            <div className="Toastify__toast-body cursor-default">
+              리뷰 정보를 불러올 수 없습니다.
+            </div>,
+            {
+              position: 'top-center',
+            },
+          )
+        })
+    } else {
+      return toast.error(
+        <div className="Toastify__toast-body cursor-default">위치 정보를 갱신해주세요.</div>,
+        {
+          position: 'top-center',
+        },
+      )
+    }
+  }
   const isSamePlaces = (prevPlaces, newPlaces) => {
     if (!prevPlaces || !newPlaces) return false
     if (prevPlaces?.length !== newPlaces?.length) return false
@@ -185,7 +242,7 @@ const HomeRecommand = () => {
   }
   const handleAvgRating = (reviews, place) => {
     if (reviews?.length > 0) {
-      const matchedReviews = reviews.filter(review => review.store?.name === place.place_name)
+      const matchedReviews = reviews.filter(review => review.store?._id === place._id)
       const avgRating =
         matchedReviews?.length > 0
           ? matchedReviews.reduce((acc, cur) => acc + cur.rating, 0) / matchedReviews.length
@@ -198,13 +255,14 @@ const HomeRecommand = () => {
   }
   const handleCountReviews = (reviews, place) => {
     if (reviews?.length > 0) {
-      const matchedReviews = reviews.filter(review => review.store?.name === place.place_name)
+      const matchedReviews = reviews.filter(review => review.store?._id === place._id)
       return matchedReviews.length
     } else {
       return 0
     }
   }
-
+  // console.log(tag)
+  // console.log(userNearPlace)
   return (
     <div className="max-xl:m-3">
       {isLoading === true ? (
@@ -220,57 +278,80 @@ const HomeRecommand = () => {
         <>
           <div className="flex justify-between">
             <span className="text-xl font-bold">추천 태그</span>
-            {/* <span>{countDown > 0 ? `review 최신화까지 ${countDown}초 남음` : `리뷰 정보 갱신 중...`}</span> */}
+            {/* <span>
+              {countDown > 0 ? `review 갱신까지 ${countDown}초 남음` : `리뷰 정보 갱신 중...`}
+            </span> */}
           </div>
-          {tag.length > 0 ? (
-            tag.map((t, i) => {
-              const filteredPlaces = userNearPlace?.filter(unp =>
-                unp.keywords?.some(kw => kw?.split(',').includes(t)),
-              )
+          {otherPlaces?.length > 0 ? (
+            otherPlaces.map((group, i) => {
+              const { tag, stores } = group
+              const filteredPlaces = stores.filter(store => {
+                return !store.name.includes(tag)
+              })
               if (!filteredPlaces || filteredPlaces?.length === 0) return null
               return (
-                <div key={i} className="container shadow-lg/20 max-w-full p-3 my-3 overflow-auto">
-                  <p className="text-lg">&#35; {t}</p>
-                  <Swiper spaceBetween={50} slidesPerView={3}>
+                <div
+                  key={`tag-${i}`}
+                  className="container shadow-lg/20 max-w-full p-3 my-3 overflow-auto"
+                >
+                  <p className="text-lg font-bold">&#35; {tag}</p>
+                  <Swiper
+                    spaceBetween={0}
+                    slidesPerView={2}
+                    breakpoints={{
+                      426: {
+                        slidesPerView: 4,
+                      },
+                    }}
+                  >
                     {filteredPlaces.map((fps, idx) => {
                       return (
-                        <SwiperSlide key={idx} className="!mr-0 max-w-full">
+                        <SwiperSlide key={idx} className="max-w-full mr-3">
                           <img
-                            src={fps.photos.length > 0 ? fps.photos : Icon}
+                            src={fps?.photos?.[0] || Icon}
                             alt="picsum"
-                            className="sm:h-[200px] hover:cursor-pointer"
+                            className="max-[376px]:h-[110px] max-[426px]:h-[150px] max-[769px]:h-[150px] min-[769px]:h-[200px] hover:cursor-pointer rounded-xl"
                             onClick={() => handleNavigate(fps)}
+                            onError={e => {
+                              e.target.src = Icon
+                              e.target.onerror = null
+                            }}
                           />
-                          <p
-                            className="text-sm hover:cursor-pointer"
-                            onClick={() => handleNavigate(fps)}
-                          >
-                            가게명: <strong>{fps.name}</strong>
-                          </p>
-                          <div className="text-sm flex gap-3 items-center">
-                            {
-                              <div className="flex items-center cursor-default">
-                                {handleAvgRating(nearPlaceReviews, fps)}
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  strokeWidth={1.5}
-                                  stroke="currentColor"
-                                  className="size-4"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
-                                  />
-                                </svg>
-                              </div>
-                            }
-                            <span className="cursor-default">
-                              리뷰수&#40;{handleCountReviews(nearPlaceReviews, fps)}&#41;
-                            </span>
+                          <div className="flex flex-col">
+                            <p className="sm:text-md text-sm">
+                              <strong
+                                onClick={() => handleNavigate(fps)}
+                                className="hover:cursor-pointer"
+                              >
+                                {fps.name}
+                              </strong>
+                            </p>
+                            <div className="sm:flex sm:flex-justify gap-1 items-center">
+                              {
+                                <div className="flex items-center cursor-default">
+                                  {handleAvgRating(nearPlaceReviews, fps)}
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={1.5}
+                                    stroke="currentColor"
+                                    className="size-4"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
+                                    />
+                                  </svg>
+                                </div>
+                              }
+                              <span className="cursor-default sm:text-md text-sm">
+                                리뷰수&#40;{handleCountReviews(nearPlaceReviews, fps)}&#41;
+                              </span>
+                            </div>
                           </div>
+                          <span className="cursor-default sm:text-md text-sm">{fps.address}</span>
                         </SwiperSlide>
                       )
                     })}

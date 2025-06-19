@@ -1,26 +1,32 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import axios from 'axios'
+import { API } from '../../../app/api'
+import { _email } from 'zod/v4/core'
 
-export const restoreLogin = createAsyncThunk('auth/restoreLogin', async (_, { rejectWithValue }) => {
-  try {
-    const response = await axios.get('http://localhost:3000/auth/restore_login', { withCredentials: true })
-    return response.data
-  } catch (e) {
-    if (e.response.status === 401 || e.response.status === 404) {
-      return rejectWithValue(e.response.data.message)
-    } else {
-      return rejectWithValue('알 수 없는 에러 발생')
+export const restoreLogin = createAsyncThunk(
+  'auth/restoreLogin',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await API.get('/auth/restore_login')
+      return response.data
+    } catch (e) {
+      if (e.response.status === 401 || e.response.status === 404) {
+        return rejectWithValue(e.response.data.message)
+      } else {
+        return rejectWithValue('알 수 없는 에러 발생')
+      }
     }
-  }
-})
+  },
+)
 
 const initialState = {
   isAuthenticated: undefined,
   user: {
-    id:'',
+    id: '',
+    email: '',
     name: '',
     profileImage: '',
     role: '',
+    isAccountSetting: undefined,
   },
   error: '',
 }

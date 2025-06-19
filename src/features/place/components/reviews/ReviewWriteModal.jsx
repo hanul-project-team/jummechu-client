@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react'
-import axios from 'axios'
+import { API } from '../../../../app/api'
 import zustandStore from '../../../../app/zustandStore'
 import Rating from 'react-rating'
 import StarGray from '../../../../assets/images/star-gray.png'
 import StarYellow from '../../../../assets/images/star-yellow.png'
-import Icon from '../../../../assets/images/Icon.png'
+import Icon from '../../../../assets/images/default2.png'
 import { toast } from 'react-toastify'
 
 const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSort }) => {
@@ -56,10 +56,8 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
       //   console.log(pair[0], pair[1])
       // }
       if (confirm('리뷰 등록을 완료하시겠습니까?')) {
-        axios
-          .post('http://localhost:3000/review/regist', newFormData, {
-            withCredentials: true,
-          })
+        API
+          .post('/review/regist', newFormData)
           .then(
             /* async */ res => {
               // const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
@@ -145,24 +143,24 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
     }, 500)
   }
   return (
-    <div className="sm:w-3/7 w-4/7 h-3/4 bg-white py-2 px-[1px] rounded-2xl mb-30">
+    <div className="min-xl:w-3/7 max-xl:w-4/7 max-lg:w-5/7 max-[321px]:w-5/7 h-3/4 bg-white sm:pt-5 pt-10 py-2 px-[1px] rounded-2xl sm:mb-30 mb-10">
       <div className="mx-auto h-full overflow-auto custom-scrollbar">
         <div className="flex flex-col p-2">
           {/* 정보 부분 */}
           <div className="w-full flex items-center justify-center">
-            <img src={Icon} alt="가게 아이콘" className="sm:w-25 w-20" />
+            <img src={Icon} alt="가게 아이콘" className="sm:w-25 w-20 mr-1" />
             <div>
-              <div className="text-center text-xl">
+              <div className="text-center sm:text-xl text-sm">
                 <p>{placeDetail.name}</p>
               </div>
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center sm:text-md text-xs">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="size-5"
+                  className="sm:size-5 size-4"
                 >
                   <path
                     strokeLinecap="round"
@@ -177,14 +175,14 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                 </svg>
                 <p>{placeDetail.address}</p>
               </div>
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center sm:text-md text-xs">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="size-5"
+                  className="sm:size-5 size-4"
                 >
                   <path
                     strokeLinecap="round"
@@ -192,7 +190,7 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                     d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"
                   />
                 </svg>
-                <p>{placeDetail.phone}</p>
+                <p>{placeDetail.phone ? placeDetail.phone : '미제공'}</p>
               </div>
             </div>
           </div>
@@ -206,7 +204,7 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
               <fieldset>
                 <legend className="hidden">리뷰 작성폼</legend>
                 {/* 별점 */}
-                <p className="text-2xl mt-10">얼마나 만족스러우셨나요?</p>
+                <p className="sm:text-2xl text-lg sm:mt-10 mt-3">얼마나 만족스러우셨나요?</p>
                 <div className="flex justify-center">
                   <Rating
                     name="rating"
@@ -218,9 +216,9 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                     initialRating={formData.rating}
                   />
                 </div>
-                <p className="text-md opacity-50">선택해주세요</p>
+                <p className="sm:text-md text-sm opacity-50">선택해주세요</p>
                 {/* textarea */}
-                <p className="text-2xl mt-10">좋았던 점을 알려주세요!</p>
+                <p className="sm:text-2xl text-xl mt-10">좋았던 점을 알려주세요!</p>
                 <div>
                   <textarea
                     type="text"
@@ -238,15 +236,15 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                 {/* 이미지 파일 첨부 */}
                 <div className="mt-10">
                   <label htmlFor="attachments">
-                    <div className="border-1 flex justify-center items-center border-dashed bg-color-gray-50 mt-1 hover:cursor-pointer w-full sm:h-[60px]">
-                      <p className="pointer-events-none cursor-not-allowed font-bold flex gap-1">
+                    <div className="border-1 flex justify-center items-center border-dashed bg-color-gray-50 mt-1 hover:cursor-pointer w-full sm:h-[60px] h-[40px]">
+                      <p className="pointer-events-none cursor-not-allowed font-bold flex items-center gap-1">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
                           strokeWidth={1.5}
                           stroke="currentColor"
-                          className="size-6"
+                          className="sm:size-6 size-5"
                         >
                           <path
                             strokeLinecap="round"
@@ -259,7 +257,7 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                             d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"
                           />
                         </svg>
-                        <span>사진 첨부하기 &#40;최대 5장&#41;</span>
+                        <span className='sm:text-md text-sm'>사진 첨부하기 &#40;최대 5장&#41;</span>
                       </p>
                     </div>
                   </label>
@@ -272,7 +270,7 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                     onChange={handleFileChange}
                     multiple
                   />
-                  <p className='font-bold text-color-gray-700'>리뷰와 관련없는 이미지를 업로드시 삭제 될 수 있습니다.</p>
+                  <p className='font-bold sm:text-md text-xs sm:mt-0 mt-1 text-color-gray-700'>리뷰와 관련없는 이미지를 업로드시 삭제 될 수 있습니다.</p>
                 </div>
                 {/* 미리보기 */}
                 {fileData && fileData?.length > 0 && (

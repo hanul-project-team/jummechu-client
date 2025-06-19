@@ -26,7 +26,7 @@ const FindAccountResultPage = () => {
     }
   }, [dispatch])
 
-  if (userFound === undefined) return null
+  if (userFound === undefined) return <main className="min-h-[544px]"></main>
   return (
     <main className="container mx-auto max-w-5xl flex justify-center px-6 ">
       <section className="flex flex-col max-w-sm w-full">
