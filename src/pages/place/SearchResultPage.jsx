@@ -4,7 +4,6 @@ import { API } from '../../app/api.js'
 import { useNavigate } from 'react-router-dom'
 import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
 import SearchResultPageList from '../../features/search/SearchResultPageList.jsx'
-import SearchResultPageFilter from '../../features/search/SearchResultPageFilter.jsx'
 
 const SearchResult = () => {
   const [tag, setTag] = useState([])
@@ -123,23 +122,18 @@ const SearchResult = () => {
           <p className='text-color-gray-700 text-md'>더 정확한 검색어를 입력해주세요!</p>
         </div>
       ) : (
-        <div className="flex">
-          {/* <div className='flex-1'>
-            <SearchResultPageFilter search={searchData} />
-          </div> */}
-          <div className="flex-4">
-            <SearchResultPageList
-              reviews={searchReviews}
-              filter={filterKeyword}
-              tag={tag}
-              extract={extractCategory}
-              count={handleCountReviews}
-              searchData={searchData}
-              searchResults={searchResults}
-              navi={handleNavigate}
-              avg={handleAvgRating}
-            />
-          </div>
+        <div>
+          <SearchResultPageList
+            reviews={searchReviews}
+            filter={filterKeyword}
+            tag={tag}
+            extract={extractCategory}
+            count={handleCountReviews}
+            searchData={searchData}
+            searchResults={searchResults}
+            navi={handleNavigate}
+            avg={handleAvgRating}
+          />
         </div>
       )}
     </div>
