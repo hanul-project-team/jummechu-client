@@ -11,6 +11,7 @@ const KakaoMaps = () => {
   const userNearPlace = zustandStore(state => state.userNearPlace)
   const setSearchData = zustandStore(state => state.setSearchData)
   const isLoading = zustandStore(state => state.isLoading)
+  const setIsLoading = zustandStore(state => state.setIsLoading)
 
   const intervalRef = useRef(null)
   const [lat, setLat] = useState(null)
@@ -79,31 +80,25 @@ const KakaoMaps = () => {
       return
     }
     if (isLoading === false && (userNearPlace?.length === 0 || !userNearPlace)) {
-      API
-        .post(
-          '/api/kakao/user/nearplace',
-          {
-            location: {
-              lat: center.lat,
-              lng: center.lng,
-            },
-          },
-        )
+      API.post('/api/kakao/user/nearplace', {
+        location: {
+          lat: center.lat,
+          lng: center.lng,
+        },
+      })
         .then(res => {
           const data = res.data
           // console.log(data)
           // setUserNearPlace(data)
           if (data) {
-            API
-              .post('/store/storeInfo', data)
+            API.post('/store/storeInfo', data)
               .then(res => {
                 const existPlaces = res.data
                 // console.log(res)
                 if (existPlaces) {
                   setUserNearPlace(existPlaces)
-                } else if(existPlaces?.length === 0 || !existPlaces){
-                  API
-                    .post('/store/save', data)
+                } else if (existPlaces?.length === 0 || !existPlaces) {
+                  API.post('/store/save', data)
                     .then(res => {
                       const places = res.data
                       if (places) {
@@ -144,52 +139,58 @@ const KakaoMaps = () => {
   const handleSubmit = e => {
     e.preventDefault()
     setSearchData(null)
+    setIsLoading(true)
     if (formData.place.startsWith('#')) {
       const sliced = formData.place.slice(1)
       navigate(`/search/${sliced}`)
-      API
-        .post(
-          '/api/kakao/search',
-          {
-            place: sliced,
-            center: center,
-          },
-        )
+      API.post('/api/kakao/search', {
+        place: sliced,
+        center: center,
+      })
         .then(res => {
-          const data = res.data
-          // console.log(data)
-          setSearchData(data)
-          API.post('/store/save', data)
-          .then((res) => {
-            console.log(res)
-          })
-          .catch((err) => {
-            console.error(err)
-          })
-          setFormData({
-            place: '',
-          })
+          if (res.status === 204) {
+            setIsLoading(false)
+          } else {
+            const data = res.data
+            // console.log(data)
+            setSearchData(data)
+            API.post('/store/save', data)
+              .then(res => {
+                const result = res.data
+                // console.log(result)
+                setSearchData(result)
+                setFormData({
+                  place: '',
+                })
+              })
+              .catch(err => {
+                console.error(err)
+              })
+            setFormData({
+              place: '',
+            })
+          }
         })
         .catch(err => {
           console.log(err)
         })
     } else {
       navigate(`/search/${formData.place}`)
-      API
-        .post(
-          '/api/kakao/search',
-          {
-            place: formData.place,
-            center: center,
-          },
-        )
+      API.post('/api/kakao/search', {
+        place: formData.place,
+        center: center,
+      })
         .then(res => {
-          const data = res.data
-          // console.log(data)
-          setSearchData(data)
-          setFormData({
-            place: '',
-          })
+          if (res.status === 204) {
+            setIsLoading(false)
+          } else {
+            const result = res.data
+            // console.log(result)
+            setSearchData(result)
+            setFormData({
+              place: '',
+            })
+          }
         })
         .catch(err => {
           console.log(err)
