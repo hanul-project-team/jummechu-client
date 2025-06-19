@@ -5,6 +5,7 @@ import { API } from '../../app/api.js'
 import 'swiper/css'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import zustandStore from '../../app/zustandStore.js'
 
 const HomeRecommand = () => {
@@ -97,11 +98,11 @@ const HomeRecommand = () => {
           if (!acc.includes(item1)) {
             acc.push(item1)
           }
-          const item2 = cts.split(',')[1]?.trim()
+          const item2 = cts.split(',')[1].trim()
           if (!acc.includes(item2)) {
             acc.push(item2)
           }
-          const item3 = cts.split(',')[2]?.trim()
+          const item3 = cts.split(',')[2].trim()
           if (!acc.includes(item3)) {
             acc.push(item3)
           }

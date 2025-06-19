@@ -180,7 +180,7 @@ const MyPageForm = () => {
         setRecentStores(fetchedRecentStores)
         if (fetchedRecentStores && fetchedRecentStores.length > 0) {
           fetchedRecentStores.forEach(item => {
-            console.log(`MyPageForm List Item - storeId: ${item._id}, recentViewId (key): ${item.recentViewId}`);
+            
           })
         }
       } catch (error) {
@@ -220,7 +220,6 @@ const MyPageForm = () => {
 
         const callUserEmail = response.data.email
         setUserEmail(callUserEmail)
-
 
         const callUserPhone = response.data.phone
         setUserPhone(callUserPhone)
@@ -597,6 +596,7 @@ const MyPageForm = () => {
                       </div>
                       <div className="py-3">
                         <h2 className="text-lg py-1 font-SinchonRhapsody flex">{item.name}</h2>
+                        {item.rating && <p className="py-1">⭐{item.rating} </p>}
                         <p className="py-1 flex items-center text-sm text-gray-500">
                           <svg
                             fill="#000000"
@@ -634,8 +634,7 @@ const MyPageForm = () => {
                           </p>
                         )}
                         <p className="py-5 text-sm text-black">
-                          {/* 본 시간: {new Date(item.viewedAt).toLocaleString()} */}
-                          ⭐ {item.rating}
+                          본 시간: {new Date(item.viewedAt).toLocaleString()}
                         </p>
                         <button
                           onClick={(e) => {
@@ -703,7 +702,7 @@ const MyPageForm = () => {
                     </p>
                     {userLocation && (
                       <p className="py-1 text-center text-sm text-gray-600">
-                        {/* 현재 위치: 위도 {userLocation.latitude.toFixed(4)}, 경도{' '} */}
+                        현재 위치: 위도 {userLocation.latitude.toFixed(4)}, 경도{' '}
                         {userLocation.longitude.toFixed(4)}
                       </p>
                     )}

@@ -15,9 +15,9 @@ const createTTLStorage = (baseStorage, ttl) => {
           baseStorage.removeItem(name)
           return null
         }
-        return data.value
+        return JSON.stringify(data.value)
       } catch (e) {
-        return null
+        return json
       }
     },
     setItem: (name, value) => {
