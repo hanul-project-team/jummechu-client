@@ -33,7 +33,7 @@ const CheckBookmarks = () => {
       }
     }
     if (user?.role.length > 0 && userBookmark && placeDetail) {
-      handleCheckBookmarked(location.state, userBookmark)
+      handleCheckBookmarked(placeDetail, userBookmark)
     }
 
     if (location.state?._id && location.state !== locationRef.current) {
