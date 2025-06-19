@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import zustandStore from '../../app/zustandStore.js'
 import { API } from '../../app/api.js'
-import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
 import SearchResultPageList from '../../features/search/SearchResultPageList.jsx'
@@ -97,13 +96,12 @@ const SearchResult = () => {
     return cutCate
   }
   const filterKeyword = sd => {
+    const storeName = sd?.place_name
     const filtered = sd?.summary?.keyword
       .split(',')
       .map(key => key.trim())
-      .filter(
-        key => key !== sd.place_name && key !== tag.filter(tg => tg === extractCategory(sd))[0],
-      )
       .filter(key => !key.includes('>'))
+      .filter(key => !storeName.includes(key))
     return filtered
   }
   // console.log(searchData)
