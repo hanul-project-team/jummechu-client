@@ -1,5 +1,10 @@
 # 점메추(Jummechu) - 맛집 검색 및 사용자 맞춤 추천 사이트
 
+## 링크모음
+- **클라이언트 GitHub**: [https://github.com/hanul-project-team/jummechu-client](https://github.com/hanul-project-team/jummechu-client)
+- **서버 GitHub**: [https://github.com/hanul-project-team/jummechu-server](https://github.com/hanul-project-team/jummechu-server)
+<br><br>
+
 ## 기술스택
 ###  Frontend
 - **React 19**: 최신 React 기반 SPA
@@ -19,6 +24,7 @@
 ###  Dev Tools
 - **Vite**: 빠른 번들러 및 개발 서버
 - **ESLint**, **Prettier**: 코드 스타일 및 정적 분석
+<br><br>
 
 ## 폴더구조
 ```bash
@@ -44,6 +50,7 @@ jummechu-client/
 ├── vite.config.js
 └── yarn.lock
 ```
+<br><br>
 
 ## 환경변수 설정
 ```bash
@@ -54,6 +61,7 @@ VITE_KAKAO_KEY=your-kakao-key
 .env.development
 VITE_API_BASE_URL=http://localhost:3000
 ```
+<br><br>
 
 ## 주요기능
 - **회원 유형에 따른 차별화된 서비스 제공**
@@ -87,6 +95,7 @@ VITE_API_BASE_URL=http://localhost:3000
     - 사업자 회원의 입점 신청 승인 및 거절
     - 입점 승인된 음식점 목록 및 정보 관리
     - 전체 서비스 운영을 위한 전반적인 사이트 관리 기능 제공
+<br><br>
 
 ## 서비스 화면 미리보기
 ### 홈 화면
@@ -113,7 +122,3 @@ VITE_API_BASE_URL=http://localhost:3000
 아이디나 비밀번호를 잊어버렸을 때, 재설정을 할 수 있는 화면
 
 ![아이디 찾기](public/images/jummechu-find_account-1.png) ![비밀번호 찾기](public/images/jummechu-find_account-2.png) 
-
-## GitHub 및 서비스 주소
-- **클라이언트 GitHub**: [https://github.com/hanul-project-team/jummechu-client](https://github.com/hanul-project-team/jummechu-client)
-- **서버 GitHub**: [https://github.com/hanul-project-team/jummechu-server](https://github.com/hanul-project-team/jummechu-server)
