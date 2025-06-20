@@ -346,7 +346,7 @@ const ViewPlaceDetail = () => {
               {/* 가게 이미지 */}
               <div className="min-sm:row-span-2 px-2">
                 <img
-                  src={import.meta.env.VITE_API_BASE_URL+placeDetail?.photos?.[0] || Icon}
+                  src={`${import.meta.env.VITE_API_BASE_URL+placeDetail?.photos?.[0]}` || Icon}
                   alt={`${placeDetail?.photos?.[0] ? 'photos' : 'Icon'}`}
                   className="sm:h-auto w-fit rounded-xl max-sm:mx-auto"
                   onError={e => {

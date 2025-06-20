@@ -108,7 +108,7 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
                         <div key={i}>
                           <div className="hover:cursor-pointer" onClick={() => handleNavigate(snd)}>
                             <img
-                              src={import.meta.env.VITE_API_BASE_URL+snd?.photos?.[0] || Icon}
+                              src={`${import.meta.env.VITE_API_BASE_URL+snd?.photos?.[0]}` || Icon}
                               alt="icon"
                               className="sm:w-[150px] sm:h-[150px] h-[80px] w-[80px] mx-auto rounded-xl"
                               onError={e => {
