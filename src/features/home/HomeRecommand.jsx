@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom'
 import zustandStore from '../../app/zustandStore.js'
 
 const HomeRecommand = () => {
-  const [tag, setTag] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const userNearPlace = zustandStore(state => state.userNearPlace)
   const nearPlaceReviews = zustandStore(state => state.nearPlaceReviews)
@@ -111,14 +110,11 @@ const HomeRecommand = () => {
         const filteredCategories = reducedCategories?.filter(tag => tag?.length > 0)
 
         try {
-          // console.log(filteredCategories)
           const results = matchingCategories(defaultCategories, filteredCategories)
           const center = {
             latitude: userNearPlace[0].latitude,
             longitude: userNearPlace[0].longitude,
           }
-          // console.log(center)
-          // console.log(results)
           if (results) {
             API.post('/store/tag/match', {
               results: results,
@@ -141,7 +137,7 @@ const HomeRecommand = () => {
                 )
               })
           }
-          setTag(results)
+
           // {/*interval 2번*/}
           if (otherPlaces?.length > 0 && lastPlacesRef.current) {
             if (isFromInterval || isSamePlaces(lastPlacesRef.current, otherPlaces)) {
@@ -261,8 +257,7 @@ const HomeRecommand = () => {
       return 0
     }
   }
-  // console.log(tag)
-  // console.log(userNearPlace)
+
   return (
     <div className="max-xl:m-3">
       {isLoading === true ? (
@@ -308,7 +303,7 @@ const HomeRecommand = () => {
                       return (
                         <SwiperSlide key={idx} className="max-w-full mr-3">
                           <img
-                            src={fps?.photos?.[0] || Icon}
+                            src={import.meta.env.VITE_API_BASE_URL+fps?.photos?.[0] || Icon}
                             alt="picsum"
                             className="max-[376px]:h-[110px] max-[426px]:h-[150px] max-[769px]:h-[150px] min-[769px]:h-[200px] hover:cursor-pointer rounded-xl"
                             onClick={() => handleNavigate(fps)}

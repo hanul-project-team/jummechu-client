@@ -247,7 +247,7 @@ const PlaceReview = () => {
             </div>
             {handleratingText(reviewInfo)}
             <p>
-              총 <strong>{reviewInfo.length}</strong>분의 고객님이 리뷰를 남기셨습니다.
+              총 <strong>{reviewInfo?.length}</strong>분의 고객님이 리뷰를 남기셨습니다.
             </p>
             {/* 리뷰 작성 모달 버튼 */}
             <div className="flex gap-3 my-2">
@@ -280,7 +280,7 @@ const PlaceReview = () => {
       {/* 리뷰 보이는곳 */}
       <div className="container sm:max-w-5xl px-6 max-w-3xl mx-auto">
         {/* 정렬 버튼 */}
-        {sortedReviews?.length > 0 && (
+        {total > 0 && (
           <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative" ref={dropdownRef}>
             <button
               className="bg-blue-500 text-white px-4 py-2 rounded-full shadow hover:bg-blue-600 transition"
@@ -293,7 +293,7 @@ const PlaceReview = () => {
         )}
         {/* 리뷰 영역 */}
         <div>
-          {sortedReviews?.length > 0 ? (
+          {total > 0 ? (
             sortedReviews?.slice(0, count).map((rv, i) => (
               <div
                 key={i}
@@ -306,7 +306,7 @@ const PlaceReview = () => {
                     <div>
                       <p>{rv?.user.name}</p>
                       <Rating
-                        initialRating={rv.rating}
+                        initialRating={rv?.rating}
                         emptySymbol={
                           <img
                             src={StarGray}
@@ -372,11 +372,14 @@ const PlaceReview = () => {
                     <p className="indent-2 my-5 max-w-9/10 break-all">{rv.comment}</p>
                   </div>
                   {/* 이미지 */}
-                  {rv.attachments?.length > 0 && (
+                  {rv?.attachments?.length > 0 && (
                     <div className="flex gap-1 items-center my-5">
                       {rv.attachments.map((img, i) => (
                         <div key={`img-${i}`}>
-                          <ReviewImageSrc src={img} alt={`img-${i}`} />
+                          <ReviewImageSrc
+                            src={img}
+                            alt={`img-${i}`}
+                          />
                         </div>
                       ))}
                     </div>

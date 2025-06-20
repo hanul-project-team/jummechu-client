@@ -98,7 +98,7 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
                 className="border-t-1 border-gray-700"
               >
                 {searchNearData
-                  .filter(snd => snd._id !== placeDetail._id)
+                  .filter(snd => snd._id !== placeDetail?._id)
                   .map((snd, i) => {
                     return (
                       <SwiperSlide
@@ -108,7 +108,7 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
                         <div key={i}>
                           <div className="hover:cursor-pointer" onClick={() => handleNavigate(snd)}>
                             <img
-                              src={snd?.photos?.[0] || Icon}
+                              src={import.meta.env.VITE_API_BASE_URL+snd?.photos?.[0] || Icon}
                               alt="icon"
                               className="sm:w-[150px] sm:h-[150px] h-[80px] w-[80px] mx-auto rounded-xl"
                               onError={e => {
@@ -122,7 +122,7 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
                               className="hover:cursor-pointer font-bold"
                               onClick={() => handleNavigate(snd)}
                             >
-                              {snd.place_name ? snd.place_name : snd.name}
+                              {snd?.place_name ? snd.place_name : snd.name}
                             </p>
                           </div>
                         </div>
