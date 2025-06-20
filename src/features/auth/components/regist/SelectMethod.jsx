@@ -7,10 +7,10 @@ import GoogleButton from '../../../../shared/GoogleButton'
 const SelectMethod = () => {
   const onClick = async response => {
     const idToken = response.credential
-    // console.log('받은 ID 토큰:', idToken)
+    console.log('받은 ID 토큰:', idToken)
     try {
       const res = await API.post('/auth/google_verify', { token: idToken })
-      // console.log('로그인 성공:', res.data)
+      console.log('로그인 성공:', res.data)
     } catch {
       toast.error(
         <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
