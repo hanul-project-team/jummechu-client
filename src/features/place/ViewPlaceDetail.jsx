@@ -270,7 +270,7 @@ const ViewPlaceDetail = () => {
           <div className="container md:max-w-5xl px-6 mx-auto p-3 m-3">
             {/* 타이틀 & 북마크 영역 */}
             <div className="flex items-center justify-between my-2">
-              <h1 className="sm:text-3xl text-xl font-bold max-w-1/2">{placeDetail.name}</h1>
+              <h1 className="sm:text-3xl text-xl font-bold max-w-1/2">{placeDetail?.name}</h1>
               <div className="flex items-center gap-1">
                 {/* 북마크 */}
                 <div
@@ -346,7 +346,7 @@ const ViewPlaceDetail = () => {
               {/* 가게 이미지 */}
               <div className="min-sm:row-span-2 px-2">
                 <img
-                  src={placeDetail?.photos?.[0] || Icon}
+                  src={import.meta.env.VITE_API_BASE_URL+placeDetail?.photos?.[0] || Icon}
                   alt={`${placeDetail?.photos?.[0] ? 'photos' : 'Icon'}`}
                   className="sm:h-auto w-fit rounded-xl max-sm:mx-auto"
                   onError={e => {
@@ -378,7 +378,7 @@ const ViewPlaceDetail = () => {
                       d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
                     />
                   </svg>
-                  <p>{placeDetail.address}</p>
+                  <p>{placeDetail?.address}</p>
                 </div>
                 {/* 전화 */}
                 <div className="flex items-center gap-2 my-2 sm:text-md max-sm:text-sm">
