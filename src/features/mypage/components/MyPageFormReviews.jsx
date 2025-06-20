@@ -265,7 +265,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                 <div className="w-full h-full flex justify-between items-start">
                   <div className="flex items-start sm:gap-3 gap-1">
                     <img
-                      src={rv?.store?.photos?.[0] || Icon}
+                      src={`${import.meta.env.VITE_API_BASE_URL+rv?.store?.photos?.[0]}` || Icon}
                       alt="icon"
                       className="sm:h-[80px] h-[40px] rounded-xl"
                       onError={e => {
