@@ -133,12 +133,6 @@ const AccountSettingForm = ({ returnUrl }) => {
       } else {
         navigate('/')
       }
-      toast.success(
-        <div className="Toastify__toast-body cursor-default">계정설정에 성공하였습니다</div>,
-        {
-          position: 'top-center',
-        },
-      )
       reset()
       dispatch(restoreLogin())
     } catch {
