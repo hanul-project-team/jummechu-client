@@ -5,7 +5,7 @@ import { toast } from 'react-toastify'
 import GoogleButton from '../../../../shared/GoogleButton'
 
 const SelectMethod = () => {
-  const onClick = async response => {
+  const onLogin = async response => {
     const idToken = response.credential
     console.log('받은 ID 토큰:', idToken)
     try {
@@ -36,7 +36,7 @@ const SelectMethod = () => {
       <GoogleButton
         className="p-3 gap-2 font-semibold border border-color-gray-300 rounded-lg"
         value="Google로 가입"
-        onClick={onClick}
+        onLogin={onLogin}
       />
     </>
   )
