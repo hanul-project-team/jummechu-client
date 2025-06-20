@@ -1,16 +1,20 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { login } from '../../slice/authSlice'
 import { API } from '../../../../app/api'
 import { toast } from 'react-toastify'
 import GoogleButton from '../../../../shared/GoogleButton'
 
 const SelectMethod = () => {
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
   const onLogin = async response => {
     const idToken = response.credential
-    console.log('받은 ID 토큰:', idToken)
     try {
-      const res = await API.post('/auth/google_verify', { token: idToken })
-      console.log('로그인 성공:', res.data)
+      const response = await API.post('/auth/google_verify', { token: idToken })
+      dispatch(login(response.data))
+      navigate('/social_setting')
     } catch {
       toast.error(
         <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
