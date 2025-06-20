@@ -235,6 +235,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   } else if (remains === 0 && total === count) {
     buttonText = '접기'
   }
+
   return (
     <div className="h-full">
       <div className="h-full">

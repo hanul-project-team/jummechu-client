@@ -38,7 +38,7 @@ const ViewPlaceDetail = () => {
     lat: 37.3946622,
     lng: 127.1026676,
   })
-  // console.log(placeDetail.keywords)
+
   /* 정보 호출 및 갱신 */
   useEffect(() => {
     if (placeDetail && placeDetail?._id) {
@@ -101,13 +101,13 @@ const ViewPlaceDetail = () => {
 
   /* placeDetail이 없을시 불러오는 코드 */
   useEffect(() => {
-    if (placeDetail?.length < 1) {
-      const placeLink = location.pathname
-      const placeId = placeLink.split('/')[2]
-      if (!placeId || placeId === 'undefined') {
-        console.warn('잘못된 URL입니다. placeId:', placeId)
-        return
-      }
+    const placeLink = location.pathname
+    const placeId = placeLink.split('/')[2]
+    if (!placeId || placeId === 'undefined') {
+      console.warn('잘못된 URL입니다. placeId:', placeId)
+      return
+    }
+    if (!placeDetail || Object.keys(placeDetail).length === 0) {
       API.get(`/store/read/${placeId}`)
         .then(res => {
           const data = res.data
@@ -117,7 +117,7 @@ const ViewPlaceDetail = () => {
           console.log(err)
         })
     }
-  }, [location.pathname, placeDetail, setPlaceDetail])
+  }, [location.pathname, placeDetail])
   useEffect(() => {
     const script = document.createElement('script')
     script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_KEY}&autoload=false`
@@ -208,7 +208,7 @@ const ViewPlaceDetail = () => {
               .then(res => {
                 const data = res.data
                 // console.log(data)
-                setUserBookmark(prev => prev.filter(ubm => ubm?.store._id !== placeDetail._id))
+                setUserBookmark(prev => prev.filter(ubm => ubm?.store._id !== placeDetail?._id))
               })
               .catch(err => {
                 console.error('북마크 해제 요청 실패!', err)
@@ -270,7 +270,7 @@ const ViewPlaceDetail = () => {
           <div className="container md:max-w-5xl px-6 mx-auto p-3 m-3">
             {/* 타이틀 & 북마크 영역 */}
             <div className="flex items-center justify-between my-2">
-              <h1 className="sm:text-3xl text-xl font-bold max-w-1/2">{placeDetail.name}</h1>
+              <h1 className="sm:text-3xl text-xl font-bold max-w-1/2">{placeDetail?.name}</h1>
               <div className="flex items-center gap-1">
                 {/* 북마크 */}
                 <div
@@ -378,7 +378,7 @@ const ViewPlaceDetail = () => {
                       d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
                     />
                   </svg>
-                  <p>{placeDetail.address}</p>
+                  <p>{placeDetail?.address}</p>
                 </div>
                 {/* 전화 */}
                 <div className="flex items-center gap-2 my-2 sm:text-md max-sm:text-sm">

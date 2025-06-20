@@ -1,52 +1,83 @@
 // src/features/mypage/components/MyPageFormBookmark.jsx
 
-import React, { useEffect } from 'react'; // useEffect를 임포트
-import { useNavigate } from 'react-router-dom'; // useNavigate를 임포트
-import { useSelector } from 'react-redux'; // useSelector를 임포트
-import zustandUser from '../../../app/zustandUser.js'; // 경로 확인: src/features/mypage/components에서 src/app으로 가는 경로
+import React, { useEffect } from 'react' // useEffect를 임포트
+import { useNavigate } from 'react-router-dom' // useNavigate를 임포트
+import { useSelector } from 'react-redux' // useSelector를 임포트
+import zustandUser from '../../../app/zustandUser.js' // 경로 확인: src/features/mypage/components에서 src/app으로 가는 경로
+import zustandStore from '../../../app/zustandStore.js'
+import { API } from '../../../app/api.js'
+import defaultfood from '../../../assets/images/default2.png'
 
-const MyPageFormBookmark = () => {
-  const navigate = useNavigate();
+const MyPageFormBookmark = ({ backendBaseUrl, recentStores}) => {
+  const navigate = useNavigate()
 
   // ZustandUser 스토어에서 찜 목록 상태와 관련 액션을 개별적으로 가져오기
   // userBookmark는 null일 경우 빈 배열로 대체 (초기 로딩 시나 저장된 데이터 없을 때 안전)
-  const userBookmark = zustandUser(state => state.userBookmark || []); 
-  const refreshUserBookmarks = zustandUser(state => state.refreshUserBookmarks);
-  const toggleUserBookmark = zustandUser(state => state.toggleUserBookmark);
-
+  const userBookmark = zustandUser(state => state.userBookmark || [])
+  const setUserBookmark = zustandUser(state => state.setUserBookmark || [])
+  const refreshUserBookmarks = zustandUser(state => state.refreshUserBookmarks)
+  const toggleUserBookmark = zustandUser(state => state.toggleUserBookmark)
+  const setPlaceDetail = zustandStore(state => state.setPlaceDetail)
   // Redux 스토어에서 사용자 ID 가져오기
-  const user = useSelector(state => state.auth.user);
-  const userId = user?.id;
+  const user = useSelector(state => state.auth.user)
+  const userId = user?.id
 
-  console.log('MyPageFormBookmark - 현재 userBookmark 상태:', userBookmark);
-  console.log('MyPageFormBookmark - 현재 refreshUserBookmarks 함수:', refreshUserBookmarks); // 함수가 정의되었는지 확인
-  console.log('MyPageFormBookmark - 현재 toggleUserBookmark 함수:', toggleUserBookmark); // 함수가 정의되었는지 확인
-  console.log('MyPageFormBookmark - 현재 userId:', userId);
+  console.log('MyPageFormBookmark - 현재 userBookmark 상태:', userBookmark)
+  console.log('MyPageFormBookmark - 현재 refreshUserBookmarks 함수:', refreshUserBookmarks) // 함수가 정의되었는지 확인
+  console.log('MyPageFormBookmark - 현재 toggleUserBookmark 함수:', toggleUserBookmark) // 함수가 정의되었는지 확인
+  console.log('MyPageFormBookmark - 현재 userId:', userId)
 
   // 찜 상태 확인 함수 (찜 목록에 해당 가게 ID가 있는지 확인)
   // userBookmark 항목은 { _id: "북마크ID", store: { _id: "가게ID", name: "가게이름", ... } } 형태입니다.
-  const isBookmarked = (item) => {
-    const targetStoreId = item.store?._id || item._id; // 찜 목록 아이템의 실제 가게 ID는 item.store?._id 또는 item._id입니다.
+  const isBookmarked = item => {
+    const targetStoreId = item.store?._id || item._id // 찜 목록 아이템의 실제 가게 ID는 item.store?._id 또는 item._id입니다.
     // userBookmark가 배열이고, 내부 항목에 store 객체가 있는지 확인 후 _id 비교
-    return Array.isArray(userBookmark) && userBookmark.some(bookmark => bookmark.store?._id === targetStoreId);
-  };
+    return (
+      Array.isArray(userBookmark) &&
+      userBookmark.some(bookmark => bookmark.store?._id === targetStoreId)
+    )
+  }
 
   // 컴포넌트 마운트 시 또는 userId 변경 시 찜 목록을 새로고침
   useEffect(() => {
     // refreshUserBookmarks 함수가 유효한지 확인 후 호출
-    if (typeof refreshUserBookmarks === 'function') { 
-        if (userId) { 
-            refreshUserBookmarks(userId);
-        } else {
-            // userId가 없을 경우 찜 목록 초기화 (refreshUserBookmarks가 내부에서 처리)
-            console.log('MyPageFormBookmark: 사용자 ID가 없어 찜 목록을 불러올 수 없습니다. 찜 목록을 초기화합니다.');
-            refreshUserBookmarks(null); 
-        }
+    if (typeof refreshUserBookmarks === 'function') {
+      if (userId) {
+        refreshUserBookmarks(userId)
+      } else {
+        // userId가 없을 경우 찜 목록 초기화 (refreshUserBookmarks가 내부에서 처리)
+        console.log(
+          'MyPageFormBookmark: 사용자 ID가 없어 찜 목록을 불러올 수 없습니다. 찜 목록을 초기화합니다.',
+        )
+        refreshUserBookmarks(null)
+      }
     } else {
-        // 이 경고가 계속 나타나면 zustandUser.js 파일이 올바르게 업데이트되지 않았다는 의미입니다.
-        console.warn('refreshUserBookmarks 함수가 아직 로드되지 않았거나 유효하지 않습니다. zustandUser.js를 확인해주세요.');
+      // 이 경고가 계속 나타나면 zustandUser.js 파일이 올바르게 업데이트되지 않았다는 의미입니다.
+      console.warn(
+        'refreshUserBookmarks 함수가 아직 로드되지 않았거나 유효하지 않습니다. zustandUser.js를 확인해주세요.',
+      )
     }
-  }, [userId, refreshUserBookmarks]); // userId와 refreshUserBookmarks가 종속성 배열에 포함되어야 함
+  }, [userId, refreshUserBookmarks]) // userId와 refreshUserBookmarks가 종속성 배열에 포함되어야 함
+
+  const handleDeleteBookmark = item => {
+    const storeId = item?.store?._id
+
+    if (confirm('북마크를 해제하시겠습니까?')) {
+      API.delete(`/bookmark/delete/${storeId}`, {
+        headers: {
+          user: userId,
+        },
+      })
+        .then(res => {
+          const data = res.data
+          // console.log(data)
+          setUserBookmark(prev => prev.filter(ubm => ubm?.store._id !== storeId))
+        })
+        .catch(err => {
+          console.error('북마크 해제 요청 실패!', err)
+        })
+    }
+  }
 
   return (
     <div className="flex justify-center">
@@ -57,41 +88,60 @@ const MyPageFormBookmark = () => {
           {userBookmark.map(item => (
             // 각 찜 항목의 고유 키는 item.store._id를 사용합니다.
             // item.store가 null일 경우를 대비하여 item._id도 확인
-            <li key={item.store?._id || item._id} className="flex gap-4"> 
+            <li key={item.store?._id || item._id} className="flex gap-4">
               <div
                 className="relative w-[250px] h-[250px] cursor-pointer"
                 // 가게 상세 페이지로 이동
                 onClick={() => {
-                  if (item.store?._id) { // item.store._id가 유효한지 확인 후 navigate
-                    navigate(`/place/${item.store._id}`); 
+                  if (item.store?._id) {
+                    // item.store._id가 유효한지 확인 후 navigate
+                    navigate(`/place/${item.store._id}`)
                   } else {
-                    console.warn('MyPageFormBookmark: 유효한 가게 ID가 없어 상세 페이지로 이동할 수 없습니다.', item);
+                    console.warn(
+                      'MyPageFormBookmark: 유효한 가게 ID가 없어 상세 페이지로 이동할 수 없습니다.',
+                      item,
+                    )
                   }
-                }} 
+                }}
               >
                 <img
-                  // 이미지 URL은 item.store.thumbnail 사용, 없을 경우 플레이스홀더
-                  src={item.store?.thumbnail || `https://placehold.co/250x250/F0F0F0/6C757D?text=${encodeURIComponent(item.store?.name ? item.store.name.substring(0, Math.min(5, item.store.name.length)) : 'No Image')}`}
-                  alt={item.store?.name || '가게 이미지'}
+                  src={
+                    item.photos && item.photos.length > 0
+                      ? item.photos[0].startsWith('http') || item.photos[0].startsWith('https')
+                        ? item.photos[0]
+                        : `${backendBaseUrl}${item.photos[0]}`
+                      : defaultfood
+                  }
+                  alt={item.name}
                   className="w-full h-full object-cover rounded-lg"
+                  onError={e => {
+                    e.target.onerror = null
+                    e.target.src = defaultfood
+                  }}
                 />
                 <button
                   type="button"
                   onClick={e => {
-                    e.stopPropagation(); // li의 onClick 이벤트 방지
+                    e.stopPropagation() // li의 onClick 이벤트 방지
                     // toggleUserBookmark 함수가 유효한지 확인 후 호출
-                    if (typeof toggleUserBookmark === 'function') { 
-                        // toggleUserBookmark에 item 객체 전체를 전달 (내부에서 storeId 추출)
-                        toggleUserBookmark(userId, item); 
+                    if (typeof toggleUserBookmark === 'function') {
+                      // toggleUserBookmark에 item 객체 전체를 전달 (내부에서 storeId 추출)
+                      toggleUserBookmark(userId, item)
                     } else {
-                        // 이 경고가 계속 나타나면 zustandUser.js 파일이 올바르게 업데이트되지 않았다는 의미입니다.
-                        console.warn('toggleUserBookmark 함수가 아직 로드되지 않았거나 유효하지 않습니다. zustandUser.js를 확인해주세요.');
+                      // 이 경고가 계속 나타나면 zustandUser.js 파일이 올바르게 업데이트되지 않았다는 의미입니다.
+                      console.warn(
+                        'toggleUserBookmark 함수가 아직 로드되지 않았거나 유효하지 않습니다. zustandUser.js를 확인해주세요.',
+                      )
                     }
                   }}
                   className="absolute top-2 right-2 bg-white bg-opacity-70 rounded-full p-2 shadow hover:bg-opacity-100"
                 >
                   {isBookmarked(item) ? ( // 현재 찜 상태에 따라 하트 아이콘 변경
-                    <span role="img" aria-label="bookmarked">
+                    <span
+                      role="img"
+                      aria-label="bookmarked"
+                      onClick={() => handleDeleteBookmark(item)}
+                    >
                       ❤️
                     </span>
                   ) : (
@@ -113,8 +163,9 @@ const MyPageFormBookmark = () => {
                 </button>
               </div>
               <div className="py-3">
-                <h2 className="text-lg py-1 font-SinchonRhapsody flex">{item.store?.name || '이름 없음'}</h2>
-                {item.store?.rating && <p className="py-1">⭐{item.store.rating} </p>}
+                <h2 className="text-lg py-1 font-SinchonRhapsody flex">
+                  {item.store?.name || '이름 없음'}
+                </h2>
                 <p className="py-1 flex items-center text-sm text-gray-500">
                   <svg
                     fill="#000000"
@@ -144,25 +195,32 @@ const MyPageFormBookmark = () => {
                       />
                     </g>
                   </svg>
-                  {item.store?.address || '주소 없음'}
+                  {item.store.address || '주소 없음'}
                 </p>
-                {item.store?.keywords && (
-                  <p className="py-1 text-sm text-gray-700">
-                    #{Array.isArray(item.store.keywords) ? item.store.keywords.join(', #') : String(item.store.keywords).split(',').map(k => k.trim()).join(', #')}
-                  </p>
-                )}
+                {item.keyword && (
+                    <p className="py-1 text-sm text-gray-700">
+                      #{Array.isArray(item.keyword) ? item.keyword.join(', #') : item.keyword}
+                    </p>
+                  )}
+                
                 <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (item.store?._id) { // item.store._id가 유효한지 확인 후 navigate
-                        navigate(`/place/${item.store._id}`);
-                      } else {
-                        console.warn('MyPageFormBookmark: 유효한 가게 ID가 없어 상세 페이지로 이동할 수 없습니다.', item);
-                      }
-                    }}
-                    className="mt-2 text-blue-500 hover:underline text-sm"
+                  onClick={e => {
+                    e.stopPropagation()
+                    if (item.store?._id) {
+                      // item.store._id가 유효한지 확인 후 navigate
+                      console.log(item)
+                      setPlaceDetail(null)
+                      navigate(`/place/${item.store._id}`)
+                    } else {
+                      console.warn(
+                        'MyPageFormBookmark: 유효한 가게 ID가 없어 상세 페이지로 이동할 수 없습니다.',
+                        item,
+                      )
+                    }
+                  }}
+                  className="mt-2 text-blue-500 hover:underline text-sm"
                 >
-                    상세 보기
+                  상세 보기
                 </button>
               </div>
             </li>
@@ -170,7 +228,7 @@ const MyPageFormBookmark = () => {
         </ul>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default MyPageFormBookmark;
+export default MyPageFormBookmark

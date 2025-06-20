@@ -98,7 +98,7 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
                 className="border-t-1 border-gray-700"
               >
                 {searchNearData
-                  .filter(snd => snd._id !== placeDetail._id)
+                  .filter(snd => snd._id !== placeDetail?._id)
                   .map((snd, i) => {
                     return (
                       <SwiperSlide

@@ -98,11 +98,11 @@ const HomeRecommand = () => {
           if (!acc.includes(item1)) {
             acc.push(item1)
           }
-          const item2 = cts.split(',')[1].trim()
+          const item2 = cts.split(',')[1]?.trim()
           if (!acc.includes(item2)) {
             acc.push(item2)
           }
-          const item3 = cts.split(',')[2].trim()
+          const item3 = cts.split(',')[2]?.trim()
           if (!acc.includes(item3)) {
             acc.push(item3)
           }
