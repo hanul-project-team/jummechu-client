@@ -14,7 +14,11 @@ const SelectMethod = () => {
     try {
       const response = await API.post('/auth/google_verify', { token: idToken })
       dispatch(login(response.data))
-      navigate('/social_setting')
+      if (response.data.isAccountSetting === 'false') {
+        navigate('/social_setting')
+      } else {
+        navigate('/')
+      }
     } catch {
       toast.error(
         <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
