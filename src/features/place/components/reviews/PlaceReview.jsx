@@ -181,7 +181,7 @@ const PlaceReview = () => {
     } else {
       if (user.isAccountSetting === false) {
         if (confirm('계정 설정을 완료해야합니다. 설정 페이지로 이동하시겠습니까?')) {
-          navigate(`/account_setting`)
+          navigate(`/account_setting`, { state: { returnUrl } })
         } else {
           return
         }

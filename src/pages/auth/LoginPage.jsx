@@ -5,7 +5,6 @@ import LoginAction from '../../features/auth/components/login/LoginAction'
 
 const LoginPage = () => {
   const location = useLocation()
-
   const returnUrl = location.state?.returnUrl
   return (
     <main className="container mx-auto max-w-5xl flex justify-center px-6 ">
@@ -16,7 +15,7 @@ const LoginPage = () => {
             <p className="text-sm text-color-gray-800">ai가 당신만의 맛집을 추천해드립니다</p>
           </div>
           <LoginForm returnUrl={returnUrl} />
-          <LoginAction />
+          <LoginAction returnUrl={returnUrl} />
         </div>
       </section>
     </main>

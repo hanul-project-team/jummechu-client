@@ -28,6 +28,7 @@ const ViewPlaceDetail = () => {
   const [linkCopied, setLinkCopied] = useState(false)
   const rootLocation = `${window.location.origin}`
   const location = useLocation()
+  const returnUrl = location.pathname + location?.search
   const [recommandLoading, setRecommandLoading] = useState(false)
   const [center, setCenter] = useState({
     lat: 37.3946622,
@@ -186,12 +187,12 @@ const ViewPlaceDetail = () => {
   const handleBookmark = () => {
     if (!user.id) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 하시겠습니까?')) {
-        navigate('/login')
+        navigate('/login', { state: { returnUrl } })
       }
     } else {
       if (user.isAccountSetting === false) {
         if (confirm('계정 설정을 완료해야합니다. 설정 페이지로 이동하시겠습니까?')) {
-          navigate(`/account_setting`)
+          navigate(`/account_setting`, { state: { returnUrl } })
         } else {
           return
         }

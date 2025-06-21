@@ -7,7 +7,7 @@ import { toast } from 'react-toastify'
 import { Link } from 'react-router-dom'
 import GoogleButton from '../../../../shared/GoogleButton'
 
-const LoginAction = () => {
+const LoginAction = ({ returnUrl }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const onLogin = async response => {
@@ -15,11 +15,13 @@ const LoginAction = () => {
     try {
       const response = await API.post('/auth/google_verify', { token: idToken })
       dispatch(login(response.data))
-      if (response.data.isAccountSetting === 'false') {
-        navigate('/account_setting')
-      } else {
-        navigate('/')
+      if (response.data.isAccountSetting === false) {
+        return navigate('/account_setting')
       }
+      if (returnUrl) {
+        return navigate(returnUrl)
+      }
+      navigate('/')
     } catch {
       toast.error(
         <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
@@ -46,6 +48,7 @@ const LoginAction = () => {
         <Link
           to="/regist/method"
           className="text-color-teal-400 font-semibold hover:underline outline-hidden"
+          state={returnUrl ? returnUrl : ''}
         >
           회원가입
         </Link>

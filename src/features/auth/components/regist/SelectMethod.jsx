@@ -6,7 +6,7 @@ import { API } from '../../../../app/api'
 import { toast } from 'react-toastify'
 import GoogleButton from '../../../../shared/GoogleButton'
 
-const SelectMethod = () => {
+const SelectMethod = ({ returnUrl }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const onLogin = async response => {
@@ -14,11 +14,13 @@ const SelectMethod = () => {
     try {
       const response = await API.post('/auth/google_verify', { token: idToken })
       dispatch(login(response.data))
-      if (response.data.isAccountSetting === 'false') {
-        navigate('/social_setting')
-      } else {
-        navigate('/')
+      if (response.data.isAccountSetting === false) {
+        return navigate('/account_setting')
       }
+      if (returnUrl) {
+        return navigate(returnUrl)
+      }
+      navigate('/')
     } catch {
       toast.error(
         <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
@@ -41,11 +43,13 @@ const SelectMethod = () => {
         <span className="grow-0">또는</span>
         <span className="bg-color-gray-300 h-0.25 grow-1"></span>
       </div>
-      <GoogleButton
-        className="p-3 gap-2 font-semibold border border-color-gray-300 rounded-lg"
-        value="Google로 가입"
-        onLogin={onLogin}
-      />
+      <div className="flex flex-col gap-3">
+        <GoogleButton
+          className="p-3 gap-2 font-semibold border border-color-gray-300 rounded-lg"
+          value="Google로 가입"
+          onLogin={onLogin}
+        />
+      </div>
     </>
   )
 }
