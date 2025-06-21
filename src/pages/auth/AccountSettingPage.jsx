@@ -2,9 +2,9 @@ import React, { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
-import AccountSettingForm from '../../features/auth/components/social/AccountSettingForm'
+import AccountSettingForm from '../../features/auth/components/oauth/AccountSettingForm'
 
-const SocailSettingPage = () => {
+const AccountSettingPage = () => {
   const user = useSelector(state => state.auth.user)
   const location = useLocation()
   const navigate = useNavigate()
@@ -33,4 +33,4 @@ const SocailSettingPage = () => {
   )
 }
 
-export default SocailSettingPage
+export default AccountSettingPage

@@ -16,7 +16,7 @@ const LoginAction = () => {
       const response = await API.post('/auth/google_verify', { token: idToken })
       dispatch(login(response.data))
       if (response.data.isAccountSetting === 'false') {
-        navigate('/social_setting')
+        navigate('/account_setting')
       } else {
         navigate('/')
       }
