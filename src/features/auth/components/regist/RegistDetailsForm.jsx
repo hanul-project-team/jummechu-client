@@ -10,7 +10,7 @@ import TermsBox from './TermsBox'
 import VisibleBtn from '../../../../shared/VisibleBtn'
 import Timer from '../../../../shared/Timer'
 
-const RegistDetailsForm = () => {
+const RegistDetailsForm = ({ returnUrl }) => {
   const [isPhone, setIsPhone] = useState(false)
   const [isRequested, setIsRequested] = useState(false)
   const [isCode, setIsCode] = useState(false)
@@ -164,7 +164,7 @@ const RegistDetailsForm = () => {
         },
       )
       reset()
-      navigate('/login')
+      navigate('/login', { state: { returnUrl } })
     } catch (e) {
       if (e.response.status === 400) {
         toast.error(

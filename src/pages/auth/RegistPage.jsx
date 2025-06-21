@@ -37,8 +37,8 @@ const RegistPage = () => {
         {step === 'method' && (
           <div className="flex flex-col gap-10">
             <h2 className="text-center text-2xl font-semibold cursor-default">회원가입</h2>
-            <SelectMethod />
-            <RegistAction returnUrl={returnUrl} />
+            <SelectMethod returnUrl={returnUrl} />
+            <RegistAction />
           </div>
         )}
         {step === 'type' && (
@@ -57,7 +57,7 @@ const RegistPage = () => {
             <h2 className="text-center text-2xl font-semibold cursor-default">
               회원 정보를 입력해주세요
             </h2>
-            <RegistDetailsForm />
+            <RegistDetailsForm returnUrl={returnUrl} />
           </div>
         )}
       </section>

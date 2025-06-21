@@ -48,7 +48,7 @@ const LoginAction = ({ returnUrl }) => {
         <Link
           to="/regist/method"
           className="text-color-teal-400 font-semibold hover:underline outline-hidden"
-          state={returnUrl ? returnUrl : ''}
+          state={{ returnUrl }}
         >
           회원가입
         </Link>
