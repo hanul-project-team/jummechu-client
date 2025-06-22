@@ -17,6 +17,7 @@ const AccountSettingPage = () => {
     }
   }, [user.isAccountSetting, navigate])
   const returnUrl = location.state?.returnUrl
+  const from = location.state?.from
   if (user.isAccountSetting === undefined || user.isAccountSetting === true)
     return <main className="min-h-[1000px]"></main>
   return (
@@ -26,7 +27,7 @@ const AccountSettingPage = () => {
           <h2 className="text-center text-2xl font-semibold cursor-default">
             계정 설정을 완료해주세요
           </h2>
-          <AccountSettingForm returnUrl={returnUrl} />
+          <AccountSettingForm returnUrl={returnUrl} from={from} />
         </div>
       </section>
     </main>
