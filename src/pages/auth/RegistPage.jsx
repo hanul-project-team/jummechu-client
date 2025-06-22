@@ -9,7 +9,7 @@ import RegistAction from '../../features/auth/components/regist/RegistAction'
 const RegistPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const returnUrl = location.state?.returnUrl
+  const returnUrl = location.state.returnUrl
   const { step } = useParams()
   useEffect(() => {
     if (!step) {
@@ -22,8 +22,18 @@ const RegistPage = () => {
     }
   }, [step, navigate])
   useEffect(() => {
+    if (returnUrl) {
+      localStorage.setItem('returnUrl', returnUrl)
+    }
+  }, [returnUrl])
+  useEffect(() => {
     return () => {
       localStorage.removeItem('role')
+    }
+  }, [])
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('returnUrl')
     }
   }, [])
   const nextStep = () => {
@@ -37,7 +47,7 @@ const RegistPage = () => {
         {step === 'method' && (
           <div className="flex flex-col gap-10">
             <h2 className="text-center text-2xl font-semibold cursor-default">회원가입</h2>
-            <SelectMethod returnUrl={returnUrl} />
+            <SelectMethod />
             <RegistAction />
           </div>
         )}
@@ -57,7 +67,7 @@ const RegistPage = () => {
             <h2 className="text-center text-2xl font-semibold cursor-default">
               회원 정보를 입력해주세요
             </h2>
-            <RegistDetailsForm returnUrl={returnUrl} />
+            <RegistDetailsForm />
           </div>
         )}
       </section>

@@ -10,7 +10,7 @@ import TermsBox from './TermsBox'
 import VisibleBtn from '../../../../shared/VisibleBtn'
 import Timer from '../../../../shared/Timer'
 
-const RegistDetailsForm = ({ returnUrl }) => {
+const RegistDetailsForm = () => {
   const [isPhone, setIsPhone] = useState(false)
   const [isRequested, setIsRequested] = useState(false)
   const [isCode, setIsCode] = useState(false)
@@ -32,6 +32,7 @@ const RegistDetailsForm = ({ returnUrl }) => {
     name: false,
     phone: false,
   })
+  const returnUrl = localStorage.getItem('returnUrl')
   const {
     register,
     handleSubmit,
@@ -164,7 +165,7 @@ const RegistDetailsForm = ({ returnUrl }) => {
         },
       )
       reset()
-      navigate('/login', { state: { returnUrl } })
+      navigate('/login', returnUrl && { state: { returnUrl } })
     } catch (e) {
       if (e.response.status === 400) {
         toast.error(
