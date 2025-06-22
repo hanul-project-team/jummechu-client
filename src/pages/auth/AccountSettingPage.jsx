@@ -2,9 +2,9 @@ import React, { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
-import AccountSettingForm from '../../features/auth/components/social/AccountSettingForm'
+import AccountSettingForm from '../../features/auth/components/oauth/AccountSettingForm'
 
-const SocailSettingPage = () => {
+const AccountSettingPage = () => {
   const user = useSelector(state => state.auth.user)
   const location = useLocation()
   const navigate = useNavigate()
@@ -17,6 +17,7 @@ const SocailSettingPage = () => {
     }
   }, [user.isAccountSetting, navigate])
   const returnUrl = location.state?.returnUrl
+  const from = location.state?.from
   if (user.isAccountSetting === undefined || user.isAccountSetting === true)
     return <main className="min-h-[1000px]"></main>
   return (
@@ -26,11 +27,11 @@ const SocailSettingPage = () => {
           <h2 className="text-center text-2xl font-semibold cursor-default">
             계정 설정을 완료해주세요
           </h2>
-          <AccountSettingForm returnUrl={returnUrl} />
+          <AccountSettingForm returnUrl={returnUrl} from={from} />
         </div>
       </section>
     </main>
   )
 }
 
-export default SocailSettingPage
+export default AccountSettingPage

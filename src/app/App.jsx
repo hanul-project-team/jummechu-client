@@ -13,12 +13,12 @@ import LoginPage from '../pages/auth/LoginPage'
 import FindAccountPage from '../pages/auth/FindAccountPage'
 import FindAccountResultPage from '../pages/auth/FindAccountResultPage'
 import ResetPasswordPage from '../pages/auth/ResetPasswordPage.jsx'
-import SocailSettingPage from '../pages/auth/SocailSettingPage.jsx'
+import AccountSettingPage from '../pages/auth/AccountSettingPage.jsx'
 import Dashboardlayout from '../layouts/Dashboardlayout.jsx'
 import MyjobPage from '../pages/business/MyjobPage.jsx'
 import MyRequestPage from '../pages/business/MyRequestPage.jsx'
 import ReqsetPage from '../pages/business/ReqsetPage.jsx'
-
+import KakaoCallback from '../features/auth/components/oauth/KakaoCallback.jsx'
 
 const App = () => {
   const dispatch = useDispatch()
@@ -40,13 +40,14 @@ const App = () => {
         <Route path="find_account" element={<FindAccountPage />} />
         <Route path="find_account/result" element={<FindAccountResultPage />} />
         <Route path="find_account/reset" element={<ResetPasswordPage />} />
-        <Route path="social_setting" element={<SocailSettingPage />} />
+        <Route path="account_setting" element={<AccountSettingPage />} />
       </Route>
       <Route element={<Dashboardlayout />}>
         <Route path="business" element={<MyjobPage />} />
         <Route path="business/request" element={<MyRequestPage />} />
         <Route path="business/reqset" element={<ReqsetPage />} />
       </Route>
+      <Route path="kakao_callback" element={<KakaoCallback />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
