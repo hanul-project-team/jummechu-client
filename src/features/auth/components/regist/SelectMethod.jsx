@@ -14,7 +14,7 @@ const SelectMethod = ({ returnUrl }) => {
     try {
       const response = await API.post('/auth/google_verify', { token: idToken })
       dispatch(login(response.data))
-      if (response.data.isAccountSetting === false) {
+      if (response.data.user.isAccountSetting === false) {
         return navigate('/account_setting')
       }
       if (returnUrl) {
@@ -43,13 +43,11 @@ const SelectMethod = ({ returnUrl }) => {
         <span className="grow-0">또는</span>
         <span className="bg-color-gray-300 h-0.25 grow-1"></span>
       </div>
-      <div className="flex flex-col gap-3">
-        <GoogleButton
-          className="p-3 gap-2 font-semibold border border-color-gray-300 rounded-lg"
-          value="Google로 가입"
-          onLogin={onLogin}
-        />
-      </div>
+      <GoogleButton
+        className="p-3 gap-2 font-semibold border border-color-gray-300 rounded-lg"
+        value="Google로 가입"
+        onLogin={onLogin}
+      />
     </>
   )
 }

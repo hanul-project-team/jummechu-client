@@ -15,7 +15,7 @@ const LoginAction = ({ returnUrl }) => {
     try {
       const response = await API.post('/auth/google_verify', { token: idToken })
       dispatch(login(response.data))
-      if (response.data.isAccountSetting === false) {
+      if (response.data.user.isAccountSetting === false) {
         return navigate('/account_setting')
       }
       if (returnUrl) {
@@ -48,7 +48,6 @@ const LoginAction = ({ returnUrl }) => {
         <Link
           to="/regist/method"
           className="text-color-teal-400 font-semibold hover:underline outline-hidden"
-          state={{ returnUrl }}
         >
           회원가입
         </Link>
