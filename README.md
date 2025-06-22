@@ -47,6 +47,7 @@ jummechu-client/
 ├── index.html
 ├── package.json
 ├── README.md
+├── vercel.json
 ├── vite.config.js
 └── yarn.lock
 ```
@@ -56,7 +57,9 @@ jummechu-client/
 ```bash
 .env
 VITE_GOOGLE_CLIENT_ID=your-google-client-id
+VITE_KAKAO_API_KEY=your-kakao-API_key
 VITE_KAKAO_KEY=your-kakao-key
+VITE_KAKAO_REDIRECT_URI=http://localhost:5173/kakao_callback
 
 .env.development
 VITE_API_BASE_URL=http://localhost:3000
