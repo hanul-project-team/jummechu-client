@@ -9,7 +9,7 @@ import RegistAction from '../../features/auth/components/regist/RegistAction'
 const RegistPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const returnUrl = location.state.returnUrl
+  const returnUrl = location.state?.returnUrl
   const { step } = useParams()
   useEffect(() => {
     if (!step) {
