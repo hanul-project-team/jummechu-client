@@ -165,7 +165,7 @@ const RegistDetailsForm = () => {
         },
       )
       reset()
-      navigate('/login', returnUrl && { state: { returnUrl } })
+      navigate('/login', returnUrl ? { state: { returnUrl } } : undefined)
     } catch (e) {
       if (e.response.status === 400) {
         toast.error(

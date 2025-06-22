@@ -16,7 +16,7 @@ const SelectMethod = () => {
       const response = await API.post('/auth/google_verify', { token: idToken })
       dispatch(login(response.data))
       if (response.data.user.isAccountSetting === false) {
-        return navigate('/account_setting', returnUrl && { state: { returnUrl } })
+        return navigate('/account_setting', returnUrl ? { state: { returnUrl } } : undefined)
       }
       if (returnUrl) {
         return navigate(returnUrl)
