@@ -47,7 +47,7 @@ const RegistPage = () => {
         {step === 'method' && (
           <div className="flex flex-col gap-10">
             <h2 className="text-center text-2xl font-semibold cursor-default">회원가입</h2>
-            <SelectMethod />
+            <SelectMethod returnUrl={returnUrl} />
             <RegistAction />
           </div>
         )}

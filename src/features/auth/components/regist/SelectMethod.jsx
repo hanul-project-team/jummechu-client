@@ -6,17 +6,16 @@ import { API } from '../../../../app/api'
 import { toast } from 'react-toastify'
 import GoogleButton from '../../../../shared/GoogleButton'
 
-const SelectMethod = () => {
+const SelectMethod = ({ returnUrl }) => {
   const navigate = useNavigate()
   const dispatch = useDispatch()
-  const returnUrl = localStorage.getItem('returnUrl')
   const onLogin = async response => {
     const idToken = response.credential
     try {
       const response = await API.post('/auth/google_verify', { token: idToken })
       dispatch(login(response.data))
       if (response.data.user.isAccountSetting === false) {
-        return navigate('/account_setting', returnUrl ? { state: { returnUrl } } : undefined)
+        return navigate('/account_setting', { state: { returnUrl } })
       }
       if (returnUrl) {
         return navigate(returnUrl)
