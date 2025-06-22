@@ -1,6 +1,7 @@
 # 점메추(Jummechu) - 맛집 검색 및 사용자 맞춤 추천 사이트
 
 ## 링크모음
+- **서비스 주소**: [https://jummechu-web.vercel.app](https://jummechu-web.vercel.app)
 - **클라이언트 GitHub**: [https://github.com/hanul-project-team/jummechu-client](https://github.com/hanul-project-team/jummechu-client)
 - **서버 GitHub**: [https://github.com/hanul-project-team/jummechu-server](https://github.com/hanul-project-team/jummechu-server)
 <br><br>
