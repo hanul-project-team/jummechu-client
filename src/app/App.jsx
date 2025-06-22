@@ -18,7 +18,7 @@ import Dashboardlayout from '../layouts/Dashboardlayout.jsx'
 import MyjobPage from '../pages/business/MyjobPage.jsx'
 import MyRequestPage from '../pages/business/MyRequestPage.jsx'
 import ReqsetPage from '../pages/business/ReqsetPage.jsx'
-
+import KakaoCallback from '../features/auth/components/oauth/KakaoCallback.jsx'
 
 const App = () => {
   const dispatch = useDispatch()
@@ -47,6 +47,7 @@ const App = () => {
         <Route path="business/request" element={<MyRequestPage />} />
         <Route path="business/reqset" element={<ReqsetPage />} />
       </Route>
+      <Route path="kakao_callback" element={<KakaoCallback />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

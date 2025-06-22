@@ -5,6 +5,7 @@ import { login } from '../../slice/authSlice'
 import { API } from '../../../../app/api'
 import { toast } from 'react-toastify'
 import GoogleButton from '../../../../shared/GoogleButton'
+import KakaoButton from '../../../../shared/KakaoButton'
 
 const SelectMethod = ({ returnUrl }) => {
   const navigate = useNavigate()
@@ -15,7 +16,7 @@ const SelectMethod = ({ returnUrl }) => {
       const response = await API.post('/auth/google_verify', { token: idToken })
       dispatch(login(response.data))
       if (response.data.user.isAccountSetting === false) {
-        return navigate('/account_setting', { state: { returnUrl } })
+        return navigate('/account_setting', { state: { returnUrl, from: 'google' } })
       }
       if (returnUrl) {
         return navigate(returnUrl)
@@ -43,11 +44,17 @@ const SelectMethod = ({ returnUrl }) => {
         <span className="grow-0">또는</span>
         <span className="bg-color-gray-300 h-0.25 grow-1"></span>
       </div>
-      <GoogleButton
-        className="p-3 gap-2 font-semibold border border-color-gray-300 rounded-lg"
-        value="Google로 가입"
-        onLogin={onLogin}
-      />
+      <div className="flex flex-col gap-3">
+        <GoogleButton
+          className="p-3 gap-2 font-semibold border border-color-gray-300 rounded-lg"
+          value="Google로 가입"
+          onLogin={onLogin}
+        />
+        <KakaoButton
+          className="p-3 gap-2 font-semibold border border-color-yellow-500 bg-color-yellow-500 rounded-lg"
+          value="Kakao로 가입"
+        />
+      </div>
     </>
   )
 }
