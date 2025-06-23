@@ -39,8 +39,6 @@ const ViewPlaceDetail = () => {
     lat: 37.3946622,
     lng: 127.1026676,
   })
-  // console.log(placeDetail.keywords)
-  /* 정보 호출 및 갱신 */
   useEffect(() => {
     if (placeDetail && placeDetail?._id) {
       const storeId = placeDetail._id
@@ -62,20 +60,17 @@ const ViewPlaceDetail = () => {
           ]).then(([revRes, searchRes]) => {
             if (revRes.statusText === 'OK' || revRes.status === 200) {
               const data = revRes.data
-              // console.log(data)
               setReviewInfo(data)
             } else if (revRes.status === 204) {
               setReviewInfo([])
             }
             if (searchRes.statusText === 'OK' || searchRes.status === 200) {
               const data = searchRes.data
-              // console.log(data)
               if (data?.length > 0) {
                 setRecommandLoading(true)
                 API.post('/store/save', data)
                   .then(res => {
                     const nearPlaces = res.data
-                    // console.log(nearPlaces)
                     setSearchNearData(nearPlaces)
                     setRecommandLoading(false)
                   })
@@ -100,7 +95,6 @@ const ViewPlaceDetail = () => {
     }
   }, [isBookmarked, placeDetail, userBookmark])
 
-  /* placeDetail이 없을시 불러오는 코드 */
   useEffect(() => {
     if (placeDetail?.length < 1) {
       const placeLink = location.pathname
@@ -115,7 +109,12 @@ const ViewPlaceDetail = () => {
           setPlaceDetail(data)
         })
         .catch(err => {
-          console.log(err)
+          toast.error(
+            <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요.</div>,
+            {
+              position: 'top-center',
+            },
+          )
         })
     }
   }, [location.pathname, placeDetail, setPlaceDetail])
@@ -155,8 +154,6 @@ const ViewPlaceDetail = () => {
       document.head.removeChild(script)
       if (marker && typeof marker === 'function') {
         marker?.setMap(null)
-      } else {
-        console.warn('마커 삭제. setMap이 유효하지 않음.')
       }
     }
   }, [])
@@ -183,7 +180,6 @@ const ViewPlaceDetail = () => {
       }
     }
   }, [map, center, marker])
-  // console.log(center.lat, center.lng)
   const handleBookmark = () => {
     if (!user.id) {
       if (confirm('로그인이 필요한 기능입니다. 로그인 하시겠습니까?')) {
@@ -208,11 +204,15 @@ const ViewPlaceDetail = () => {
             })
               .then(res => {
                 const data = res.data
-                // console.log(data)
                 setUserBookmark(prev => prev.filter(ubm => ubm?.store._id !== placeDetail._id))
               })
               .catch(err => {
-                console.error('북마크 해제 요청 실패!', err)
+                toast.error(
+                  <div className="Toastify__toast-body cursor-default">북마크 삭제 에러</div>,
+                  {
+                    position: 'top-center',
+                  },
+                )
               })
           }
         } else {
@@ -228,7 +228,12 @@ const ViewPlaceDetail = () => {
                 setUserBookmark(prev => [...prev, data])
               })
               .catch(err => {
-                console.error('북마크 등록 요청 실패!', err)
+                toast.error(
+                  <div className="Toastify__toast-body cursor-default">북마크 등록 에러</div>,
+                  {
+                    position: 'top-center',
+                  },
+                )
               })
           }
         }
@@ -269,11 +274,9 @@ const ViewPlaceDetail = () => {
         <>
           <KakaoMaps />
           <div className="container md:max-w-5xl px-6 mx-auto p-3 m-3">
-            {/* 타이틀 & 북마크 영역 */}
             <div className="flex items-center justify-between my-2">
               <h1 className="sm:text-3xl text-xl font-bold max-w-1/2">{placeDetail?.name}</h1>
               <div className="flex items-center gap-1">
-                {/* 북마크 */}
                 <div
                   className="flex items-center border-1 sm:py-2 sm:px-3 py-1 px-2 rounded-3xl hover:cursor-pointer"
                   onClick={handleBookmark}
@@ -292,10 +295,8 @@ const ViewPlaceDetail = () => {
                       d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z"
                     />
                   </svg>
-                  {/* 북마크 하트 아이콘 */}
                   <p className="font-bold sm:text-md text-sm">저장</p>
                 </div>
-                {/* 링크 공유 */}
                 <div
                   className="flex items-center border-1 sm:py-2 sm:px-3 py-1 px-2 rounded-3xl hover:cursor-pointer"
                   onClick={handleCopyClipBoard}
@@ -335,19 +336,16 @@ const ViewPlaceDetail = () => {
                 </div>
               </div>
             </div>
-            {/* 가게 정보란 */}
             <div className="grid grid-cols-2 items-start justify-center mt-5">
-              {/* 지도 */}
               <div className="min-lg:pl-3">
                 <div
                   id="map"
                   className="w-full min-lg:h-[300px] max-lg:h-[200px] max-md:h-[130px]"
                 ></div>
               </div>
-              {/* 가게 이미지 */}
               <div className="min-sm:row-span-2 px-2">
                 <img
-                  src={import.meta.env.VITE_API_BASE_URL+placeDetail?.photos?.[0] || Icon}
+                  src={`${import.meta.env.VITE_API_BASE_URL + placeDetail?.photos?.[0]}` || Icon}
                   alt={`${placeDetail?.photos?.[0] ? 'photos' : 'Icon'}`}
                   className="sm:h-auto w-fit rounded-xl max-sm:mx-auto"
                   onError={e => {
@@ -356,9 +354,7 @@ const ViewPlaceDetail = () => {
                   }}
                 />
               </div>
-              {/* 상세정보 */}
               <div className="sm:w-full my-2 max-sm:col-span-2 min-lg:ml-3">
-                {/* 주소지 */}
                 <div className="flex items-center gap-2 relative sm:text-md max-sm:text-sm">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -381,7 +377,6 @@ const ViewPlaceDetail = () => {
                   </svg>
                   <p>{placeDetail?.address}</p>
                 </div>
-                {/* 전화 */}
                 <div className="flex items-center gap-2 my-2 sm:text-md max-sm:text-sm">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -399,7 +394,6 @@ const ViewPlaceDetail = () => {
                   </svg>
                   <p>{placeDetail?.phone ? placeDetail.phone : '연락처 미제공'}</p>
                 </div>
-                {/* 문의? */}
                 <div className="flex items-center gap-2 my-2">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -427,7 +421,6 @@ const ViewPlaceDetail = () => {
                 </div>
               </div>
             </div>
-            {/* 다른 장소 추천 */}
             <RecommandPlace
               placeDetail={placeDetail}
               setLoading={setRecommandLoading}
