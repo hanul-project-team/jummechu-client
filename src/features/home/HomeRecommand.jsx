@@ -308,7 +308,7 @@ const HomeRecommand = () => {
                       return (
                         <SwiperSlide key={idx} className="max-w-full mr-3">
                           <img
-                            src={`${import.meta.env.VITE_API_BASE_URL + fps?.photos?.[0]}` || Icon}
+                            src={`${fps?.photos?.[0] ? import.meta.env.VITE_API_BASE_URL + fps?.photos?.[0] : Icon}`}
                             alt="picsum"
                             className="max-[376px]:h-[110px] max-[426px]:h-[150px] max-[769px]:h-[150px] min-[769px]:h-[200px] hover:cursor-pointer rounded-xl"
                             onClick={() => handleNavigate(fps)}

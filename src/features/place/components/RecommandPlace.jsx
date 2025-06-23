@@ -14,12 +14,9 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
     if (snd && snd._id) {
       navigate(`/place/${snd._id}`, { state: snd })
     } else {
-      toast.error(
-        <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
-        {
-          position: 'top-center',
-        },
-      )
+      toast.error(<div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>, {
+        position: 'top-center',
+      })
     }
   }
 
@@ -72,9 +69,7 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
                         <div key={i}>
                           <div className="hover:cursor-pointer" onClick={() => handleNavigate(snd)}>
                             <img
-                              src={
-                                `${import.meta.env.VITE_API_BASE_URL + snd?.photos?.[0]}` || Icon
-                              }
+                              src={`${snd?.photos?.[0] ? import.meta.env.VITE_API_BASE_URL + snd?.photos?.[0] : Icon}`}
                               alt="icon"
                               className="sm:w-[150px] sm:h-[150px] h-[80px] w-[80px] mx-auto rounded-xl"
                               onError={e => {
