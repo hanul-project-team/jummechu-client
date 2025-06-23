@@ -107,7 +107,9 @@ const HomeRecommand = () => {
           return acc
         }, [])
 
-        const filteredCategories = reducedCategories?.filter(tag => tag?.length > 0)
+        const filteredCategories = reducedCategories?.filter(
+          tag => tag?.length > 0 && !tag.includes('>'),
+        )
 
         try {
           const results = matchingCategories(defaultCategories, filteredCategories)
@@ -257,7 +259,7 @@ const HomeRecommand = () => {
       return 0
     }
   }
-
+  const renderedStoreIds = new Set()
   return (
     <div className="max-xl:m-3">
       {isLoading === true ? (
@@ -281,7 +283,19 @@ const HomeRecommand = () => {
             otherPlaces.map((group, i) => {
               const { tag, stores } = group
               const filteredPlaces = stores.filter(store => {
-                return !store.name.includes(tag)
+                const isAlreadyRendered = renderedStoreIds.has(store._id)
+                const tagWords = tag.split(/\s|,|#/).filter(Boolean)
+                const isTagRelevant = tagWords.some(
+                  word => store.name.includes(word) || store.address.includes(word),
+                )
+
+                const isMeaningfulTag = tagWords.some(word => defaultCategories.includes(word))
+
+                if (!isAlreadyRendered && isTagRelevant && isMeaningfulTag) {
+                  renderedStoreIds.add(store._id)
+                  return true
+                }
+                return false
               })
               if (!filteredPlaces || filteredPlaces?.length === 0) return null
               return (
@@ -303,7 +317,7 @@ const HomeRecommand = () => {
                       return (
                         <SwiperSlide key={idx} className="max-w-full mr-3">
                           <img
-                            src={`${import.meta.env.VITE_API_BASE_URL+fps?.photos?.[0]}` || Icon}
+                            src={`${import.meta.env.VITE_API_BASE_URL + fps?.photos?.[0]}` || Icon}
                             alt="picsum"
                             className="max-[376px]:h-[110px] max-[426px]:h-[150px] max-[769px]:h-[150px] min-[769px]:h-[200px] hover:cursor-pointer rounded-xl"
                             onClick={() => handleNavigate(fps)}
