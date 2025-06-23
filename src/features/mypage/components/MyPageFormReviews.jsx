@@ -346,7 +346,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                 {/* 리뷰 내용 */}
                 <div className="h-full">
                   <div className="flex items-end my-1">
-                    <p className={`indent-2 max-w-9/10 sm:text-md text-sm break-all`}>
+                    <p className={`indent-2 max-w-9/10 sm:text-md max-sm:text-sm break-all`}>
                       {rv?.comment}
                     </p>
                   </div>
