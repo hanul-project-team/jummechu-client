@@ -304,7 +304,7 @@ const PlaceReview = () => {
                   <div className="flex gap-3 items-center">
                     <img src={Icon} alt="icon" className="sm:max-h-[80px] max-h-[40px]" />
                     <div>
-                      <p>{rv?.user.name}</p>
+                      <p>{rv?.user?.name}</p>
                       <Rating
                         initialRating={rv?.rating}
                         emptySymbol={
@@ -352,7 +352,7 @@ const PlaceReview = () => {
                       <button className="hover:cursor-pointer transition ease-in-out sm:text-sm text-xs rounded-2xl active:bg-gray-300 sm:active:bg-gray-500 sm:active:text-white sm:hover:bg-gray-300 p-2">
                         리뷰 신고하기
                       </button>
-                      {rv?.user._id === user.id && (
+                      {rv?.user?._id === user.id && (
                         <button
                           className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl sm:bg-red-600 sm:active:bg-red-700 text-white"
                           onClick={e => {
@@ -369,7 +369,7 @@ const PlaceReview = () => {
                 <div>
                   {/* 코멘트 */}
                   <div>
-                    <p className="indent-2 my-5 max-w-9/10 break-all">{rv.comment}</p>
+                    <p className="indent-2 my-5 max-w-9/10 break-all">{rv?.comment}</p>
                   </div>
                   {/* 이미지 */}
                   {rv?.attachments?.length > 0 && (
