@@ -24,16 +24,16 @@ const SearchResultPageList = ({ searchData, searchResults, navi, avg, reviews, c
             </div>
             <div className="md:max-h-[200px] overflow-y-auto">
               <span className="hover:cursor-pointer text-2xl" onClick={() => navi(searchResults[i])}>
-                <strong>{sd.place_name}</strong>
+                <strong>{sd?.place_name}</strong>
               </span>
               <p>
-                <strong>주소지</strong>:{sd.address_name}
+                <strong>주소지</strong>:{sd?.address_name}
               </p>
               <p>
                 {sd.phone ? (
                   <>
                     <strong>연락처: </strong>
-                    <span>{sd.phone}</span>
+                    <span>{sd?.phone}</span>
                   </>
                 ) : (
                   '연락처 미공개'

@@ -68,7 +68,10 @@ const SearchResult = () => {
 
   const handleAvgRating = (reviews, place) => {
     if (reviews?.length > 0) {
-      const matchedReviews = reviews?.filter(review => review.store?.name === place.place_name)
+      const matchedReviews = reviews?.filter(
+        review =>
+          review.store?.name === place?.place_name && review.store?.address === place?.address_name,
+      )
       const avgRating =
         matchedReviews?.length > 0
           ? matchedReviews.reduce((acc, cur) => acc + cur.rating, 0) / matchedReviews.length
@@ -81,7 +84,10 @@ const SearchResult = () => {
   }
   const handleCountReviews = (reviews, place) => {
     if (reviews?.length > 0) {
-      const matchedReviews = reviews?.filter(review => review.store?.name === place.place_name)
+      const matchedReviews = reviews?.filter(
+        review =>
+          review.store?.name === place?.place_name && review.store?.address === place?.address_name,
+      )
       return matchedReviews.length
     } else return 0
   }
