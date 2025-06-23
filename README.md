@@ -1,6 +1,7 @@
 # 점메추(Jummechu) - 맛집 검색 및 사용자 맞춤 추천 사이트
 
 ## 링크모음
+- **서비스 주소**: [https://jummechu-web.vercel.app](https://jummechu-web.vercel.app)
 - **클라이언트 GitHub**: [https://github.com/hanul-project-team/jummechu-client](https://github.com/hanul-project-team/jummechu-client)
 - **서버 GitHub**: [https://github.com/hanul-project-team/jummechu-server](https://github.com/hanul-project-team/jummechu-server)
 <br><br>
@@ -47,6 +48,7 @@ jummechu-client/
 ├── index.html
 ├── package.json
 ├── README.md
+├── vercel.json
 ├── vite.config.js
 └── yarn.lock
 ```
@@ -56,7 +58,9 @@ jummechu-client/
 ```bash
 .env
 VITE_GOOGLE_CLIENT_ID=your-google-client-id
+VITE_KAKAO_API_KEY=your-kakao-API_key
 VITE_KAKAO_KEY=your-kakao-key
+VITE_KAKAO_REDIRECT_URI=http://localhost:5173/kakao_callback
 
 .env.development
 VITE_API_BASE_URL=http://localhost:3000
