@@ -148,11 +148,7 @@ const KakaoMaps = () => {
             setSearchData(data)
             API.post('/store/save', data)
               .then(res => {
-                const result = res.data
-                setSearchData(result)
-                setFormData({
-                  place: '',
-                })
+                const savedData = res.data
               })
               .catch(err => {
                 console.error(err)
