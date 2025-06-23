@@ -17,7 +17,7 @@ const CheckBookmarks = () => {
   const locationRef = useRef(location?.state)
 
   const handleCheckBookmarked = (place, lists) => {
-    const filteredBookmark = lists?.filter(list => list?.store._id === place?._id)
+    const filteredBookmark = lists?.filter(list => list?.store?._id === place?._id)
     if (filteredBookmark?.length > 0) {
       setIsBookmarked(true)
     } else {

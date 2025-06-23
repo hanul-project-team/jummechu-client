@@ -89,47 +89,27 @@ const KakaoMaps = () => {
       })
         .then(res => {
           const data = res.data
-          if (data) {
-            API.post('/store/storeInfo', data)
-              .then(res => {
-                const existPlaces = res.data
-                if (existPlaces) {
-                  setUserNearPlace(existPlaces)
-                } else if (existPlaces?.length === 0 || !existPlaces) {
-                  API.post('/store/save', data)
-                    .then(res => {
-                      const places = res.data
-                      if (places) {
-                        if (Array.isArray(places)) {
-                          setUserNearPlace(places)
-                        } else {
-                          setUserNearPlace(places)
-                        }
-                      }
-                    })
-                    .catch(err => {
-                      toast.error(
-                        <div className="Toastify__toast-body cursor-default">
-                          잠시 후 다시 시도해주세요.
-                        </div>,
-                        {
-                          position: 'top-center',
-                        },
-                      )
-                    })
+          API.post('/store/save', data)
+            .then(res => {
+              const places = res.data
+              if (places) {
+                if (Array.isArray(places)) {
+                  setUserNearPlace(places)
+                } else {
+                  setUserNearPlace(places)
                 }
-              })
-              .catch(err => {
-                toast.error(
-                  <div className="Toastify__toast-body cursor-default">
-                    잠시 후 다시 시도해주세요.
-                  </div>,
-                  {
-                    position: 'top-center',
-                  },
-                )
-              })
-          }
+              }
+            })
+            .catch(err => {
+              toast.error(
+                <div className="Toastify__toast-body cursor-default">
+                  잠시 후 다시 시도해주세요.
+                </div>,
+                {
+                  position: 'top-center',
+                },
+              )
+            })
           retryCountRef.current = 0
         })
         .catch(err => {
@@ -138,7 +118,9 @@ const KakaoMaps = () => {
             setTimeout(() => getKakaoData(center), 1000)
           } else {
             toast.error(
-              <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도하거나 새로고침을 해주세요.</div>,
+              <div className="Toastify__toast-body cursor-default">
+                잠시 후 다시 시도하거나 새로고침을 해주세요.
+              </div>,
               {
                 position: 'top-center',
               },
