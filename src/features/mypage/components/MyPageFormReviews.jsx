@@ -46,13 +46,11 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
         console.log(err)
       })
   }
-  // 리뷰 정보 불러오기
   useEffect(() => {
     if (currentTab === '리뷰' && myReviews !== userReviewRef.current) {
       initialFetchFromDB()
     }
   }, [currentTab, myReviews])
-  // 리뷰 드랍다운 메뉴 바깥클릭 시 접기
   useEffect(() => {
     const handleClickOutside = e => {
       const isOutside = Object.values(wrappers.current || {}).some(ref => {
@@ -66,7 +64,6 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-  // 리뷰 정렬 기능
   useEffect(() => {
     let sorted = Array.isArray(myReviews) ? [...myReviews] : []
     switch (currentSort) {
@@ -103,7 +100,6 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [currentSort, showSort, myReviews])
-  // 리뷰 수정중 모달 이외 접근 금지
   useEffect(() => {
     if (modifyReviewId !== null) {
       document.body.style.overflow = 'hidden'
@@ -237,7 +233,6 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   return (
     <div className="h-full">
       <div className="h-full">
-        {/* 정렬 버튼 */}
         <div>
           {sortedReviews?.length > 0 && (
             <div
@@ -254,7 +249,6 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
             </div>
           )}
         </div>
-        {/* 리뷰 영역 */}
         <div>
           {total > 0 ? (
             sortedReviews.slice(0, count).map((rv, i) => (
@@ -273,7 +267,6 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                         e.target.onerror = null
                       }}
                     />
-                    {/* 가게명, 별점 */}
                     <div>
                       <p className="hover:cursor-pointer sm:text-lg text-sm max-[325px]:text-xs">
                         <strong onClick={() => handleNavigateStore(rv)}>{rv?.store?.name}</strong>
@@ -294,7 +287,6 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                       />
                     </div>
                   </div>
-                  {/* 작성일, 더보기 메뉴 */}
                   <div
                     className="flex items-center sm:gap-3 gap-1 top-0 relative"
                     ref={el => {
@@ -306,7 +298,6 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                     }}
                   >
                     <p className="min-sm:text-md max-sm:text-xs">{rv?.createdAt?.split('T')[0]}</p>
-                    {/* 드랍다운 아이콘 / 버튼 */}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -343,7 +334,6 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                     </div>
                   </div>
                 </div>
-                {/* 리뷰 내용 */}
                 <div className="h-full">
                   <div className="flex items-end my-1">
                     <p className={`indent-2 max-w-9/10 sm:text-md max-sm:text-sm break-all`}>
@@ -377,7 +367,6 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
             </div>
           )}
         </div>
-        {/* 더보기 버튼 */}
         {total > 0 && (
           <div className="mx-auto max-w-fit my-2 min-sm:text-md max-sm:text-sm">
             <button
@@ -390,7 +379,6 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
           </div>
         )}
       </div>
-      {/* 리뷰 수정 모달 */}
       {modifyReviewId && (
         <div className="fixed inset-0 bg-black/70 z-50 flex justify-center items-center text-color-gray-900">
           <ModifyReviewModal

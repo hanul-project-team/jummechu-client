@@ -86,7 +86,7 @@ const HomeRecommand = () => {
   ]
   useEffect(() => {
     const fetchReviews = (isFromInterval = false) => {
-      setIsLoading(true) // {/* interval 1번 */}
+      setIsLoading(true)
       if (userNearPlace && userNearPlace.length > 0) {
         const categories = userNearPlace.map(unp => {
           return unp.keywords[0]
@@ -140,7 +140,6 @@ const HomeRecommand = () => {
               })
           }
 
-          // {/*interval 2번*/}
           if (otherPlaces?.length > 0 && lastPlacesRef.current) {
             if (isFromInterval || isSamePlaces(lastPlacesRef.current, otherPlaces)) {
               const places = otherPlaces.map(place => place.stores)
@@ -154,7 +153,6 @@ const HomeRecommand = () => {
     }
 
     fetchReviews(true)
-    // {/* interval 3번 : 개발모드 해제해야함 */}
     if (!import.meta.env.DEV) {
       intervalRef.current = setInterval(() => {
         fetchReviews(true)
@@ -177,11 +175,9 @@ const HomeRecommand = () => {
     const filtered = user?.filter(use => {
       return def?.some(de => use.includes(de))
     })
-    // console.log(filtered)
     return filtered
   }
   const handleNavigate = fps => {
-    // console.log(fps)
     if (fps) {
       API.post('/store/storeInfo', fps).then(res => {
         const data = res.data
@@ -199,8 +195,6 @@ const HomeRecommand = () => {
         .then(res => {
           const data = res.data
           const reviews = data
-          // console.log(data)
-          // console.log(reviews)
           setNearPlaceReviews(reviews?.length > 0 ? reviews : [])
           setIsLoading(false)
           setCountDown(60)
@@ -275,9 +269,6 @@ const HomeRecommand = () => {
         <>
           <div className="flex justify-between">
             <span className="text-xl font-bold">추천 태그</span>
-            {/* <span>
-              {countDown > 0 ? `review 갱신까지 ${countDown}초 남음` : `리뷰 정보 갱신 중...`}
-            </span> */}
           </div>
           {otherPlaces?.length > 0 ? (
             otherPlaces.map((group, i) => {

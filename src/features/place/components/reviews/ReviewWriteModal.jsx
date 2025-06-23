@@ -18,7 +18,6 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
   })
   const [fileData, setFileData] = useState([])
 
-  // 리뷰 제약
   useEffect(() => {
     if (formData.comment?.length > 6 && formData.rating > 0) {
       setReadyToSubmit(true)
@@ -26,7 +25,6 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
       setReadyToSubmit(false)
     }
   }, [fileData?.length, formData.rating, formData.comment?.length])
-  /* 미리보기 메모리 누수 방지 */
   useEffect(() => {
     return () => {
       fileData.forEach(data => URL.revokeObjectURL(data.previewURL))
@@ -51,36 +49,27 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
         newFormData.append('attachments', file.attachments)
         newFormData.append('previewURL', file.previewURL)
       })
-      /* 전송데이터 콘솔 */
-      // for (const pair of newFormData.entries()) {
-      //   console.log(pair[0], pair[1])
-      // }
       if (confirm('리뷰 등록을 완료하시겠습니까?')) {
-        API
-          .post('/review/regist', newFormData)
-          .then(
-            /* async */ res => {
-              // const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
-              if (res.status === 201) {
-                toast.success(
-                  <div className="Toastify__toast-body cursor-default">리뷰가 등록되었습니다.</div>,
-                  {
-                    position: 'top-center',
-                  },
-                )
-                setShowReviewModal(prev => !prev)
-                // await sleep(500)
-                setFormData({
-                  ...formData,
-                  rating: 0,
-                  comment: '',
-                })
-                setFileData([])
-                setReviewInfo(res.data.data)
-                setCurrentSort('latest')
-              }
-            },
-          )
+        API.post('/review/regist', newFormData)
+          .then(res => {
+            if (res.status === 201) {
+              toast.success(
+                <div className="Toastify__toast-body cursor-default">리뷰가 등록되었습니다.</div>,
+                {
+                  position: 'top-center',
+                },
+              )
+              setShowReviewModal(prev => !prev)
+              setFormData({
+                ...formData,
+                rating: 0,
+                comment: '',
+              })
+              setFileData([])
+              setReviewInfo(res.data.data)
+              setCurrentSort('latest')
+            }
+          })
           .catch(err => {
             toast.error(
               <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
@@ -146,7 +135,6 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
     <div className="min-xl:w-3/7 max-xl:w-4/7 max-lg:w-5/7 max-[321px]:w-5/7 h-3/4 bg-white sm:pt-5 pt-10 py-2 px-[1px] rounded-2xl sm:mb-30 mb-10">
       <div className="mx-auto h-full overflow-auto custom-scrollbar">
         <div className="flex flex-col p-2">
-          {/* 정보 부분 */}
           <div className="w-full flex items-center justify-center">
             <img src={Icon} alt="가게 아이콘" className="sm:w-25 w-20 mr-1" />
             <div>
@@ -194,7 +182,6 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
               </div>
             </div>
           </div>
-          {/* 폼 부분 */}
           <div className="w-full">
             <form
               onSubmit={handleSubmit}
@@ -203,7 +190,6 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
             >
               <fieldset>
                 <legend className="hidden">리뷰 작성폼</legend>
-                {/* 별점 */}
                 <p className="sm:text-2xl text-lg sm:mt-10 mt-3">얼마나 만족스러우셨나요?</p>
                 <div className="flex justify-center">
                   <Rating
@@ -217,7 +203,6 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                   />
                 </div>
                 <p className="sm:text-md text-sm opacity-50">선택해주세요</p>
-                {/* textarea */}
                 <p className="sm:text-2xl text-xl mt-10">좋았던 점을 알려주세요!</p>
                 <div>
                   <textarea
@@ -233,7 +218,6 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                     focus:border-blue-500 focus:outline-none focus:ring-1`}
                   />
                 </div>
-                {/* 이미지 파일 첨부 */}
                 <div className="mt-10">
                   <label htmlFor="attachments">
                     <div className="border-1 flex justify-center items-center border-dashed bg-color-gray-50 mt-1 hover:cursor-pointer w-full sm:h-[60px] h-[40px]">
@@ -257,7 +241,7 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                             d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"
                           />
                         </svg>
-                        <span className='sm:text-md text-sm'>사진 첨부하기 &#40;최대 5장&#41;</span>
+                        <span className="sm:text-md text-sm">사진 첨부하기 &#40;최대 5장&#41;</span>
                       </p>
                     </div>
                   </label>
@@ -270,9 +254,10 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                     onChange={handleFileChange}
                     multiple
                   />
-                  <p className='font-bold sm:text-md text-xs sm:mt-0 mt-1 text-color-gray-700'>리뷰와 관련없는 이미지를 업로드시 삭제 될 수 있습니다.</p>
+                  <p className="font-bold sm:text-md text-xs sm:mt-0 mt-1 text-color-gray-700">
+                    리뷰와 관련없는 이미지를 업로드시 삭제 될 수 있습니다.
+                  </p>
                 </div>
-                {/* 미리보기 */}
                 {fileData && fileData?.length > 0 && (
                   <div className="mt-4 flex gap-2 flex-wrap">
                     {fileData.map((file, i) => {
@@ -304,7 +289,6 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                     })}
                   </div>
                 )}
-                {/* 첨부 비우기 버튼 */}
                 {fileData?.length > 0 && (
                   <div className="text-start mt-2">
                     <button
@@ -316,7 +300,6 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                     </button>
                   </div>
                 )}
-                {/* 등록 취소 버튼 */}
                 <div className="flex justify-around gap-2 mt-5 w-full">
                   <button
                     type="button"

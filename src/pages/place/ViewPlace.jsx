@@ -3,6 +3,7 @@ import zustandStore from '../../app/zustandStore.js'
 import ViewPlaceDetail from '../../features/place/ViewPlaceDetail.jsx'
 import { useLocation, useParams } from 'react-router-dom'
 import { API } from '../../app/api.js'
+import { toast } from 'react-toastify'
 
 const ViewPlace = () => {
   const location = useLocation()
@@ -21,7 +22,12 @@ const ViewPlace = () => {
           setIsLoading(false)
         })
         .catch(err => {
-          console.error(err)
+          toast.error(
+            <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요.</div>,
+            {
+              position: 'top-center',
+            },
+          )
           setIsLoading(false)
         })
     }

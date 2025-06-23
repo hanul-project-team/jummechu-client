@@ -3,6 +3,7 @@ import zustandStore from '../../app/zustandStore.js'
 import { API } from '../../app/api.js'
 import { useLocation, useNavigate } from 'react-router-dom'
 import KakaoNearPlace from './KakaoNearPlace.jsx'
+import { toast } from 'react-toastify'
 
 const KakaoMaps = () => {
   const setCenter = zustandStore(state => state.setCenter)
@@ -49,24 +50,24 @@ const KakaoMaps = () => {
       position => {
         const latitude = position.coords.latitude
         const longitude = position.coords.longitude
-        // console.log('y:'+latitude, 'x:'+longitude)
         setLat(latitude)
         setLng(longitude)
         if (!center || center.lat !== latitude || center.lng !== longitude) {
           setCenter({ lat: latitude, lng: longitude })
         }
-        // console.log(center)
       },
       err => {
-        console.error('error msg:', err)
         if (retryCountRef.current < 3) {
           retryCountRef.current += 1
-          console.log(`위치정보 획득 실패, ${retryCountRef.current}회 째 재시도...`)
           setTimeout(() => getNowLocation(retryCountRef, 1000))
         } else {
-          console.log('위치 정보 획득 실패 및 재시도 실패')
           if (err.code === 1) {
-            alert('위치 권한이 거부 되었습니다. 사용자 권한을 설정해주세요.')
+            toast.error(
+              <div className="Toastify__toast-body cursor-default">위치 권한을 허용해주세요.</div>,
+              {
+                position: 'top-center',
+              },
+            )
           }
         }
       },
@@ -88,13 +89,10 @@ const KakaoMaps = () => {
       })
         .then(res => {
           const data = res.data
-          // console.log(data)
-          // setUserNearPlace(data)
           if (data) {
             API.post('/store/storeInfo', data)
               .then(res => {
                 const existPlaces = res.data
-                // console.log(res)
                 if (existPlaces) {
                   setUserNearPlace(existPlaces)
                 } else if (existPlaces?.length === 0 || !existPlaces) {
@@ -102,36 +100,49 @@ const KakaoMaps = () => {
                     .then(res => {
                       const places = res.data
                       if (places) {
-                        // console.log('등록완료')
                         if (Array.isArray(places)) {
-                          // console.log('배열로 반환', places)
                           setUserNearPlace(places)
                         } else {
-                          // console.log('미배열 반환', places)
                           setUserNearPlace(places)
                         }
                       }
                     })
                     .catch(err => {
-                      console.log(err)
+                      toast.error(
+                        <div className="Toastify__toast-body cursor-default">
+                          잠시 후 다시 시도해주세요.
+                        </div>,
+                        {
+                          position: 'top-center',
+                        },
+                      )
                     })
                 }
               })
               .catch(err => {
-                console.log(err)
+                toast.error(
+                  <div className="Toastify__toast-body cursor-default">
+                    잠시 후 다시 시도해주세요.
+                  </div>,
+                  {
+                    position: 'top-center',
+                  },
+                )
               })
           }
           retryCountRef.current = 0
         })
         .catch(err => {
-          // console.error('error msg:', err)
           if (retryCountRef.current < 3) {
             retryCountRef.current += 1
-            console.log(`데이터 로딩 실패 ${retryCountRef.current}회 째 재시도...`)
             setTimeout(() => getKakaoData(center), 1000)
           } else {
-            console.error('Kakao API 호출 실패:', err.response?.data || err.message)
-            console.log('kakao map 데이터 로딩 실패 및 재시도 실패', err)
+            toast.error(
+              <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도하거나 새로고침을 해주세요.</div>,
+              {
+                position: 'top-center',
+              },
+            )
           }
         })
     }
@@ -152,12 +163,10 @@ const KakaoMaps = () => {
             setIsLoading(false)
           } else {
             const data = res.data
-            // console.log(data)
             setSearchData(data)
             API.post('/store/save', data)
               .then(res => {
                 const result = res.data
-                // console.log(result)
                 setSearchData(result)
                 setFormData({
                   place: '',
@@ -196,7 +205,6 @@ const KakaoMaps = () => {
           console.log(err)
         })
     }
-    // console.log('검색어:', formData.place)
   }
   const handleChange = e => {
     // console.log(e.target.value)
@@ -205,7 +213,6 @@ const KakaoMaps = () => {
       [e.target.name]: e.target.value,
     })
   }
-  // console.log(searchData)
   return (
     <>
       {isRoot === true ? (

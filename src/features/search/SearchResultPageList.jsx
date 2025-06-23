@@ -7,7 +7,6 @@ const SearchResultPageList = ({ searchData, searchResults, navi, avg, reviews, c
     <>
       <span className="ml-3 pointer-events-none select-none">{searchData?.length} 개의 검색 결과</span>
       {searchData.map((sd, i) => {
-        // console.log(sd)
         return (
           <div key={`${sd._id}-${i}`} className="flex gap-2 p-2 my-3 max-sm:flex-col">
             <div className="md:min-w-[200px]">

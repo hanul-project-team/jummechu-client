@@ -11,6 +11,7 @@ import ReviewChart from './ReviewChart.jsx'
 import ReviewWriteModal from './ReviewWriteModal.jsx'
 import SortDropdown from './sortButton/SortDropdown.jsx'
 import ReviewImageSrc from '../../../../shared/ReviewImageSrc.jsx'
+import { toast } from 'react-toastify'
 
 const PlaceReview = () => {
   const [showReviewMore, setShowReviewMore] = useState(5)
@@ -31,7 +32,6 @@ const PlaceReview = () => {
 
   const tabRefs = useRef([])
   const dropdownRef = useRef(null)
-  // 바깥 클릭시 버튼 fade out
   useEffect(() => {
     const handleClickOutside = e => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -60,7 +60,6 @@ const PlaceReview = () => {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
-  // 리뷰 작성중 외부 접근 금지
   useEffect(() => {
     if (showReviewModal === true) {
       document.body.style.overflow = 'hidden'
@@ -68,7 +67,6 @@ const PlaceReview = () => {
       document.body.style.overflow = 'auto'
     }
   }, [showReviewModal])
-  // 정렬 관리
   useEffect(() => {
     if (sortedReviews !== reviewInfo) {
       setSortedReviews(reviewInfo)
@@ -140,7 +138,6 @@ const PlaceReview = () => {
   const handleTotalRating = reviews => {
     if (reviews?.length > 0) {
       const result = reviews.reduce((acc, cur) => acc + cur.rating, 0) / reviews.length
-      // console.log(result)
       const rounded = Math.round(result * 10) / 10
       return rounded
     } else {
@@ -200,12 +197,16 @@ const PlaceReview = () => {
           },
         })
           .then(res => {
-            // console.log('리뷰 삭제 정보', res)
             setReviewInfo(prev => prev.filter(review => review._id !== rv?._id))
             setSortedReviews(prev => prev.filter(review => review._id !== rv?._id))
           })
           .catch(err => {
-            console.error('리뷰 삭제 실패 에러 발생', err)
+            toast.error(
+              <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요.</div>,
+              {
+                position: 'top-center',
+              },
+            )
           })
       }
     }
@@ -225,12 +226,10 @@ const PlaceReview = () => {
   }
   return (
     <div>
-      {/* 리뷰 헤더 영역 */}
       <div className="container max-w-full bg-gray-300 py-15">
         <div className="max-w-3/5 mx-auto text-center">
           <span className="text-2xl italic">고객 리뷰</span>
         </div>
-        {/* 리뷰 통계 */}
         <div className="flex justify-evenly sm:max-w-5xl sm:px-6 px-3 max-sm:flex-col mx-auto items-center">
           <div className="sm:max-w-1/2">
             <p className="font-bold text-3xl">{handleTotalRating(reviewInfo)}</p>
@@ -277,9 +276,7 @@ const PlaceReview = () => {
           </div>
         </div>
       </div>
-      {/* 리뷰 보이는곳 */}
       <div className="container sm:max-w-5xl px-6 max-w-3xl mx-auto">
-        {/* 정렬 버튼 */}
         {total > 0 && (
           <div className="sm:max-w-4/5 max-w-full text-end mx-auto my-3 relative" ref={dropdownRef}>
             <button
@@ -291,7 +288,6 @@ const PlaceReview = () => {
             <SortDropdown handleSortChange={handleSortChange} showSort={showSort} />
           </div>
         )}
-        {/* 리뷰 영역 */}
         <div>
           {total > 0 ? (
             sortedReviews?.slice(0, count).map((rv, i) => (
@@ -300,7 +296,6 @@ const PlaceReview = () => {
                 className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 sm:pl-5 my-3 mx-auto relative"
               >
                 <div className="flex items-start justify-between">
-                  {/* 작성자 정보, 별점 */}
                   <div className="flex gap-3 items-center">
                     <img src={Icon} alt="icon" className="sm:max-h-[80px] max-h-[40px]" />
                     <div>
@@ -325,7 +320,6 @@ const PlaceReview = () => {
                       />
                     </div>
                   </div>
-                  {/* 작성일, 더보기 메뉴 */}
                   <div
                     className="text-end flex items-center gap-3 top-0"
                     ref={el => (tabRefs.current[i] = el)}
@@ -367,24 +361,18 @@ const PlaceReview = () => {
                   </div>
                 </div>
                 <div>
-                  {/* 코멘트 */}
                   <div>
                     <p className="indent-2 my-5 max-w-9/10 break-all">{rv?.comment}</p>
                   </div>
-                  {/* 이미지 */}
                   {rv?.attachments?.length > 0 && (
                     <div className="flex gap-1 items-center my-5">
                       {rv.attachments.map((img, i) => (
                         <div key={`img-${i}`}>
-                          <ReviewImageSrc
-                            src={img}
-                            alt={`img-${i}`}
-                          />
+                          <ReviewImageSrc src={img} alt={`img-${i}`} />
                         </div>
                       ))}
                     </div>
                   )}
-                  {/* 작성일 D-day */}
                   <div className="text-end">{handleReviewDate(rv?.createdAt)}</div>
                 </div>
               </div>
@@ -395,7 +383,6 @@ const PlaceReview = () => {
             </div>
           )}
         </div>
-        {/* 더보기 버튼 */}
         {total > 0 && (
           <div className="mx-auto max-w-fit my-2">
             <button
@@ -408,7 +395,6 @@ const PlaceReview = () => {
           </div>
         )}
       </div>
-      {/* 리뷰 작성 폼 -> 모달로 변경 */}
       <div
         className={`fixed inset-0 bg-black/30 z-50 flex justify-center items-center ${showReviewModal === true ? 'block' : 'hidden'}`}
       >
