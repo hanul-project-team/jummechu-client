@@ -7,7 +7,6 @@ const ReviewChart = ({ reviews }) => {
       return { rating: rv.rating }
     })
   }
-  // console.log(rating)
   const ratingLabel = {
     5: '매우 만족',
     4: '만족',

@@ -7,7 +7,6 @@ const SearchResultPageList = ({ searchData, searchResults, navi, avg, reviews, c
     <>
       <span className="ml-3 pointer-events-none select-none">{searchData?.length} 개의 검색 결과</span>
       {searchData.map((sd, i) => {
-        // console.log(sd)
         return (
           <div key={`${sd._id}-${i}`} className="flex gap-2 p-2 my-3 max-sm:flex-col">
             <div className="md:min-w-[200px]">
@@ -24,16 +23,16 @@ const SearchResultPageList = ({ searchData, searchResults, navi, avg, reviews, c
             </div>
             <div className="md:max-h-[200px] overflow-y-auto">
               <span className="hover:cursor-pointer text-2xl" onClick={() => navi(searchResults[i])}>
-                <strong>{sd.place_name}</strong>
+                <strong>{sd?.place_name}</strong>
               </span>
               <p>
-                <strong>주소지</strong>:{sd.address_name}
+                <strong>주소지</strong>:{sd?.address_name}
               </p>
               <p>
                 {sd.phone ? (
                   <>
                     <strong>연락처: </strong>
-                    <span>{sd.phone}</span>
+                    <span>{sd?.phone}</span>
                   </>
                 ) : (
                   '연락처 미공개'
