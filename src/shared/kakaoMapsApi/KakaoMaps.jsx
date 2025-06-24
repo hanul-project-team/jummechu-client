@@ -247,7 +247,7 @@ const KakaoMaps = () => {
         </>
       ) : (
         <>
-          <div className="container sm:absolute sm:max-w-1/3 sm:left-1/3 top-[9px]">
+          <div className="container sm:absolute lg:max-w-[480px] sm:max-w-[380px] xl:left-1/3 lg:left-1/4 sm:left-1/4 2xl:left-4/11 top-[9px]">
             <form className="px-3 my-3" onSubmit={handleSubmit} autoComplete="off">
               <fieldset>
                 <legend className="hidden">kakao search</legend>
