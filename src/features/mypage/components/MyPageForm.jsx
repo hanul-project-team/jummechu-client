@@ -852,7 +852,7 @@ ${aiKeywordsStringForPrompt}
                   className="mt-4 px-4 py-2 text-white bg-red-600 rounded cursor-pointer"
                   onClick={handleDeleteAccountClick}
                 >
-                  계정 삭제
+                  회원 탈퇴
                 </button>
                 {isEditing ? (
                   <button
