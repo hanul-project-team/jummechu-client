@@ -172,7 +172,6 @@ const KakaoMaps = () => {
             setIsLoading(false)
           } else {
             const result = res.data
-            // console.log(result)
             setSearchData(result)
             setFormData({
               place: '',
@@ -185,7 +184,6 @@ const KakaoMaps = () => {
     }
   }
   const handleChange = e => {
-    // console.log(e.target.value)
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -195,51 +193,45 @@ const KakaoMaps = () => {
     <>
       {isRoot === true ? (
         <>
-          <div className="md:max-w-1/2 mx-auto">
-            <h1 className="text-center text-4xl sm:text-5xl font-bold">오늘 뭐 먹지?</h1>
-            <form className="p-3 my-3" onSubmit={handleSubmit} autoComplete="off">
-              <fieldset>
-                <legend className="hidden">kakao search</legend>
-                <div className="flex items-center mx-auto gap-1 border-1 rounded-3xl px-3 py-1">
-                  <div className="max-w-6">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="sm:size-6 mx-auto size-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                      />
-                    </svg>
-                  </div>
-                  <div className="flex gap-1 items-center w-full">
-                    <div className="flex-5">
-                      <input
-                        type="text"
-                        name="place"
-                        value={formData.place}
-                        onChange={handleChange}
-                        className="py-3 indent-1 w-full outline-none"
-                        placeholder="검색어를 입력해주세요"
-                      />
-                    </div>
-                    <div className="flex-2 sm:flex-1 text-center">
-                      <button
-                        className="button w-fit px-3 py-2 rounded-3xl sm:px-5 sm:py-2 bg-color-teal-400 hover:bg-teal-400/90 active:bg-teal-500/80 text-white hover:cursor-pointer"
-                        type="submit"
-                      >
-                        <p className="sm:w-max sm:text-sm text-xs">검색</p>
-                      </button>
+          <div className='bg-banner py-10 mb-15 relative left-1/2 -translate-x-1/2 w-screen'>
+            <div className="md:max-w-1/2 mx-auto relative z-50">
+              <h1 className="text-center text-4xl sm:text-5xl text-color-gray-900 font-bold">오늘 뭐 먹지?</h1>
+              <form className="p-3 my-3" onSubmit={handleSubmit} autoComplete="off">
+                <fieldset>
+                  <legend className="hidden">kakao search</legend>
+                  <div className="flex items-center bg-color-gray-50 mx-auto gap-1 border-1 rounded-3xl px-3 py-1">
+                    <div className="flex gap-1 items-center w-full">
+                      <div className="flex-5">
+                        <input
+                          type="text"
+                          name="place"
+                          value={formData.place}
+                          onChange={handleChange}
+                          className="py-3 indent-1 w-full outline-none"
+                          placeholder="검색어를 입력해주세요"
+                        />
+                      </div>
+                      <div className="max-w-6">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={1.5}
+                          stroke="currentColor"
+                          className="sm:size-6 mx-auto size-5"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                          />
+                        </svg>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </fieldset>
-            </form>
+                </fieldset>
+              </form>
+            </div>
           </div>
           <div className="container mx-auto sm:max-w-5xl max-w-5xl max-sm:p-3">
             <KakaoNearPlace />
