@@ -9,6 +9,7 @@ import { toast } from 'react-toastify'
 import { CSSTransition } from 'react-transition-group'
 import { loginSchema } from '../../schema/loginSchema'
 import { login } from '../../slice/authSlice'
+import { useMediaQuery } from 'react-responsive'
 import VisibleBtn from '../../../../shared/VisibleBtn'
 import CustomCheckBox from '../../../../shared/CustomCheckBox'
 
@@ -38,9 +39,10 @@ const LoginForm = ({ returnUrl }) => {
     email: createRef(null),
     password: createRef(null),
   })
+  const isMobile = useMediaQuery({ maxWidth: '640px' })
   useEffect(() => {
-    setFocus('email')
-  }, [setFocus])
+    if (!isMobile) setFocus('email')
+  }, [isMobile, setFocus])
   useEffect(() => {
     setShowError(prev => ({
       ...prev,
@@ -79,7 +81,7 @@ const LoginForm = ({ returnUrl }) => {
           },
         )
         resetField('password', { keepError: true })
-        setFocus('password')
+        if (!isMobile) setFocus('password')
       } else {
         toast.error(
           <div className="Toastify__toast-body cursor-default">잠시 후 다시 시도해주세요</div>,
@@ -92,9 +94,9 @@ const LoginForm = ({ returnUrl }) => {
   }
   const onIsvalid = errors => {
     if (errors.email) {
-      setFocus('email')
+      if (!isMobile) setFocus('email')
     } else if (errors.password) {
-      setFocus('password')
+      if (!isMobile) setFocus('password')
     }
     resetField('password', { keepError: true })
   }
