@@ -63,8 +63,8 @@ const MyPageFormRecent = ({
                 </div>
                 <div className="py-3">
                   <h2 className="text-lg py-1 font-SinchonRhapsody flex">{item.name}</h2>
-                  <p className="py-1">⭐{item.rating}</p>
-                  <p className="py-1 flex items-center text-sm text-gray-500">
+
+                  <div className="py-1 flex items-center text-sm text-gray-500">
                     <svg
                       fill="#000000"
                       height="25px"
@@ -93,16 +93,15 @@ const MyPageFormRecent = ({
                         />
                       </g>
                     </svg>
-                    {item.address}
-                  </p>
-                  {item.keyword && (
-                    <p className="py-1 text-sm text-gray-700">
-                      #{Array.isArray(item.keyword) ? item.keyword.join(', #') : item.keyword}
-                    </p>
-                  )}
-                  <p className="py-5 text-sm text-black">
-                    본 시간: {new Date(item.viewedAt).toLocaleString()}
-                  </p>
+                    {item.keyword && (
+                      <p className="py-1 text-sm text-gray-700">
+                        #{Array.isArray(item.keyword) ? item.keyword.join(', #') : item.keyword}
+                      </p>
+                    )}
+                  </div>
+                  <div>{item.address}</div>
+                  <p className="py-1">평점:⭐{item.rating}</p>
+
                   <button
                     onClick={e => {
                       e.stopPropagation()

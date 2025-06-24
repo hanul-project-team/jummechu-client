@@ -1,23 +1,24 @@
 // src/pages/mypage/MyPageForm.jsx
 
-import React, { useState, useEffect, useRef, useCallback } from 'react' // useCallback 추가
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { restoreLogin } from '../../auth/slice/authSlice.js'
 import Modal from '../components/UserModal.jsx'
 import PwdChangeModal from '../components/PwdChangeModal.jsx'
 import MypagesAuthForm from '../components/MypagesAuthForm.jsx'
 import MypageFormReview from './MyPageFormReviews.jsx'
+import MyPageFormAI from './MyPageFormAI.jsx'
+import MyPageFormRecent from '../components/MyPageFormRecent.jsx'
 import axios from 'axios'
 import { useSelector, useDispatch } from 'react-redux'
 import '../MyPage.css'
-import MyPageFormBookmark from '../components/MyPageFormBookmark.jsx' // MyPageFormBookmark 경로 확인 (components 폴더에 있다고 가정)
-import MyPageFormRecent from '../components/MyPageFormRecent.jsx'
-import MyPageFormAI from '../components/MyPageFormAI.jsx'
+import MyPageFormBookmark from '../components/MyPageFormBookmark.jsx'
 import zustandUser from '../../../app/zustandUser.js'
 import { toast } from 'react-toastify'
 import defaultProfileImg from '../../../assets/images/defaultProfileImg.jpg'
-import { shallow } from 'zustand/shallow' // shallow 임포트
+import { shallow } from 'zustand/shallow'
 import zustandStore from '../../../app/zustandStore.js'
+import ConfirmModal from '../components/ConfirmModal.jsx' // ConfirmModal 임포트
 
 const MyPageForm = () => {
   const dispatch = useDispatch()
@@ -25,38 +26,33 @@ const MyPageForm = () => {
   const location = useLocation()
   const user = useSelector(state => state.auth.user)
   const userId = user?.id
-  const wrapperRefs = useRef({})
-  const backendBaseUrl = import.meta.env.VITE_API_BASE_URL
+  const wrapperRefs = useRef({}) // 환경 변수에서 backendBaseUrl 가져오기
+  const backendBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'
   const setPlaceDetail = zustandStore(state => state.setPlaceDetail)
 
-  // zustandUser에서 userBookmark 상태와 setUserBookmark 액션 가져오기
-  // shallow를 사용하여 userBookmark가 변경될 때만 리렌더링되도록 최적화
   const userBookmark = zustandUser(state => state.userBookmark, shallow)
   const setUserBookmark = zustandUser(state => state.setUserBookmark)
+  const setIsLoading = zustandUser(state => state.setIsLoading) // AI 추천 API 호출 중인지 여부를 추적하는 Ref (리렌더링을 유발하지 않음)
 
-  // MyPageFormBookmark에서 로딩 상태를 받아서 zustandUser 스토어에 연결
-  // const isBookmarksLoading = zustandUser(state => state.isLoading) // isLoading 상태가 찜 목록 로딩으로 사용된다고 가정
-  const setIsLoading = zustandUser(state => state.setIsLoading) // setIsLoading 액션 가져오기
+  const aiFetchInProgressRef = useRef(false)
 
-  // MyPageForm에서 찜 목록을 불러오는 로컬 함수
   const fetchUserBookmarks = useCallback(async () => {
     if (!userId) {
       console.log('MyPageForm: 사용자 ID가 없어 찜 목록을 불러올 수 없습니다. userBookmark 초기화.')
-      setIsLoading(false) // 로딩 종료
+      setIsLoading(false)
       setUserBookmark([])
       return
     }
 
-    setIsLoading(true) // 로딩 시작
+    setIsLoading(true)
     try {
       console.log(`MyPageForm: 찜 목록 불러오는 중... (userId: ${userId})`)
-      const response = await axios.get(`http://localhost:3000/bookmark/read/${userId}`, {
+      const response = await axios.get(`${backendBaseUrl}/bookmark/read/${userId}`, {
         withCredentials: true,
       })
 
       if (Array.isArray(response.data)) {
         const newBookmarks = response.data
-        // Zustand 스토어 업데이트
         setUserBookmark(newBookmarks)
         console.log('MyPageForm: 찜 목록 새로고침 성공:', newBookmarks)
       } else {
@@ -69,14 +65,13 @@ const MyPageForm = () => {
       setUserBookmark([])
       toast.error('찜 목록을 불러오는데 실패했습니다.')
     } finally {
-      setIsLoading(false) // 로딩 종료
+      setIsLoading(false)
     }
-  }, [userId, setUserBookmark, setIsLoading]) // userId, setUserBookmark, setIsLoading가 변경될 때만 재생성
+  }, [userId, setUserBookmark, setIsLoading, backendBaseUrl])
 
-  // 컴포넌트 마운트 시 (또는 userId 변경 시) 찜 목록 초기 로드
   useEffect(() => {
     fetchUserBookmarks()
-  }, [fetchUserBookmarks]) // fetchUserBookmarks 함수가 변경될 때마다 실행 (useCallback으로 최적화됨)
+  }, [fetchUserBookmarks])
 
   const [active, setActive] = useState(() => {
     if (location.state?.fromVerification && location.state?.activeTab) {
@@ -104,9 +99,10 @@ const MyPageForm = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [recentStores, setRecentStores] = useState([])
   const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false)
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false)
 
   const [hasFetchedAIRecommendations, setHasFetchedAIRecommendations] = useState(false)
-  const [aiRecommendationKeyword, setAiRecommendationKeyword] = useState('')
+  const [aiRecommendationKeyword, setAiRecommendationKeyword] = useState([])
   const defaultTags = [
     '패스트푸드',
     '치킨',
@@ -173,7 +169,6 @@ const MyPageForm = () => {
     '아이스크림',
     '떡',
   ]
-  // 사용자 위치 정보 상태
   const [userLocation, setUserLocation] = useState(null)
   const [locationError, setLocationError] = useState('')
 
@@ -185,50 +180,56 @@ const MyPageForm = () => {
     navigate('/login')
   }
 
-  // 사용자 위치 정보 가져오기 useEffect
   useEffect(() => {
-    if (active === '음식점 추천(AI)' && !userLocation && !locationError) {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          position => {
-            setUserLocation({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            })
-            setLocationError('')
-            console.log('사용자 위치 획득:', position.coords.latitude, position.coords.longitude)
-          },
-          error => {
-            console.error('위치 정보 획득 실패:', error)
-            let errorMessage = '위치 정보를 가져올 수 없습니다.'
-            switch (error.code) {
-              case error.PERMISSION_DENIED:
-                errorMessage = '위치 정보 사용 권한이 거부되었습니다.'
-                break
-              case error.POSITION_UNAVAILABLE:
-                errorMessage = '위치 정보를 사용할 수 없습니다.'
-                break
-              case error.TIMEOUT:
-                errorMessage = '위치 정보를 가져오는 시간이 초과되었습니다.'
-                break
-              default:
-                errorMessage = '알 수 없는 위치 정보 오류가 발생했습니다.'
-                break
-            }
-            setLocationError(errorMessage)
-            toast.error(`위치 정보 오류: ${errorMessage}`, { position: 'top-center' })
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0,
-          },
-        )
-      } else {
-        const msg = '이 브라우저에서는 위치 정보가 지원되지 않습니다.'
-        setLocationError(msg)
-        toast.warn(msg, { position: 'top-center' })
-      }
+
+    if (active !== '음식점 추천(AI)') {
+      return
+    }
+
+    if (userLocation || locationError) {
+      return
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          })
+          setLocationError('')
+          console.log('사용자 위치 획득:', position.coords.latitude, position.coords.longitude)
+        },
+        error => {
+          console.error('위치 정보 획득 실패:', error)
+          let errorMessage = '위치 정보를 가져올 수 없습니다.'
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              errorMessage = '위치 정보 사용 권한이 거부되었습니다.'
+              break
+            case error.POSITION_UNAVAILABLE:
+              errorMessage = '위치 정보를 사용할 수 없습니다.'
+              break
+            case error.TIMEOUT:
+              errorMessage = '위치 정보를 가져오는 시간이 초과되었습니다.'
+              break
+            default:
+              errorMessage = '알 수 없는 위치 정보 오류가 발생했습니다.'
+              break
+          }
+          setLocationError(errorMessage)
+          toast.error(`위치 정보 오류: ${errorMessage}`, { position: 'top-center' })
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
+        },
+      )
+    } else {
+      const msg = '이 브라우저에서는 위치 정보가 지원되지 않습니다.'
+      setLocationError(msg)
+      toast.warn(msg, { position: 'top-center' })
     }
   }, [active, userLocation, locationError])
 
@@ -240,28 +241,26 @@ const MyPageForm = () => {
       }
 
       try {
-        const response = await axios.get(
-          `http://localhost:3000/auth/recent-history?userId=${userId}`,
-          {
-            withCredentials: true,
-          },
-        )
-        // console.log(response.data.recentViewedStores)
+        const response = await axios.get(`${backendBaseUrl}/auth/recent-history?userId=${userId}`, {
+          withCredentials: true,
+        })
         const fetchedRecentStores = response.data.recentViewedStores
         setRecentStores(fetchedRecentStores)
-        if (fetchedRecentStores && fetchedRecentStores.length > 0) {
-          fetchedRecentStores.forEach(item => {})
-        }
       } catch (error) {
         console.error('MyPageForm: 최근 기록 불러오기 실패:', error)
         setRecentStores([])
       }
     }
 
-    if (active === '최근기록') {
+    if (active !== '음식점 추천(AI)') {
+      setHasFetchedAIRecommendations(false)
+      aiFetchInProgressRef.current = false
+    }
+
+    if (active === '최근기록' || active === '음식점 추천(AI)') {
       fetchRecentStores()
     }
-  }, [active, userId])
+  }, [active, userId, backendBaseUrl])
 
   useEffect(() => {
     if (location.state) {
@@ -278,7 +277,7 @@ const MyPageForm = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/auth/myprofile', {
+        const response = await axios.get(`${backendBaseUrl}/auth/myprofile`, {
           withCredentials: true,
         })
 
@@ -303,9 +302,8 @@ const MyPageForm = () => {
       }
     }
     fetchUserProfile()
-  }, [])
+  }, [backendBaseUrl])
 
-  // AI 추천 호출 함수 (위치 정보 인자 추가)
   const callOpenAi = async (promptContent, lat = null, lon = null) => {
     try {
       const payload = { prompt: promptContent }
@@ -313,7 +311,7 @@ const MyPageForm = () => {
         payload.latitude = lat
         payload.longitude = lon
       }
-      const response = await axios.post('http://localhost:3000/api/azure/openai', payload)
+      const response = await axios.post(`${backendBaseUrl}/api/azure/openai`, payload)
       return response
     } catch (error) {
       console.error('OpenAI 호출 실패:', error.response?.data || error.message)
@@ -321,45 +319,75 @@ const MyPageForm = () => {
     }
   }
 
-  const extractMostFrequentKeywords = (data, defaultKeys) => {
-    if (!data || !defaultKeys) return []
+  const extractMostFrequentKeywords = useCallback(() => {
+    const allKeywords = {}
+    const excludeKeywords = ['#음식점']
 
-    // 1. 모든 키워드들을 flat하게 수집
-    const rawStoreKeywords = data.flatMap(store => store.keyword || [])
 
-    // 2. defaultKeys 중 하나라도 포함된 키워드만 필터링
-    const filtered = rawStoreKeywords.filter(keyword =>
-      defaultKeys.some(defaultKey => keyword.includes(defaultKey)),
-    )
+    recentStores.forEach(item => {
+      const keywordsArray = Array.isArray(item.keyword)
+        ? item.keyword
+        : item.keyword
+          ? String(item.keyword)
+              .split(',')
+              .map(k => k.trim())
+          : []
 
-    // 3. 빈도수 계산
-    const freqMap = {}
-    for (const keyword of filtered) {
-      freqMap[keyword] = (freqMap[keyword] || 0) + 1
+      keywordsArray.forEach(keyword => {
+        if (keyword && !excludeKeywords.includes(keyword)) {
+
+          allKeywords[keyword] = (allKeywords[keyword] || 0) + 1
+        }
+      })
+    })
+
+    userBookmark.forEach(bookmarkItem => {
+
+      if (
+        bookmarkItem.store &&
+        bookmarkItem.store.keywords &&
+        Array.isArray(bookmarkItem.store.keywords)
+      ) {
+        bookmarkItem.store.keywords.forEach(keyword => {
+          if (keyword && !excludeKeywords.includes(keyword.trim())) {
+            // 제외 키워드 필터링 추가
+            allKeywords[keyword.trim()] = (allKeywords[keyword.trim()] || 0) + 1
+          }
+        })
+      }
+    })
+
+    let maxCount = 0
+    for (const keyword in allKeywords) {
+      if (allKeywords[keyword] > maxCount) {
+        maxCount = allKeywords[keyword]
+      }
     }
 
-    // 4. 가장 많이 등장한 키워드만 반환 (예: 상위 1개만)
-    const sorted = Object.entries(freqMap).sort((a, b) => b[1] - a[1])
-    const mostFrequent = sorted.length > 0 ? sorted[0][0] : null
-
-    return mostFrequent
-  }
+    if (maxCount === 0) return []
+    return Object.keys(allKeywords).filter(keyword => allKeywords[keyword] === maxCount)
+  }, [recentStores, userBookmark])
 
   useEffect(() => {
-    if (active === '음식점 추천(AI)') {
-      if (recentStores.length === 0) {
-        console.log('AI 추천: 최근 본 가게 기록이 없어 추천을 시작할 수 없습니다.')
-        setOpenAi(['최근 본 가게 기록에서 추천 키워드를 찾을 수 없습니다.'])
-        setLoading(false)
-        setHasFetchedAIRecommendations(false)
+    const fetchAIRecommendations = async () => {
+
+      if (active !== '음식점 추천(AI)') {
         return
       }
-      // if (hasFetchedAIRecommendations || loading) {
-      //   console.log("AI 추천: 이미 불러온 추천이 있거나 로딩 중이므로 다시 불러오지 않습니다.");
-      //   return;
-      // }
 
-      // 위치 정보 로딩 대기 또는 오류 처리
+      if (hasFetchedAIRecommendations || aiFetchInProgressRef.current) {
+        console.log('AI 추천: 이미 데이터를 불러왔거나 로딩 중이므로 다시 불러오지 않습니다.')
+        return
+      }
+
+      if (recentStores.length === 0 && userBookmark.length === 0) {
+        console.log('AI 추천: 최근 본 가게 기록과 찜 목록이 모두 없어 추천을 시작할 수 없습니다.')
+        setOpenAi(['AI 추천을 위해 최근 본 가게 기록 또는 찜 목록이 필요합니다.'])
+        setLoading(false)
+        setHasFetchedAIRecommendations(true)
+        return
+      }
+
       if (!userLocation && !locationError) {
         console.log('AI 추천: 사용자 위치 정보를 기다리는 중...')
         setLoading(true)
@@ -373,99 +401,131 @@ const MyPageForm = () => {
       }
 
       setLoading(true)
-      setHasFetchedAIRecommendations(true)
       setOpenAi([])
       setDalleImage(null)
+      aiFetchInProgressRef.current = true
 
-      const keywordsForAI = extractMostFrequentKeywords(recentStores)
+      try {
+        const keywordsForAI = extractMostFrequentKeywords()
+        const aiKeywordsForState = keywordsForAI?.length > 0 ? keywordsForAI : ['다양한 음식']
+        setAiRecommendationKeyword(aiKeywordsForState)
 
-      if (keywordsForAI?.length === 0) {
-        console.log('AI 추천: 최근 본 가게에서 유의미한 키워드를 추출할 수 없습니다.')
-        setOpenAi(['최근 본 가게 기록에서 추천 키워드를 찾을 수 없습니다.'])
-        setLoading(false)
-        return
-      }
+        let promptToUse
+        let dalleKeyword
+        const aiKeywordsStringForPrompt = aiKeywordsForState.join(', ')
 
-      const restaurantRecommendationPrompt = `
-        다음은 사용자가 최근 방문한 음식점들의 키워드 목록입니다:
-        ${keywordsForAI?.join(', ')}
-        
-        이 키워드들과 **가장 많이** 겹치는 음식점 3곳을 추천해 주세요.
-        
-        결과는 다음 필드를 포함하는 JSON 형식의 배열로만 출력하세요. JSON 외에는 아무 것도 출력하지 마세요.
-        각 추천 음식점은 다음 필드를 포함해야 합니다:
-        - title: 음식점 이름
-        - rating: 평점 (0.0 ~ 5.0)
-        - description: 음식점 설명 (간단하고 매력적인 한 줄)
-        - keyword: 이 음식점의 키워드 배열 (예: ["#떡볶이", "#분식", "#매운맛"])
-        - overlap_count: 겹치는 키워드 수
-      `
+        if (
+          aiKeywordsForState.length > 0 &&
+          !(aiKeywordsForState.length === 1 && aiKeywordsForState[0] === '다양한 음식')
+        ) {
+          promptToUse = `
+ 다음은 사용자가 최근 관심 있어 했거나 찜한 음식점들의 키워드 목록입니다. 이 목록에 있는 키워드를 **최대한 많이 반영**하여 새로운 음식점을 추천해주세요:
+${aiKeywordsStringForPrompt}
+이 키워드들과 **가장 많이** 겹치고, 현재 위치 주변에서 **가까운** 주변 음식점 4곳을 추천해 주세요.
+추천 시, '#음식점'과 같이 너무 일반적인 키워드는 생성하지 마십시오.
+결과는 다음 필드를 포함하는 JSON 형식의 배열로만 출력하세요. JSON 외에는 아무 것도 출력하지 마세요.
+- title: 음식점 이름
+- rating: 평점 (0.0 ~ 5.0)
+- description: 음식점 설명 (간단하고 매력적인 한 줄)
+- keyword: 이 음식점의 키워드 배열 (예: ["#떡볶이", "#분식", "#매운맛"])
+- overlap_count: 겹치는 키워드 수
+`
+          dalleKeyword = aiKeywordsStringForPrompt
+        } else {
+          console.log('AI 추천: 특정 키워드를 추출할 수 없어 일반적인 음식점 추천을 시도합니다.')
+          promptToUse = `
+사용자에게 현재 위치 주변에서 **가까운** 인기 있는 주변 음식점 4곳을 추천해 주세요.
+다양한 종류의 음식점을 포함하여 추천해 주세요.
+추천 시, '#음식점'과 같이 너무 일반적인 키워드는 생성하지 마십시오.
+결과는 다음 필드를 포함하는 JSON 형식의 배열로만 출력하세요. JSON 외에는 아무 것도 출력하지 마세요.
+- title: 음식점 이름
+- rating: 평점 (0.0 ~ 5.0)
+- description: 음식점 설명 (간단하고 매력적인 한 줄)
+- keyword: 이 음식점의 키워드 배열 (예: ["#한식", "#분위기좋은", "#가성비"])
+- overlap_count: 겹치는 키워드 수 (항상 0)
+`
+          dalleKeyword = '한국 음식'
+        }
 
-      // callOpenAi 호출 시 위치 정보 전달
-      callOpenAi(restaurantRecommendationPrompt, userLocation.latitude, userLocation.longitude)
-        .then(response => {
-          if (response && response.data) {
-            let parsedData = response.data
-            if (typeof response.data === 'string') {
-              try {
-                parsedData = JSON.parse(response.data)
-              } catch (e) {
-                console.error('Client: AI 응답 JSON 파싱 오류 (문자열 -> JSON):', e)
-                setOpenAi(['AI 응답 형식이 유효하지 않아 추천을 표시할 수 없습니다.'])
-                setLoading(false)
-                return
-              }
+        const openaiResponse = await callOpenAi(
+          promptToUse,
+          userLocation.latitude,
+          userLocation.longitude,
+        )
+        if (openaiResponse && openaiResponse.data) {
+          let parsedData = openaiResponse.data
+          if (typeof openaiResponse.data === 'string') {
+            try {
+              parsedData = JSON.parse(openaiResponse.data)
+            } catch (e) {
+              console.error('Client: AI 응답 JSON 파싱 오류 (문자열 -> JSON):', e)
+              setOpenAi(['AI 응답 형식이 유효하지 않아 추천을 표시할 수 없습니다.'])
+              return
             }
+          }
 
-            if (Array.isArray(parsedData) && parsedData.length > 0) {
-              setOpenAi(parsedData)
-              console.log('AI 추천 음식점 목록 설정:', parsedData)
+          if (Array.isArray(parsedData) && parsedData.length > 0) {
+            // AI 응답에서 다시 한번 #음식점 키워드를 필터링 (방어적 코딩)
+            const cleanedData = parsedData.map(item => ({
+              ...item,
+              keyword: Array.isArray(item.keyword)
+                ? item.keyword.filter(k => k.trim() !== '#음식점')
+                : item.keyword, // 배열이 아닌 경우 그대로 유지
+            }))
+            setOpenAi(cleanedData) // 필터링된 데이터로 상태 업데이트
+            console.log('AI 추천 음식점 목록 설정:', cleanedData)
 
-              const keywordSummary = Array.from(new Set(keywordsForAI)).slice(0, 10).join(',')
-              return callDalleImage(keywordSummary)
+            const imageUrl = await callDalleImage(dalleKeyword)
+            if (imageUrl) {
+              setDalleImage(imageUrl)
+              console.log('DALL-E 이미지 URL 설정:', imageUrl)
             } else {
-              console.error('AI 응답이 예상된 배열 형태가 아닙니다:', parsedData)
-              setOpenAi(['AI 응답이 예상된 형식이 아니거나 비어있습니다.'])
-              setLoading(false)
+              setDalleImage(null)
+              console.warn('DALL-E 이미지 생성 실패 또는 URL 없음.')
             }
           } else {
-            console.error('AI 응답 데이터가 유효하지 않습니다.')
-            setOpenAi(['AI 추천을 받을 수 없습니다.'])
-            setLoading(false)
+            console.error('AI 응답이 예상된 배열 형태가 아니거나 비어있습니다:', parsedData)
+            setOpenAi(['AI 응답이 예상된 형식이 아니거나 비어있습니다.'])
           }
-        })
-        .then(imageUrl => {
-          if (imageUrl) {
-            setDalleImage(imageUrl)
-            console.log('DALL-E 이미지 URL 설정:', imageUrl)
-          } else {
-            setDalleImage(null)
-            console.warn('DALL-E 이미지 생성 실패 또는 URL 없음.')
-          }
-        })
-        .catch(apiError => {
-          console.error('OpenAI/DALL-E API 호출 실패:', apiError)
-          setOpenAi(['AI 추천을 불러오는 중 오류가 발생했습니다.'])
-          setDalleImage(null)
-        })
-        .finally(() => {
-          setLoading(false)
-        })
-    } else {
-      setDalleImage(null)
-      setLoading(false)
-      setOpenAi([])
-      setHasFetchedAIRecommendations(false)
+        } else {
+          console.error('AI 응답 데이터가 유효하지 않습니다.')
+          setOpenAi(['AI 추천을 받을 수 없습니다.'])
+        }
+      } catch (apiError) {
+        console.error('OpenAI/DALL-E API 호출 실패:', apiError)
+        setOpenAi(['AI 추천을 불러오는 중 오류가 발생했습니다.'])
+        setDalleImage(null)
+      } finally {
+        setLoading(false)
+        setHasFetchedAIRecommendations(true) // API 호출 시도 완료 표시
+        aiFetchInProgressRef.current = false // API 호출 완료를 Ref에 기록
+      }
     }
-  }, [active, recentStores, hasFetchedAIRecommendations, userLocation, locationError])
+
+    fetchAIRecommendations()
+  }, [
+    active,
+    recentStores,
+    userBookmark,
+    userLocation,
+    locationError,
+    defaultTags,
+    backendBaseUrl,
+    extractMostFrequentKeywords,
+  ])
 
   const callDalleImage = async keyword => {
     try {
-      const res = await axios.post('http://localhost:3000/api/azure/dalle', {
+      const res = await axios.post(`${backendBaseUrl}/api/azure/dalle`, {
+        // **backendBaseUrl 사용**
         prompt: `${keyword}에 대한 실제 음식 사진처럼 보이고, 시선을 사로잡는 아름다운 구도와 부드러운 자연광이 돋보이는 초고화질 음식 사진을 생성해주세요. 식욕을 돋우는 선명한 색감과 생생한 질감을 가진, 배경은 단순하게 처리하고 음식에 집중해주세요.`,
       })
-      console.log('DALL-E 응답:', res)
-      return res?.data?.imageUrl || null
+      console.log('DALL-E 응답:', res) // 이미지 URL이 완전한 URL (http/https)인지 확인하고 반환
+      // 백엔드에서 Base64 인코딩된 데이터를 직접 받는 경우, 'data:image/png;base64,...' 형식으로 반환해야 합니다.
+      // 현재 이미지 경로가 파일 시스템 경로로 되어 있어 이 부분에 문제가 있을 수 있습니다.
+      // 백엔드에서 유효한 URL을 반환한다고 가정하고, 그대로 사용합니다.
+      // 만약 백엔드가 Base64 문자열을 준다면, `data:image/png;base64,${res.data.imageUrl}` 과 같이 만들어야 합니다.
+      return res?.data?.imageUrl || null // **백엔드 응답이 유효한 이미지 URL이라고 가정**
     } catch (err) {
       console.error(`DALL·E 호출 실패 (${keyword}):`, err.response?.data || err.message)
       return null
@@ -490,7 +550,7 @@ const MyPageForm = () => {
   const handleSaveChanges = async () => {
     try {
       const response = await axios.put(
-        'http://localhost:3000/auth/profile',
+        `${backendBaseUrl}/auth/profile`,
         {
           nickname: tempNickname,
           email: userEmail,
@@ -521,38 +581,61 @@ const MyPageForm = () => {
     }
   }
 
-  const handleDeleteAccount = async () => {
-    if (window.confirm('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-      try {
-        const response = await axios.delete('http://localhost:3000/auth/account', {
-          withCredentials: true,
-        })
+  const handleDeleteAccountClick = async () => {
+    setShowDeleteConfirmModal(true) // window.confirm 대신 toast 또는 커스텀 모달로 사용자에게 확인 요청
+    toast.warn('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.', {
+      position: 'top-center',
+      autoClose: true, // 사용자가 직접 닫아야 함
+      closeButton: true,
+      closeOnClick: false,
+      draggable: false,
+      action: {
+        label: '삭제',
+        onClick: async () => {
+          try {
+            const response = await axios.delete(`${backendBaseUrl}/auth/account`, {
+              withCredentials: true,
+            })
+          } catch (error) {
+            console.error('계정 삭제 실패:', error)
+            toast.error(
+              `계정 삭제 중 오류가 발생했습니다: ${error.response?.data?.message || '서버 오류'}`,
+              { position: 'top-center' },
+            )
+          }
+        },
+      },
+    })
+  }
 
-        if (response.status === 200) {
-          toast.success('계정이 성공적으로 삭제되었습니다. 로그인 페이지로 이동합니다.', {
-            position: 'top-center',
-          })
-          localStorage.removeItem('accessToken')
-          window.location.href = '/login'
-        }
-      } catch (error) {
-        console.error('계정 삭제 실패:', error)
-        toast.error(
-          `계정 삭제 중 오류가 발생했습니다: ${error.response?.data?.message || '서버 오류'}`,
-          { position: 'top-center' },
-        )
+  const confirmDeleteAccount = async () => {
+    setShowDeleteConfirmModal(false) // 모달 닫기
+    try {
+      const response = await axios.delete(`${backendBaseUrl}/auth/account`, {
+        withCredentials: true,
+      })
+
+      if (response.status === 200) {
+        toast.success('계정이 성공적으로 삭제되었습니다. 로그인 페이지로 이동합니다.', {
+          position: 'top-center',
+        })
+        localStorage.removeItem('accessToken')
+        window.location.href = '/login' // 페이지 전체 새로고침 및 로그인 페이지로 이동
       }
+    } catch (error) {
+      console.error('계정 삭제 실패:', error)
+      toast.error(
+        `계정 삭제 중 오류가 발생했습니다: ${error.response?.data?.message || '서버 오류'}`,
+        { position: 'top-center' },
+      )
     }
   }
 
-  // 가게가 찜 목록에 있는지 확인하는 헬퍼 함수
   const isStoreBookmarked = storeId => {
-    // userBookmark가 null일 경우 빈 배열로 처리하여 에러 방지
     const bookmarks = userBookmark || []
     return bookmarks.some(bookmark => bookmark.store?._id === storeId)
   }
 
-  // 북마크 토글 핸들러 (MyPageForm 내부에서 처리)
   const handleBookmarkToggle = async (e, storeId, storeName, isCurrentlyBookmarked) => {
     e.stopPropagation()
 
@@ -564,27 +647,22 @@ const MyPageForm = () => {
 
     try {
       if (isCurrentlyBookmarked) {
-        // 북마크 삭제
-        await axios.delete(`http://localhost:3000/bookmark/delete/${storeId}`, {
+        await axios.delete(`${backendBaseUrl}/bookmark/delete/${storeId}`, {
           withCredentials: true,
           data: { headers: { user: userId } },
         })
-        // Zustand 스토어 업데이트
         setUserBookmark(prev => (prev || []).filter(bookmark => bookmark.store?._id !== storeId))
         toast.success(`'${storeName}' 찜 목록에서 삭제되었습니다.`, { position: 'top-center' })
       } else {
-        // 북마크 추가
         const response = await axios.post(
-          `http://localhost:3000/bookmark/regist/${storeId}`,
+          `${backendBaseUrl}/bookmark/regist/${storeId}`,
           { headers: { user: userId } },
           {
             withCredentials: true,
           },
         )
-        // Zustand 스토어 업데이트 (새로 추가된 북마크 객체 포함)
         setUserBookmark(prev => {
           const currentBookmarks = prev || []
-          // 중복 추가 방지 로직 (혹시 모를 경우를 대비)
           if (!currentBookmarks.some(b => b.store?._id === response.data.store?._id)) {
             return [...currentBookmarks, response.data]
           }
@@ -602,9 +680,7 @@ const MyPageForm = () => {
   }
 
   const renderContent = () => {
-    const mostFrequentKeywords = extractMostFrequentKeywords(recentStores, defaultTags)
-
-    // recentStores, isStoreBookmarked, backendBaseUrl, handleBookmarkToggle, setPlaceDetail
+    // MyPageFormAI 컴포넌트에 aiRecommendationKeyword 상태를 그대로 전달합니다 (이제 배열입니다).
     switch (active) {
       case '최근기록':
         return (
@@ -620,11 +696,12 @@ const MyPageForm = () => {
       case '찜':
         return (
           <MyPageFormBookmark
-            recentStores={recentStores}
-            active={active} // MyPageFormBookmark에 active prop 전달
-            userId={userId} // MyPageFormBookmark에 userId prop 전달
-            handleBookmarkToggle={handleBookmarkToggle} // 찜 토글 함수 전달
             backendBaseUrl={backendBaseUrl}
+            active={active}
+            userId={userId}
+            handleBookmarkToggle={handleBookmarkToggle}
+            setPlaceDetail={setPlaceDetail}
+            recentStores={recentStores} // recentStores prop은 MyPageFormBookmark에서 사용되지 않으므로 제거 가능
           />
         )
 
@@ -643,7 +720,7 @@ const MyPageForm = () => {
             backendBaseUrl={backendBaseUrl}
             openai={openai}
             userNickname={userNickname}
-            mostFrequentKeywords={mostFrequentKeywords}
+            mostFrequentKeywords={aiRecommendationKeyword}
             userLocation={userLocation}
             locationError={locationError}
           />
@@ -700,7 +777,6 @@ const MyPageForm = () => {
                   </span>
                 </div>
               </div>
-
               <div className="py-5">
                 <div>
                   <div className="py-3 flex justify-between">
@@ -728,7 +804,6 @@ const MyPageForm = () => {
                   </div>
                   <hr className="py-3" />
                 </div>
-
                 <div className="py-3 flex justify-between">
                   <p>이름</p>
                   {isEditing ? (
@@ -742,7 +817,6 @@ const MyPageForm = () => {
                     <p>{userName}</p>
                   )}
                 </div>
-
                 <hr className="py-3" />
                 <div className="py-3 flex justify-between">
                   <p>닉네임</p>
@@ -776,7 +850,7 @@ const MyPageForm = () => {
               <div className="flex gap-5 justify-center">
                 <button
                   className="mt-4 px-4 py-2 text-white bg-red-600 rounded cursor-pointer"
-                  onClick={handleDeleteAccount}
+                  onClick={handleDeleteAccountClick}
                 >
                   계정 삭제
                 </button>
@@ -822,7 +896,6 @@ const MyPageForm = () => {
         </div>
       </div>
       <Modal isOpen={isopen} onClose={() => setIsOpen(false)} />
-
       <div className="max-w-5xl mx-auto">
         <ul className="py-5 flex gap-5">
           {tabs.map(tab => (
@@ -842,15 +915,22 @@ const MyPageForm = () => {
           ))}
         </ul>
       </div>
-
       {showPasswordChangeModal && (
         <PwdChangeModal
           onClose={() => setShowPasswordChangeModal(false)}
           onPasswordChangeSuccess={handlePasswordChangeSuccess}
         />
       )}
-
       <div className="max-w-5xl mx-auto px-6">{renderContent()}</div>
+      {showDeleteConfirmModal && (
+        <ConfirmModal
+          isOpen={showDeleteConfirmModal}
+          onClose={() => setShowDeleteConfirmModal(false)}
+          onConfirm={confirmDeleteAccount}
+          title="계정 삭제 확인"
+          message="정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다."
+        />
+      )}
     </div>
   )
 }
