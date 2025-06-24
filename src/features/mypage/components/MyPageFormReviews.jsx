@@ -5,6 +5,7 @@ import StarGray from '../../../assets/images/star-gray.png'
 import StarYellow from '../../../assets/images/star-yellow.png'
 import { toast } from 'react-toastify'
 import Rating from 'react-rating'
+import zustandStore from '../../../app/zustandStore.js'
 import SortDropdown from '../../../features/place/components/reviews/sortButton/SortDropdown.jsx'
 import ModifyReviewModal from './review/ModifyReviewModal.jsx'
 import ReviewImageSrc from '../../../shared/ReviewImageSrc.jsx'
@@ -19,27 +20,32 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   const [sortedReviews, setSortedReviews] = useState([])
   const [currentSort, setCurrentSort] = useState('none')
   const [modifyReviewId, setModifyReviewId] = useState(null)
-
+  const isLoading = zustandStore(state => state.isLoading)
+  const setIsLoading = zustandStore(state => state.setIsLoading)
   const navigate = useNavigate()
   const userReviewRef = useRef(null)
   const dropdownRef = useRef(null)
 
   const initialFetchFromDB = () => {
+    setIsLoading(true)
     API.get(`/review/read/user/${user.id}`)
       .then(res => {
         const data = res.data
         if (data.length < 1 && userReviewRef.current) {
           setMyReviews([])
           userReviewRef.current = []
+          setIsLoading(false)
           return
         } else {
           const sorted = data.sort((a, b) => a.createdAt - b.createdAt)
           setMyReviews(sorted)
           userReviewRef.current = sorted
+          setIsLoading(false)
           return
         }
       })
       .catch(err => {
+        setIsLoading(false)
         toast.error(<div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>, {
           position: 'top-center',
         })
@@ -233,6 +239,18 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   return (
     <div className="h-full">
       <div className="h-full">
+        {isLoading === true && (
+          <div className="text-center p-2">
+            <p className="loading-jump text-center p-3 sm:mb-[1000px]">
+              Loading
+              <span className="jump-dots">
+                <span>.</span>
+                <span>.</span>
+                <span>.</span>
+              </span>
+            </p>
+          </div>
+        )}
         <div>
           {sortedReviews?.length > 0 && (
             <div
@@ -259,7 +277,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
                 <div className="w-full h-full flex justify-between items-start">
                   <div className="flex items-start sm:gap-3 gap-1">
                     <img
-                      src={`${rv?.store?.photos?.[0] ? import.meta.env.VITE_API_BASE_URL+rv?.store?.photos?.[0] : Icon}`}
+                      src={`${rv?.store?.photos?.[0] ? import.meta.env.VITE_API_BASE_URL + rv?.store?.photos?.[0] : Icon}`}
                       alt="icon"
                       className="sm:h-[80px] h-[40px] rounded-xl"
                       onError={e => {
@@ -355,15 +373,8 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
               </div>
             ))
           ) : (
-            <div className="text-center p-2">
-              <p className="loading-jump text-center p-3 sm:mb-[1000px]">
-                Loading
-                <span className="jump-dots">
-                  <span>.</span>
-                  <span>.</span>
-                  <span>.</span>
-                </span>
-              </p>
+            <div className="font-semibold text-center">
+              <p>작성한 리뷰가 없습니다.</p>
             </div>
           )}
         </div>
