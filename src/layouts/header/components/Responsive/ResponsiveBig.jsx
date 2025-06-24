@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 
 const ResponsiveBig = ({
   Logo,
@@ -10,15 +10,18 @@ const ResponsiveBig = ({
   setLogout,
   open,
 }) => {
+  const location = useLocation()
+  const isRoot = location.pathname === '/'
+
   return (
-    <div className="grid min-sm:grid-cols-3 sm:items-center items-end pt-4 min-sm:pb-8">
-      <div className="justify-self-start min-sm:order-1">
+    <div className="grid grid-cols-3 items-center pt-4 pb-8">
+      <div className="justify-self-start order-1">
         <Link to="/">
           <img src={Logo} alt="logo" />
         </Link>
       </div>
-      <div className="justify-self-center min-sm:order-2">
-        <ul className="flex items-center gap-2 min-sm:text-md font-semibold">
+      {isRoot ? <div className="justify-self-center order-2">
+        <ul className="flex items-center gap-2 text-md font-semibold">
           <Link to="#">
             <li>공지사항</li>
           </Link>
@@ -29,8 +32,8 @@ const ResponsiveBig = ({
             <li>점메추 소개</li>
           </Link>
         </ul>
-      </div>
-      <div className="justify-self-end min-sm:order-3">
+      </div> : <div className='order-2'></div>}
+      <div className="justify-self-end order-3">
         {isAuthenticated ? (
           <div className="flex gap-2 items-center relative hover:cursor-pointer">
             <div className="flex gap-1 p-2" onClick={handleOpen} ref={dropdownRef}>
