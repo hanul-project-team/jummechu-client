@@ -28,6 +28,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
     API.get(`/review/read/user/${user.id}`)
       .then(res => {
         const data = res.data
+        console.log(data)
         if (data.length < 1 && userReviewRef.current) {
           setMyReviews([])
           userReviewRef.current = []
@@ -53,7 +54,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   }, [currentTab, myReviews])
   useEffect(() => {
     const handleClickOutside = e => {
-      const isOutside = Object.values(wrappers.current || {}).some(ref => {
+      const isOutside = Object.values(wrappers?.current || {}).some(ref => {
         return ref instanceof HTMLElement && ref.contains(e.target)
       })
       if (!isOutside) {
@@ -230,6 +231,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   } else if (remains === 0 && total === count) {
     buttonText = '접기'
   }
+
   return (
     <div className="h-full">
       <div className="h-full">

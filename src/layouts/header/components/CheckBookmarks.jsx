@@ -17,7 +17,8 @@ const CheckBookmarks = () => {
   const locationRef = useRef(location?.state)
 
   const handleCheckBookmarked = (place, lists) => {
-    const filteredBookmark = lists?.filter(list => list?.store._id === place?._id)
+    const filteredBookmark = lists?.filter(list => list?.store?._id === place?._id)
+    // console.log(filteredBookmark[0]?.store.name ? '북마크 등록된 가게' : '미등록')
     if (filteredBookmark?.length > 0) {
       setIsBookmarked(true)
     } else {

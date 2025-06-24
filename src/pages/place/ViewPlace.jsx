@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react'
-import zustandStore from '../../app/zustandStore.js'
-import ViewPlaceDetail from '../../features/place/ViewPlaceDetail.jsx'
 import { useLocation, useParams } from 'react-router-dom'
 import { API } from '../../app/api.js'
 import { toast } from 'react-toastify'
+import React, { useEffect } from 'react'
+import zustandStore from '../../app/zustandStore.js'
+import ViewPlaceDetail from '../../features/place/ViewPlaceDetail.jsx'
+import RecentViewPlace from './RecentViewPlace.jsx'
 
 const ViewPlace = () => {
   const location = useLocation()
@@ -37,7 +38,12 @@ const ViewPlace = () => {
     window.scrollTo({ top: 0 })
   }, [location.pathname])
 
-  return <ViewPlaceDetail />
+  return (
+    <div>
+      <ViewPlaceDetail />
+      <RecentViewPlace />
+    </div>
+  )
 }
 
 export default ViewPlace
