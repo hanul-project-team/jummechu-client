@@ -21,7 +21,7 @@ const ResponsiveBig = ({
         </Link>
       </div>
       {isRoot ? <div className="justify-self-center order-2">
-        <ul className="flex items-center gap-2 text-md font-semibold">
+        <ul className="flex items-center sm:gap-3 lg:gap-13 xl:gap-14 text-md font-semibold">
           <Link to="#">
             <li>공지사항</li>
           </Link>
