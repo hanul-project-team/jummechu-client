@@ -17,7 +17,7 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
     store: '',
   })
   const [fileData, setFileData] = useState([])
-
+  const fileRef = useRef()
   useEffect(() => {
     if (formData.comment?.length > 6 && formData.rating > 0) {
       setReadyToSubmit(true)
@@ -119,6 +119,9 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
   }
   const resetFiles = () => {
     setFileData([])
+    if (fileRef.current) {
+      fileRef.current.value = ''
+    }
   }
   const handleDeleteOneImage = id => {
     const target = fileData.find(file => file.id === id)
@@ -127,9 +130,9 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
       URL.revokeObjectURL(target.previewURL)
       setFileData(prev => prev.filter(file => file.id !== id))
     }
-    setTimeout(() => {
-      setFileData(prev => [...prev])
-    }, 500)
+    if (fileRef.current) {
+      fileRef.current.value = ''
+    }
   }
   return (
     <div className="min-xl:w-3/7 max-xl:w-4/7 max-lg:w-5/7 max-[321px]:w-5/7 h-3/4 bg-white sm:pt-5 pt-10 py-2 px-[1px] rounded-2xl sm:mb-30 mb-10">
@@ -247,6 +250,7 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                   </label>
                   <input
                     type="file"
+                    ref={fileRef}
                     name="attachments"
                     id="attachments"
                     className="hidden"

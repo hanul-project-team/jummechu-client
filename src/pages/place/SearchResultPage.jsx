@@ -29,6 +29,7 @@ const SearchResult = () => {
         phone: place?.phone ?? '',
         keyword: place?.summary?.keyword ?? [],
         description: place?.summary?.description ?? '',
+        category_name: place?.category_name
       }))
       const categories = searchData.map(sd => sd.category_name)
       const visualCategories = categories.reduce((acc, cts) => {
