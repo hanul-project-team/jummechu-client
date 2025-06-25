@@ -293,7 +293,7 @@ const MyPageForm = () => {
         setUserName(callUserName)
 
         const callUserImage = response.data.profileImage
-        setUserProfileImage(callUserImage ? `${API}${callUserImage}` : defaultProfileImg)
+        setUserProfileImage(callUserImage ? `${import.meta.env.VITE_API_BASE_URL}${callUserImage}` : defaultProfileImg)
       } catch (error) {
         console.error('사용자 프로필 정보를 불러오는데 실패했습니다:', error)
         setUserProfileImage(defaultProfileImg)
