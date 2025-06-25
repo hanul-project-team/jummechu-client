@@ -11,7 +11,7 @@ const SearchResultPageList = ({ searchData, searchResults, navi, avg, reviews, c
           <div key={`${sd._id}-${i}`} className="flex gap-2 p-2 my-3 max-sm:flex-col">
             <div className="md:min-w-[200px]">
               <img
-                src={`${searchResults[i]?.photos?.[0] || Icon}`}
+                src={`${searchResults[i]?.photos?.[0] ? import.meta.env.VITE_API_BASE_URL+searchResults[i]?.photos?.[0] : Icon}`}
                 alt="picsum"
                 onError={e => {
                   e.target.src = Icon

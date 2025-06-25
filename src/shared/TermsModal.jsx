@@ -10,7 +10,7 @@ const TermsModal = ({ isOpen, setIsOpen, termsMd, termsTitle, name }) => {
       className="relative z-50"
     >
       <div className="fixed inset-0 flex w-screen items-center justify-center bg-color-gray-900/50 ">
-        <DialogPanel className="max-w-lg space-y-4 rounded-lg bg-white py-6 pe-1">
+        <DialogPanel className="max-w-xs sm:max-w-lg space-y-4 rounded-lg bg-white py-6 pe-1">
           <div className="h-120 overflow-y-scroll custom-scrollbar">
             <div className="font-semibold text-xl flex justify-between ps-6 pe-4">
               <span className="cursor-default">{termsTitle}</span>

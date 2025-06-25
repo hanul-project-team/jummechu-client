@@ -5,6 +5,7 @@ import StarGray from '../../../assets/images/star-gray.png'
 import StarYellow from '../../../assets/images/star-yellow.png'
 import { toast } from 'react-toastify'
 import Rating from 'react-rating'
+import zustandStore from '../../../app/zustandStore.js'
 import SortDropdown from '../../../features/place/components/reviews/sortButton/SortDropdown.jsx'
 import ModifyReviewModal from './review/ModifyReviewModal.jsx'
 import ReviewImageSrc from '../../../shared/ReviewImageSrc.jsx'
@@ -15,32 +16,36 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   let count = showReviewMore
   const [openTabId, setOpenTabId] = useState(null)
   const [showSort, setShowSort] = useState(false)
-  const [myReviews, setMyReviews] = useState([])
+  const [myReviews, setMyReviews] = useState(null)
   const [sortedReviews, setSortedReviews] = useState([])
   const [currentSort, setCurrentSort] = useState('none')
   const [modifyReviewId, setModifyReviewId] = useState(null)
-
+  const isLoading = zustandStore(state => state.isLoading)
+  const setIsLoading = zustandStore(state => state.setIsLoading)
   const navigate = useNavigate()
   const userReviewRef = useRef(null)
   const dropdownRef = useRef(null)
 
   const initialFetchFromDB = () => {
+    setIsLoading(true)
     API.get(`/review/read/user/${user.id}`)
       .then(res => {
         const data = res.data
-        // console.log(data)
-        if (data.length < 1 && userReviewRef.current) {
+        if (res.status === 204) {
           setMyReviews([])
           userReviewRef.current = []
+          setIsLoading(false)
           return
         } else {
-          const sorted = data.sort((a, b) => a.createdAt - b.createdAt)
+          const sorted = data?.sort((a, b) => a.createdAt - b.createdAt)
           setMyReviews(sorted)
           userReviewRef.current = sorted
+          setIsLoading(false)
           return
         }
       })
       .catch(err => {
+        setIsLoading(false)
         toast.error(<div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>, {
           position: 'top-center',
         })
@@ -48,7 +53,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
       })
   }
   useEffect(() => {
-    if (currentTab === '리뷰' && myReviews !== userReviewRef.current) {
+    if (currentTab === '리뷰' && !myReviews) {
       initialFetchFromDB()
     }
   }, [currentTab, myReviews])
@@ -235,6 +240,18 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
   return (
     <div className="h-full">
       <div className="h-full">
+        {isLoading === true && (
+          <div className="text-center p-2">
+            <p className="loading-jump text-center p-3 sm:mb-[1000px]">
+              Loading
+              <span className="jump-dots">
+                <span>.</span>
+                <span>.</span>
+                <span>.</span>
+              </span>
+            </p>
+          </div>
+        )}
         <div>
           {sortedReviews?.length > 0 && (
             <div
@@ -252,122 +269,117 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
           )}
         </div>
         <div>
-          {total > 0 ? (
-            sortedReviews.slice(0, count).map((rv, i) => (
-              <div
-                key={i}
-                className="sm:max-w-4/5 max-w-full sm:pl-5 border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto h-full"
-              >
-                <div className="w-full h-full flex justify-between items-start">
-                  <div className="flex items-start sm:gap-3 gap-1">
-                    <img
-                      src={`${rv?.store?.photos?.[0] ? import.meta.env.VITE_API_BASE_URL+rv?.store?.photos?.[0] : Icon}`}
-                      alt="icon"
-                      className="sm:h-[80px] h-[40px] rounded-xl"
-                      onError={e => {
-                        e.target.src = Icon
-                        e.target.onerror = null
-                      }}
-                    />
-                    <div>
-                      <p className="hover:cursor-pointer sm:text-lg text-sm max-[325px]:text-xs">
-                        <strong onClick={() => handleNavigateStore(rv)}>{rv?.store?.name}</strong>
-                      </p>
-                      <Rating
-                        initialRating={rv.rating}
-                        emptySymbol={
-                          <img src={StarGray} alt="gray-star" className="sm:w-6 sm:h-6 w-3 h-3" />
-                        }
-                        fullSymbol={
-                          <img
-                            src={StarYellow}
-                            alt="yellow-star"
-                            className="sm:w-6 sm:h-6 w-3 h-3"
-                          />
-                        }
-                        readonly={true}
-                      />
-                    </div>
-                  </div>
-                  <div
-                    className="flex items-center sm:gap-3 gap-1 top-0 relative"
-                    ref={el => {
-                      if (el) {
-                        wrappers.current[rv._id] = el
-                      } else if (wrappers.current) {
-                        delete wrappers.current[rv._id]
-                      }
-                    }}
-                  >
-                    <p className="min-sm:text-md max-sm:text-xs">{rv?.createdAt?.split('T')[0]}</p>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      onClick={() => handleShowUserTap(rv)}
-                      className={`sm:size-8 size-6 relative sm:p-[2px] active:bg-gray-300 sm:hover:bg-color-gray-300 rounded-3xl`}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
-                      />
-                    </svg>
-                    <div
-                      className={`absolute right-[-1.5rem] top-9 flex flex-col max-w-fit p-3 bg-white transition-all duration-200 ease-in-out z-50 border-1 border-gray-300 rounded-xl ${openTabId === rv._id ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
-                    >
-                      <button
-                        className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl bg-color-gray-700 sm:bg-gray-600 sm:hover:bg-gray-400 text-white"
-                        onClick={() => handleModifyMyReview(rv)}
-                      >
-                        수정
-                      </button>
-                      <button
-                        className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl bg-color-red-700 sm:bg-red-600 sm:hover:bg-red-400 text-white"
-                        onClick={e => {
-                          e.stopPropagation()
-                          handleDeleteMyReview(rv)
+          {total > 0
+            ? sortedReviews.slice(0, count).map((rv, i) => (
+                <div
+                  key={i}
+                  className="sm:max-w-4/5 max-w-full sm:pl-5 border-1 border-gray-300 rounded-xl p-2 my-3 mx-auto h-full"
+                >
+                  <div className="w-full h-full flex justify-between items-start">
+                    <div className="flex items-start sm:gap-3 gap-1">
+                      <img
+                        src={`${rv?.store?.photos?.[0] ? import.meta.env.VITE_API_BASE_URL + rv?.store?.photos?.[0] : Icon}`}
+                        alt="icon"
+                        className="sm:h-[80px] h-[40px] rounded-xl"
+                        onError={e => {
+                          e.target.src = Icon
+                          e.target.onerror = null
                         }}
+                      />
+                      <div>
+                        <p className="hover:cursor-pointer sm:text-lg text-sm max-[325px]:text-xs">
+                          <strong onClick={() => handleNavigateStore(rv)}>{rv?.store?.name}</strong>
+                        </p>
+                        <Rating
+                          initialRating={rv.rating}
+                          emptySymbol={
+                            <img src={StarGray} alt="gray-star" className="sm:w-6 sm:h-6 w-3 h-3" />
+                          }
+                          fullSymbol={
+                            <img
+                              src={StarYellow}
+                              alt="yellow-star"
+                              className="sm:w-6 sm:h-6 w-3 h-3"
+                            />
+                          }
+                          readonly={true}
+                        />
+                      </div>
+                    </div>
+                    <div
+                      className="flex items-center sm:gap-3 gap-1 top-0 relative"
+                      ref={el => {
+                        if (el) {
+                          wrappers.current[rv._id] = el
+                        } else if (wrappers.current) {
+                          delete wrappers.current[rv._id]
+                        }
+                      }}
+                    >
+                      <p className="min-sm:text-md max-sm:text-xs">
+                        {rv?.createdAt?.split('T')[0]}
+                      </p>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        onClick={() => handleShowUserTap(rv)}
+                        className={`sm:size-8 size-6 relative sm:p-[2px] active:bg-gray-300 sm:hover:bg-color-gray-300 rounded-3xl`}
                       >
-                        삭제
-                      </button>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+                        />
+                      </svg>
+                      <div
+                        className={`absolute right-[-1.5rem] top-9 flex flex-col max-w-fit p-3 bg-white transition-all duration-200 ease-in-out z-50 border-1 border-gray-300 rounded-xl ${openTabId === rv._id ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+                      >
+                        <button
+                          className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl bg-color-gray-700 sm:bg-gray-600 sm:hover:bg-gray-400 text-white"
+                          onClick={() => handleModifyMyReview(rv)}
+                        >
+                          수정
+                        </button>
+                        <button
+                          className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl bg-color-red-700 sm:bg-red-600 sm:hover:bg-red-400 text-white"
+                          onClick={e => {
+                            e.stopPropagation()
+                            handleDeleteMyReview(rv)
+                          }}
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="h-full">
+                    <div className="flex items-end my-1">
+                      <p className={`indent-2 max-w-9/10 sm:text-md max-sm:text-sm break-all`}>
+                        {rv?.comment}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {rv.attachments?.length > 0 &&
+                        rv.attachments.map((src, i) => (
+                          <div key={`image-${src}`}>
+                            <ReviewImageSrc src={src} alt={`image-${i}`} />
+                          </div>
+                        ))}
+                    </div>
+                    <div className="flex justify-end min-sm:text-md max-sm:text-xs">
+                      {handleReviewDate(rv?.createdAt)}
                     </div>
                   </div>
                 </div>
-                <div className="h-full">
-                  <div className="flex items-end my-1">
-                    <p className={`indent-2 max-w-9/10 sm:text-md max-sm:text-sm break-all`}>
-                      {rv?.comment}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {rv.attachments?.length > 0 &&
-                      rv.attachments.map((src, i) => (
-                        <div key={`image-${src}`}>
-                          <ReviewImageSrc src={src} alt={`image-${i}`} />
-                        </div>
-                      ))}
-                  </div>
-                  <div className="flex justify-end min-sm:text-md max-sm:text-xs">
-                    {handleReviewDate(rv?.createdAt)}
-                  </div>
+              ))
+            : isLoading === false && (
+                <div className="font-semibold text-center">
+                  <p>작성한 리뷰가 없습니다.</p>
                 </div>
-              </div>
-            ))
-          ) : (
-            <div className="text-center p-2">
-              <p className="loading-jump text-center p-3 sm:mb-[1000px]">
-                Loading
-                <span className="jump-dots">
-                  <span>.</span>
-                  <span>.</span>
-                  <span>.</span>
-                </span>
-              </p>
-            </div>
-          )}
+              )}
         </div>
         {total > 0 && (
           <div className="mx-auto max-w-fit my-2 min-sm:text-md max-sm:text-sm">

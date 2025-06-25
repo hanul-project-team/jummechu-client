@@ -319,7 +319,7 @@ const HomeRecommand = () => {
                             }}
                           />
                           <div className="flex flex-col">
-                            <p className="sm:text-md text-sm">
+                            <p className="min-sm:text-md max-sm:text-sm">
                               <strong
                                 onClick={() => handleNavigate(fps)}
                                 className="hover:cursor-pointer"
@@ -347,12 +347,12 @@ const HomeRecommand = () => {
                                   </svg>
                                 </div>
                               }
-                              <span className="cursor-default sm:text-md text-sm">
+                              <span className="cursor-default min-sm:text-md max-sm:text-sm">
                                 리뷰수&#40;{handleCountReviews(nearPlaceReviews, fps)}&#41;
                               </span>
                             </div>
                           </div>
-                          <span className="cursor-default sm:text-md text-sm">{fps.address}</span>
+                          <span className="cursor-default min-sm:text-md max-sm:text-sm">{fps.address}</span>
                         </SwiperSlide>
                       )
                     })}

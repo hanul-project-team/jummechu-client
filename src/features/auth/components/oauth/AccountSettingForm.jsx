@@ -8,6 +8,7 @@ import { accountSettingSchema } from '../../schema/accountSettingSchema'
 import { API } from '../../../../app/api'
 import { toast } from 'react-toastify'
 import { CSSTransition } from 'react-transition-group'
+import { useMediaQuery } from 'react-responsive'
 import TermsBox from '../regist/TermsBox'
 import Timer from '../../../../shared/Timer'
 
@@ -43,6 +44,7 @@ const AccountSettingForm = ({ returnUrl, from }) => {
     },
   })
   const user = useSelector(state => state.auth.user)
+  const isMobile = useMediaQuery({ maxWidth: '640px' })
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const phoneValue = watch('phone')
@@ -52,8 +54,8 @@ const AccountSettingForm = ({ returnUrl, from }) => {
     phone: createRef(null),
   })
   useEffect(() => {
-    setFocus('name')
-  }, [setFocus])
+    if (!isMobile) setFocus('name')
+  }, [isMobile, setFocus])
   useEffect(() => {
     const isValid = /^01[016789][0-9]{8}$/.test(phoneValue)
     setIsPhone(!!isValid)
@@ -218,7 +220,7 @@ const AccountSettingForm = ({ returnUrl, from }) => {
             </label>
             <div className="flex gap-3">
               <input
-                className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
+                className="w-0 border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
                 type="text"
                 id="phone"
                 placeholder="'-'제외 숫자만 입력해주세요"
@@ -270,7 +272,7 @@ const AccountSettingForm = ({ returnUrl, from }) => {
               </label>
               <div className="flex gap-3">
                 <input
-                  className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
+                  className="w-0 border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
                   type="text"
                   id="code"
                   placeholder="인증번호 6자리"
