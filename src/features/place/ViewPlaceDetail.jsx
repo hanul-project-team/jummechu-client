@@ -336,11 +336,11 @@ const ViewPlaceDetail = () => {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 items-start justify-center mt-5">
-              <div className="min-lg:pl-3">
+            <div className="grid grid-cols-2 max-sm:auto-rows-auto items-start justify-center mt-5">
+              <div className="min-lg:pl-3 min-sm:aspect-[3/2] max-sm:aspect-[1/1] max-sm:pb-3">
                 <div
                   id="map"
-                  className="w-full min-lg:h-[300px] max-lg:h-[200px] max-md:h-[130px]"
+                  className="w-full h-full"
                 ></div>
               </div>
               <div className="min-sm:row-span-2 px-2">
