@@ -249,7 +249,6 @@ const PlaceReview = () => {
             <p>
               총 <strong>{reviewInfo?.length}</strong>분의 고객님이 리뷰를 남기셨습니다.
             </p>
-            {/* 리뷰 작성 모달 버튼 */}
             <div className="flex gap-3 my-2">
               <div className="flex hover:cursor-pointer" onClick={handleReviewWrite}>
                 <svg
@@ -297,12 +296,12 @@ const PlaceReview = () => {
                 className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 sm:pl-5 my-3 mx-auto relative"
               >
                 <div className="flex items-start justify-between">
-                  <div className="flex gap-3 items-center">
+                  <div className="flex min-sm:gap-3 max-sm:gap-1 items-center">
                     <div className='sm:w-20 sm:h-20 w-10 h-10 overflow-hidden'>
                       <img
                         src={
-                          user?.profileImage
-                            ? import.meta.env.VITE_API_BASE_URL + user.profileImage
+                          rv?.user?.profileImage
+                            ? import.meta.env.VITE_API_BASE_URL + rv?.user?.profileImage
                             : DefaultProfile
                         }
                         alt="icon"

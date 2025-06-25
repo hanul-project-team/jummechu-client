@@ -20,10 +20,10 @@ const ResponsiveSmall = ({
       setTimeout(() => setIsShowing(true), 10)
     } else {
       setIsShowing(false)
+      document.body.style.overflow = ''
       setTimeout(() => {
         setOpenModal(false)
-      }, 300)
-      document.body.style.overflow = ''
+      }, 350)
     }
   }
   const handleCloseMenu = () => {
@@ -64,9 +64,13 @@ const ResponsiveSmall = ({
         </div>
       </div>
       {openModal === true && (
-        <div className="bg-black/70 fixed inset-0 z-50 flex transition-opacity duration-300">
+        <div
+          className={`bg-black/70 fixed inset-0 z-50 flex transition-opacity duration-300 ${isShowing ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+          onClick={handleUserMenu}
+        >
           <div
             className={`ml-auto w-[70vw] max-w-sm h-full bg-white z-50 relative p-4 rounded-l-2xl transform transition-all duration-300 ease-in-out ${isShowing ? 'translate-x-0' : 'translate-x-full'}`}
+            onClick={e => e.stopPropagation()}
           >
             {isAuthenticated ? (
               <div className="text-md">

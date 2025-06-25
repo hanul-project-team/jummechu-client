@@ -8,7 +8,7 @@ const MainHeader = () => {
   const isRoot = location.pathname === '/'
   return (
     <>
-      <header>
+      <header className="max-sm:py-5">
         {isRoot === true ? (
           <div className="container max-w-5xl mx-auto px-6">
             <MainHeaderTop />

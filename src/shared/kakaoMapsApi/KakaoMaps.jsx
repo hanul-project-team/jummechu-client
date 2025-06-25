@@ -194,7 +194,7 @@ const KakaoMaps = () => {
       {isRoot === true ? (
         <>
           <div className='bg-banner py-10 mb-15 relative left-1/2 -translate-x-1/2 w-screen'>
-            <div className="md:max-w-1/2 mx-auto relative z-50">
+            <div className="md:max-w-1/2 xl:max-w-1/3 mx-auto relative z-50">
               <h1 className="text-center text-4xl sm:text-5xl text-color-gray-900 font-bold">오늘 뭐 먹지?</h1>
               <form className="p-3 my-3" onSubmit={handleSubmit} autoComplete="off">
                 <fieldset>
