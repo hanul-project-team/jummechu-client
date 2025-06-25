@@ -693,7 +693,7 @@
   }
 
   .bg-banner {
-    background: url(../images/freebanner.jpg);
+    background: url(../images/home-banner.png);
     position: relative;
     background-repeat: no-repeat;
     background-size: cover;
@@ -704,6 +704,7 @@
     content: '';
     position: absolute;
     inset: 0;
+    backdrop-filter: blur(4px);
     background: rgba(255, 255, 255, 0.3);
     z-index: 1;
   }
