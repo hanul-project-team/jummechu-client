@@ -296,7 +296,7 @@ const PlaceReview = () => {
                 className="sm:max-w-4/5 max-w-full border-1 border-gray-300 rounded-xl p-2 sm:pl-5 my-3 mx-auto relative"
               >
                 <div className="flex items-start justify-between">
-                  <div className="flex gap-3 items-center">
+                  <div className="flex min-sm:gap-3 max-sm:gap-1 items-center">
                     <img src={Icon} alt="icon" className="sm:max-h-[80px] max-h-[40px]" />
                     <div>
                       <p>{rv?.user?.name}</p>
