@@ -12,7 +12,7 @@ import defaultfood from '../../../assets/images/default2.png'
 // import { toast } from 'react-toastify';
 
 // recentStores는 현재 컴포넌트에서 사용되지 않지만, 사용자 요청에 따라 제거하지 않음
-const MyPageFormBookmark = ({ backendBaseUrl, recentStores }) => {
+const MyPageFormBookmark = ({ API, recentStores }) => {
   const navigate = useNavigate() // ZustandUser 스토어에서 찜 목록 상태와 관련 액션을 개별적으로 가져오기
   // userBookmark는 null일 경우 빈 배열로 대체 (초기 로딩 시나 저장된 데이터 없을 때 안전)
 
@@ -40,9 +40,6 @@ const MyPageFormBookmark = ({ backendBaseUrl, recentStores }) => {
         refreshUserBookmarks(userId)
       } else {
         // userId가 없을 경우 찜 목록 초기화 (refreshUserBookmarks가 내부에서 처리)
-        console.log(
-          'MyPageFormBookmark: 사용자 ID가 없어 찜 목록을 불러올 수 없습니다. 찜 목록을 초기화합니다.',
-        )
         refreshUserBookmarks(null)
       }
     } else {
@@ -108,10 +105,8 @@ const MyPageFormBookmark = ({ backendBaseUrl, recentStores }) => {
                 >
                   <img
                     src={
-                      store.photos && store.photos.length > 0
-                        ? store.photos[0].startsWith('http') || store.photos[0].startsWith('https')
-                          ? store.photos[0]
-                          : `${backendBaseUrl}${store.photos[0]}`
+                           store?.photos[0] ?
+                           `${import.meta.env.VITE_API_BASE_URL}${store.photos[0]}`
                         : defaultfood
                     }
                     alt={store.name || '이미지 없음'} // item.name -> store.name
@@ -168,7 +163,7 @@ const MyPageFormBookmark = ({ backendBaseUrl, recentStores }) => {
                   <h2 className="text-lg py-1 font-SinchonRhapsody flex">
                     {store.name || '이름 없음'}
                   </h2>
-                
+
                   <div className="py-1 flex items-center text-sm text-gray-500">
                     <svg
                       fill="#000000"

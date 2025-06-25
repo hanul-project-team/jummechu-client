@@ -28,7 +28,7 @@ const MyPageFormReviews = ({ user, currentTab, wrappers }) => {
     API.get(`/review/read/user/${user.id}`)
       .then(res => {
         const data = res.data
-        console.log(data)
+        // console.log(data)
         if (data.length < 1 && userReviewRef.current) {
           setMyReviews([])
           userReviewRef.current = []

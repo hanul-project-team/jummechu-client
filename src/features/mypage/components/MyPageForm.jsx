@@ -18,6 +18,7 @@ import { toast } from 'react-toastify'
 import defaultProfileImg from '../../../assets/images/defaultProfileImg.jpg'
 import { shallow } from 'zustand/shallow'
 import zustandStore from '../../../app/zustandStore.js'
+import {API} from '../../../app/api.js'
 import ConfirmModal from '../components/ConfirmModal.jsx' // ConfirmModal 임포트
 
 const MyPageForm = () => {
@@ -38,7 +39,6 @@ const MyPageForm = () => {
 
   const fetchUserBookmarks = useCallback(async () => {
     if (!userId) {
-      console.log('MyPageForm: 사용자 ID가 없어 찜 목록을 불러올 수 없습니다. userBookmark 초기화.')
       setIsLoading(false)
       setUserBookmark([])
       return
@@ -46,17 +46,17 @@ const MyPageForm = () => {
 
     setIsLoading(true)
     try {
-      console.log(`MyPageForm: 찜 목록 불러오는 중... (userId: ${userId})`)
-      const response = await axios.get(`${backendBaseUrl}/bookmark/read/${userId}`, {
+      // console.log(`MyPageForm: 찜 목록 불러오는 중... (userId: ${userId})`)
+      const response = await API.get(`/bookmark/read/${userId}`, {
         withCredentials: true,
       })
 
       if (Array.isArray(response.data)) {
         const newBookmarks = response.data
         setUserBookmark(newBookmarks)
-        console.log('MyPageForm: 찜 목록 새로고침 성공:', newBookmarks)
+        // console.log('MyPageForm: 찜 목록 새로고침 성공:', newBookmarks)
       } else {
-        console.warn('MyPageForm: 찜 목록 응답 형식이 배열이 아닙니다:', response.data)
+        // console.warn('MyPageForm: 찜 목록 응답 형식이 배열이 아닙니다:', response.data)
         setUserBookmark([])
         toast.error('찜 목록 데이터를 처리할 수 없습니다.')
       }
@@ -67,7 +67,7 @@ const MyPageForm = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [userId, setUserBookmark, setIsLoading, backendBaseUrl])
+  }, [userId, setUserBookmark, setIsLoading, API])
 
   useEffect(() => {
     fetchUserBookmarks()
@@ -198,7 +198,6 @@ const MyPageForm = () => {
             longitude: position.coords.longitude,
           })
           setLocationError('')
-          console.log('사용자 위치 획득:', position.coords.latitude, position.coords.longitude)
         },
         error => {
           console.error('위치 정보 획득 실패:', error)
@@ -241,7 +240,7 @@ const MyPageForm = () => {
       }
 
       try {
-        const response = await axios.get(`${backendBaseUrl}/auth/recent-history?userId=${userId}`, {
+        const response = await API.get(`/auth/recent-history?userId=${userId}`, {
           withCredentials: true,
         })
         const fetchedRecentStores = response.data.recentViewedStores
@@ -260,7 +259,7 @@ const MyPageForm = () => {
     if (active === '최근기록' || active === '음식점 추천(AI)') {
       fetchRecentStores()
     }
-  }, [active, userId, backendBaseUrl])
+  }, [active, userId, API])
 
   useEffect(() => {
     if (location.state) {
@@ -277,7 +276,7 @@ const MyPageForm = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await axios.get(`${backendBaseUrl}/auth/myprofile`, {
+        const response = await API.get(`/auth/myprofile`, {
           withCredentials: true,
         })
 
@@ -295,7 +294,7 @@ const MyPageForm = () => {
         setUserName(callUserName)
 
         const callUserImage = response.data.profileImage
-        setUserProfileImage(callUserImage ? `${backendBaseUrl}${callUserImage}` : defaultProfileImg)
+        setUserProfileImage(callUserImage ? `${import.meta.env.VITE_API_BASE_URL}${callUserImage}` : defaultProfileImg)
       } catch (error) {
         console.error('사용자 프로필 정보를 불러오는데 실패했습니다:', error)
         setUserProfileImage(defaultProfileImg)
@@ -311,7 +310,7 @@ const MyPageForm = () => {
         payload.latitude = lat
         payload.longitude = lon
       }
-      const response = await axios.post(`${backendBaseUrl}/api/azure/openai`, payload)
+      const response = await API.post(`/api/azure/openai`, payload)
       return response
     } catch (error) {
       console.error('OpenAI 호출 실패:', error.response?.data || error.message)
@@ -376,12 +375,10 @@ const MyPageForm = () => {
       }
 
       if (hasFetchedAIRecommendations || aiFetchInProgressRef.current) {
-        console.log('AI 추천: 이미 데이터를 불러왔거나 로딩 중이므로 다시 불러오지 않습니다.')
         return
       }
 
       if (recentStores.length === 0 && userBookmark.length === 0) {
-        console.log('AI 추천: 최근 본 가게 기록과 찜 목록이 모두 없어 추천을 시작할 수 없습니다.')
         setOpenAi(['AI 추천을 위해 최근 본 가게 기록 또는 찜 목록이 필요합니다.'])
         setLoading(false)
         setHasFetchedAIRecommendations(true)
@@ -389,7 +386,6 @@ const MyPageForm = () => {
       }
 
       if (!userLocation && !locationError) {
-        console.log('AI 추천: 사용자 위치 정보를 기다리는 중...')
         setLoading(true)
         return
       }
@@ -432,7 +428,6 @@ ${aiKeywordsStringForPrompt}
 `
           dalleKeyword = aiKeywordsStringForPrompt
         } else {
-          console.log('AI 추천: 특정 키워드를 추출할 수 없어 일반적인 음식점 추천을 시도합니다.')
           promptToUse = `
 사용자에게 현재 위치 주변에서 **가까운** 인기 있는 주변 음식점 4곳을 추천해 주세요.
 다양한 종류의 음식점을 포함하여 추천해 주세요.
@@ -473,22 +468,17 @@ ${aiKeywordsStringForPrompt}
                 : item.keyword, // 배열이 아닌 경우 그대로 유지
             }))
             setOpenAi(cleanedData) // 필터링된 데이터로 상태 업데이트
-            console.log('AI 추천 음식점 목록 설정:', cleanedData)
 
             const imageUrl = await callDalleImage(dalleKeyword)
             if (imageUrl) {
               setDalleImage(imageUrl)
-              console.log('DALL-E 이미지 URL 설정:', imageUrl)
             } else {
               setDalleImage(null)
-              console.warn('DALL-E 이미지 생성 실패 또는 URL 없음.')
             }
           } else {
-            console.error('AI 응답이 예상된 배열 형태가 아니거나 비어있습니다:', parsedData)
             setOpenAi(['AI 응답이 예상된 형식이 아니거나 비어있습니다.'])
           }
         } else {
-          console.error('AI 응답 데이터가 유효하지 않습니다.')
           setOpenAi(['AI 추천을 받을 수 없습니다.'])
         }
       } catch (apiError) {
@@ -516,11 +506,10 @@ ${aiKeywordsStringForPrompt}
 
   const callDalleImage = async keyword => {
     try {
-      const res = await axios.post(`${backendBaseUrl}/api/azure/dalle`, {
-        // **backendBaseUrl 사용**
+      const res = await API.post(`/api/azure/dalle`, {
         prompt: `${keyword}에 대한 실제 음식 사진처럼 보이고, 시선을 사로잡는 아름다운 구도와 부드러운 자연광이 돋보이는 초고화질 음식 사진을 생성해주세요. 식욕을 돋우는 선명한 색감과 생생한 질감을 가진, 배경은 단순하게 처리하고 음식에 집중해주세요.`,
       })
-      console.log('DALL-E 응답:', res) // 이미지 URL이 완전한 URL (http/https)인지 확인하고 반환
+     // 이미지 URL이 완전한 URL (http/https)인지 확인하고 반환
       // 백엔드에서 Base64 인코딩된 데이터를 직접 받는 경우, 'data:image/png;base64,...' 형식으로 반환해야 합니다.
       // 현재 이미지 경로가 파일 시스템 경로로 되어 있어 이 부분에 문제가 있을 수 있습니다.
       // 백엔드에서 유효한 URL을 반환한다고 가정하고, 그대로 사용합니다.
@@ -549,8 +538,8 @@ ${aiKeywordsStringForPrompt}
 
   const handleSaveChanges = async () => {
     try {
-      const response = await axios.put(
-        `${backendBaseUrl}/auth/profile`,
+      const response = await API.put(
+        `/auth/profile`,
         {
           nickname: tempNickname,
           email: userEmail,
@@ -573,7 +562,6 @@ ${aiKeywordsStringForPrompt}
         })
       }
     } catch (error) {
-      console.error('프로필 정보 업데이트 실패:', error)
       toast.error(
         `프로필 정보 업데이트 중 오류가 발생했습니다: ${error.response?.data?.message || '서버 오류'}`,
         { position: 'top-center' },
@@ -593,7 +581,7 @@ ${aiKeywordsStringForPrompt}
         label: '삭제',
         onClick: async () => {
           try {
-            const response = await axios.delete(`${backendBaseUrl}/auth/account`, {
+            const response = await API.delete(`/auth/account`, {
               withCredentials: true,
             })
           } catch (error) {
@@ -611,7 +599,7 @@ ${aiKeywordsStringForPrompt}
   const confirmDeleteAccount = async () => {
     setShowDeleteConfirmModal(false) // 모달 닫기
     try {
-      const response = await axios.delete(`${backendBaseUrl}/auth/account`, {
+      const response = await API.delete(`/auth/account`, {
         withCredentials: true,
       })
 
@@ -647,15 +635,15 @@ ${aiKeywordsStringForPrompt}
 
     try {
       if (isCurrentlyBookmarked) {
-        await axios.delete(`${backendBaseUrl}/bookmark/delete/${storeId}`, {
+        await API.delete(`/bookmark/delete/${storeId}`, {
           withCredentials: true,
           data: { headers: { user: userId } },
         })
         setUserBookmark(prev => (prev || []).filter(bookmark => bookmark.store?._id !== storeId))
         toast.success(`'${storeName}' 찜 목록에서 삭제되었습니다.`, { position: 'top-center' })
       } else {
-        const response = await axios.post(
-          `${backendBaseUrl}/bookmark/regist/${storeId}`,
+        const response = await API.post(
+          `/bookmark/regist/${storeId}`,
           { headers: { user: userId } },
           {
             withCredentials: true,
@@ -687,7 +675,7 @@ ${aiKeywordsStringForPrompt}
           <MyPageFormRecent
             recentStores={recentStores}
             isStoreBookmarked={isStoreBookmarked}
-            backendBaseUrl={backendBaseUrl}
+            API={API}
             handleBookmarkToggle={handleBookmarkToggle}
             setPlaceDetail={setPlaceDetail}
           />
@@ -696,7 +684,7 @@ ${aiKeywordsStringForPrompt}
       case '찜':
         return (
           <MyPageFormBookmark
-            backendBaseUrl={backendBaseUrl}
+          API={API}
             active={active}
             userId={userId}
             handleBookmarkToggle={handleBookmarkToggle}
@@ -717,7 +705,7 @@ ${aiKeywordsStringForPrompt}
           <MyPageFormAI
             loading={loading}
             dalleImage={dalleImage}
-            backendBaseUrl={backendBaseUrl}
+            API={API}
             openai={openai}
             userNickname={userNickname}
             mostFrequentKeywords={aiRecommendationKeyword}
@@ -780,12 +768,11 @@ ${aiKeywordsStringForPrompt}
               <div className="py-5">
                 <div>
                   <div className="py-3 flex justify-between">
-                    <p>이메일 관리</p>
+                    <p>이메일</p>
                     {isEditing ? (
                       <input
                         type="email"
                         value={userEmail}
-                        onChange={e => setUserEmail(e.target.value)}
                         className="border border-gray-300 rounded px-2 py-1 w-1/2"
                       />
                     ) : (
@@ -832,20 +819,7 @@ ${aiKeywordsStringForPrompt}
                   )}
                 </div>
                 <hr className="py-3" />
-                <div className="py-3 flex justify-between">
-                  <p>연락처</p>
-                  {isEditing ? (
-                    <input
-                      type="tel"
-                      value={userPhone}
-                      onChange={e => setUserPhone(e.target.value)}
-                      className="border border-gray-300 rounded px-2 py-1 w-1/2"
-                    />
-                  ) : (
-                    <p>{userPhone}</p>
-                  )}
-                </div>
-                <hr className="py-3" />
+
               </div>
               <div className="flex gap-5 justify-center">
                 <button

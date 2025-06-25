@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+import {API} from '../../../app/api.js'
 // ... 다른 임포트
 
 const PwdChangeModal = ({ onClose, onPasswordChangeSuccess }) => {
@@ -34,8 +35,8 @@ const PwdChangeModal = ({ onClose, onPasswordChangeSuccess }) => {
 
     try {
       // API 호출 시 oldPassword 제거
-      const response = await axios.put(
-        'http://localhost:3000/auth/change-password', // API 주소 확인 (auth/change-password)
+      const response = await API.put(
+        '/auth/change-password', // API 주소 확인 (auth/change-password)
         { newPassword, confirmPassword: newPassword }, // ★★★ oldPassword 제거 및 confirmPassword 통일 ★★★
         { withCredentials: true }
       );

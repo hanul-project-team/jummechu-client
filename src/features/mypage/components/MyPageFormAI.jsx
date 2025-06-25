@@ -9,7 +9,7 @@ const MyPageFormAI = ({
   mostFrequentKeywords,
   userLocation,
   locationError,
-  backendBaseUrl, // backendBaseUrl을 props로 받도록 추가
+  API, // backendBaseUrl을 props로 받도록 추가
 }) => {
   const displayKeywords =
     mostFrequentKeywords && mostFrequentKeywords.length > 0
@@ -47,7 +47,7 @@ const MyPageFormAI = ({
               {/* 이미지 URL이 절대 경로가 아닌 경우, backendBaseUrl을 앞에 붙여줍니다. */}
               {/* 이미지가 백엔드에서 생성된 URL을 그대로 사용한다고 가정합니다. */}
               <img
-                src={dalleImage.startsWith('http') ? dalleImage : `${backendBaseUrl}${dalleImage}`} // **수정된 부분**
+                src={dalleImage.startsWith('http') ? dalleImage : `${API}${dalleImage}`} // **수정된 부분**
                 alt="AI Generated Food"
                 className="w-full max-w-md mx-auto rounded-lg shadow-md object-cover"
                 style={{ aspectRatio: '16/9' }}

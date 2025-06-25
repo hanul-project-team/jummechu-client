@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react'
 import defaultfood from '../../../assets/images/default2.png'
 import { useNavigate } from 'react-router-dom'
+import {API} from '../../../app/api.js'
 
 const MyPageFormRecent = ({
   recentStores,
   isStoreBookmarked,
-  backendBaseUrl,
+  API,
   handleBookmarkToggle,
   setPlaceDetail,
 }) => {
@@ -27,16 +28,12 @@ const MyPageFormRecent = ({
                 >
                   <img
                     src={
-                      item.photos && item.photos.length > 0
-                        ? item.photos[0].startsWith('http') || item.photos[0].startsWith('https')
-                          ? item.photos[0]
-                          : `${backendBaseUrl}${item.photos[0]}`
+                      item?.photos[0] ? `${import.meta.env.VITE_API_BASE_URL}${item?.photos[0]}`
                         : defaultfood
-                    } ////
+                    }
                     alt={item.name}
                     className="w-full h-full object-cover rounded-lg"
                     onError={e => {
-                      e.target.onerror = null
                       e.target.src = defaultfood
                     }}
                   />
@@ -105,7 +102,6 @@ const MyPageFormRecent = ({
                   <button
                     onClick={e => {
                       e.stopPropagation()
-                      console.log(item._id)
                       setPlaceDetail(null)
                       navigate(`/place/${item._id}`, { state: item })
                     }}
