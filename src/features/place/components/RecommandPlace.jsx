@@ -11,51 +11,12 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
   const navigate = useNavigate()
 
   const handleNavigate = snd => {
-    if (snd) {
-      API.post('/store/storeInfo', snd)
-        .then(res => {
-          const data = res.data
-          if (data !== null && data._id) {
-            // console.log('1-2 데이터 있음')
-            try {
-              navigate(`/place/${data._id}`, { state: data })
-            } catch (err) {
-              console.error(`data 아이디 에러 ${data._id}`)
-            }
-          } else if (data === null) {
-            setLoading(true)
-            window.scrollTo({ top: 0 })
-            console.log('2-1 데이터 없음, 등록 실행')
-            API.post('/store/save', snd)
-              .then(res => {
-                const place = res.data
-                // console.log(place)
-                if (Array.isArray(place)) {
-                  navigate(`/place/${place[0]._id}`, { state: place[0] })
-                  setLoading(false)
-                } else {
-                  navigate(`/place/${place._id}`, { state: place })
-                  setLoading(false)
-                }
-              })
-              .catch(err => {
-                toast.error(
-                  <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
-                  {
-                    position: 'top-center',
-                  },
-                )
-              })
-          }
-        })
-        .catch(err => {
-          toast.error(
-            <div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>,
-            {
-              position: 'top-center',
-            },
-          )
-        })
+    if (snd && snd._id) {
+      navigate(`/place/${snd._id}`, { state: snd })
+    } else {
+      toast.error(<div className="Toastify__toast-body cursor-default">다시 시도해주세요.</div>, {
+        position: 'top-center',
+      })
     }
   }
 
@@ -108,7 +69,7 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
                         <div key={i}>
                           <div className="hover:cursor-pointer" onClick={() => handleNavigate(snd)}>
                             <img
-                              src={snd?.photos?.[0] || Icon}
+                              src={`${snd?.photos?.[0] ? import.meta.env.VITE_API_BASE_URL + snd?.photos?.[0] : Icon}`}
                               alt="icon"
                               className="sm:w-[150px] sm:h-[150px] h-[80px] w-[80px] mx-auto rounded-xl"
                               onError={e => {
@@ -122,7 +83,7 @@ const RecommandPlace = ({ placeDetail, setLoading, loading }) => {
                               className="hover:cursor-pointer font-bold"
                               onClick={() => handleNavigate(snd)}
                             >
-                              {snd.place_name ? snd.place_name : snd.name}
+                              {snd?.place_name ? snd.place_name : snd.name}
                             </p>
                           </div>
                         </div>

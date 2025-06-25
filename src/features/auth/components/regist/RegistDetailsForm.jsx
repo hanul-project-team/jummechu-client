@@ -32,6 +32,7 @@ const RegistDetailsForm = () => {
     name: false,
     phone: false,
   })
+  const returnUrl = localStorage.getItem('returnUrl')
   const {
     register,
     handleSubmit,
@@ -164,7 +165,7 @@ const RegistDetailsForm = () => {
         },
       )
       reset()
-      navigate('/login')
+      navigate('/login', returnUrl ? { state: { returnUrl } } : undefined)
     } catch (e) {
       if (e.response.status === 400) {
         toast.error(

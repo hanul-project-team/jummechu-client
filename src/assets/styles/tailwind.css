@@ -11,6 +11,7 @@
   .bg-color-red-700  { background-color: var(--color-red-700); }
   .bg-color-red-500  { background-color: var(--color-red-500); }
   .bg-color-red-50   { background-color: var(--color-red-50); }
+  .bg-color-yellow-500  { background-color: var(--color-yellow-500); }
 
   /* hover:bg-color */
   .hover\:bg-color-gray-900:hover { background-color: var(--color-gray-900); }
@@ -113,6 +114,7 @@
   .border-color-red-700  { border-color: var(--color-red-700); }
   .border-color-red-500  { border-color: var(--color-red-500); }
   .border-color-red-50   { border-color: var(--color-red-50); }
+  .border-color-yellow-500   { border-color: var(--color-yellow-500); }
 
   /* border-b-color */
   .border-b-color-gray-900 { border-bottom-color: var(--color-gray-900); }

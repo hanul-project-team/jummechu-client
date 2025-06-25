@@ -4,6 +4,7 @@ import zustandUser from '../../../app/zustandUser.js'
 import { useSelector } from 'react-redux'
 import zustandStore from '../../../app/zustandStore.js'
 import { useLocation } from 'react-router-dom'
+import { toast } from 'react-toastify'
 
 const CheckBookmarks = () => {
   const user = useSelector(state => state.auth.user)
@@ -43,16 +44,19 @@ const CheckBookmarks = () => {
   }, [userBookmark, placeDetail, location.state])
 
   const getUserBookmark = () => {
-    API
-      .get(`/bookmark/read/${user?.id}`)
+    API.get(`/bookmark/read/${user?.id}`)
       .then(res => {
         const data = res.data
-        // console.log(data)
         setUserBookmark(data)
         bookmarkRef.current = data
       })
       .catch(err => {
-        console.error('북마크 갱신 실패', err)
+        toast.error(
+          <div className="Toastify__toast-body cursor-default">북마크 갱신 실패</div>,
+          {
+            position: 'top-center',
+          },
+        )
       })
   }
 }

@@ -4,6 +4,7 @@ import { API } from '../../app/api.js'
 import { useNavigate } from 'react-router-dom'
 import KakaoMaps from '../../shared/kakaoMapsApi/KakaoMaps.jsx'
 import SearchResultPageList from '../../features/search/SearchResultPageList.jsx'
+import { toast } from 'react-toastify'
 
 const SearchResult = () => {
   const [tag, setTag] = useState([])
@@ -42,7 +43,6 @@ const SearchResult = () => {
         API.post('/store/save', places)
           .then(res => {
             const data = res.data
-            // console.log(data)
             setSearchResults(data)
             if (data && data.length > 0) {
               API.post('/review/readall', {
@@ -50,10 +50,18 @@ const SearchResult = () => {
               })
                 .then(res => {
                   const data = res.data
-                  // console.log(data)
                   setSearchReviews(data)
                 })
-                .catch(err => console.log(err))
+                .catch(err =>
+                  toast.error(
+                    <div className="Toastify__toast-body cursor-default">
+                      잠시 후 다시 시도해주세요.
+                    </div>,
+                    {
+                      position: 'top-center',
+                    },
+                  ),
+                )
             }
           })
           .catch(err => {
@@ -68,7 +76,10 @@ const SearchResult = () => {
 
   const handleAvgRating = (reviews, place) => {
     if (reviews?.length > 0) {
-      const matchedReviews = reviews?.filter(review => review.store?.name === place.place_name)
+      const matchedReviews = reviews?.filter(
+        review =>
+          review.store?.name === place?.place_name && review.store?.address === place?.address_name,
+      )
       const avgRating =
         matchedReviews?.length > 0
           ? matchedReviews.reduce((acc, cur) => acc + cur.rating, 0) / matchedReviews.length
@@ -81,7 +92,10 @@ const SearchResult = () => {
   }
   const handleCountReviews = (reviews, place) => {
     if (reviews?.length > 0) {
-      const matchedReviews = reviews?.filter(review => review.store?.name === place.place_name)
+      const matchedReviews = reviews?.filter(
+        review =>
+          review.store?.name === place?.place_name && review.store?.address === place?.address_name,
+      )
       return matchedReviews.length
     } else return 0
   }
@@ -103,7 +117,6 @@ const SearchResult = () => {
       .filter(key => !storeName.includes(key))
     return filtered
   }
-  // console.log(searchData)
   return (
     <div className="container max-w-5xl px-6 mx-auto">
       <KakaoMaps />

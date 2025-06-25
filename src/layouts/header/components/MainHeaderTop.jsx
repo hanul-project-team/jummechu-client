@@ -85,7 +85,7 @@ const MainHeaderTop = () => {
           ${open ? 'max-h-60 opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95'}`}
           >
             {user.role === 'member' && (
-              <NavLink to={user.isAccountSetting ? '/mypage' : '/social_setting'} state={{returnUrl:'/mypage'}}>
+              <NavLink to={user.isAccountSetting ? '/mypage' : '/account_setting'} state={{returnUrl:'/mypage'}}>
                 <button className="w-full hover:cursor-pointer text-center underline underline-offset-8 p-2 py-3 bg-white hover:bg-gray-200">
                   마이페이지
                 </button>

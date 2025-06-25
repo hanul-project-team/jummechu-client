@@ -49,7 +49,7 @@ const KakaoNearPlace = () => {
               >
                 <div onClick={() => handleSaveAndNavigate(unp)} className="hover:cursor-pointer">
                   <img
-                    src={unp?.photos?.[0] || Icon}
+                    src={`${unp?.photos?.[0] ? import.meta.env.VITE_API_BASE_URL+unp?.photos?.[0] : Icon}`}
                     alt="lorem picture"
                     className="sm:w-[200px] sm:h-[150px] rounded-xl"
                     onError={e => {

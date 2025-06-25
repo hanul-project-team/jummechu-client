@@ -1,6 +1,7 @@
 # 점메추(Jummechu) - 맛집 검색 및 사용자 맞춤 추천 사이트
 
 ## 링크모음
+- **서비스 주소**: [https://jummechu-web.vercel.app](https://jummechu-web.vercel.app)
 - **클라이언트 GitHub**: [https://github.com/hanul-project-team/jummechu-client](https://github.com/hanul-project-team/jummechu-client)
 - **서버 GitHub**: [https://github.com/hanul-project-team/jummechu-server](https://github.com/hanul-project-team/jummechu-server)
 <br><br>
@@ -47,6 +48,7 @@ jummechu-client/
 ├── index.html
 ├── package.json
 ├── README.md
+├── vercel.json
 ├── vite.config.js
 └── yarn.lock
 ```
@@ -56,7 +58,9 @@ jummechu-client/
 ```bash
 .env
 VITE_GOOGLE_CLIENT_ID=your-google-client-id
+VITE_KAKAO_API_KEY=your-kakao-API_key
 VITE_KAKAO_KEY=your-kakao-key
+VITE_KAKAO_REDIRECT_URI=http://localhost:5173/kakao_callback
 
 .env.development
 VITE_API_BASE_URL=http://localhost:3000
@@ -65,7 +69,7 @@ VITE_API_BASE_URL=http://localhost:3000
 
 ## 주요기능
 - **회원 유형에 따른 차별화된 서비스 제공**
-    - 비회원, 일반 회원, 사업자 회원, 관리자
+    - 비회원, 일반 회원, 사업자 회원
 
 - **회원 관리 기능** *(문승준)*
     - 로그인, 회원가입 (일반회원, 사업자회원)
@@ -88,13 +92,6 @@ VITE_API_BASE_URL=http://localhost:3000
     - 누구나 가입 가능 (단, 음식점 관리 기능은 입점 승인 후 사용 가능)
     - 대시보드에서 사업자 정보 입력 후 입점 요청 가능
     - 입점 승인된 사업자는 음식점 소개글 작성, 리뷰 및 평점 관리 가능
-
-- **관리자 기능** *(개발중)*
-    - 전체 회원 목록 조회 및 회원 관리
-    - 사용자 리뷰 모니터링 및 삭제 등 관리 기능
-    - 사업자 회원의 입점 신청 승인 및 거절
-    - 입점 승인된 음식점 목록 및 정보 관리
-    - 전체 서비스 운영을 위한 전반적인 사이트 관리 기능 제공
 <br><br>
 
 ## 서비스 화면 미리보기

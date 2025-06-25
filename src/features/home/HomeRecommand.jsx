@@ -9,7 +9,6 @@ import { Link } from 'react-router-dom'
 import zustandStore from '../../app/zustandStore.js'
 
 const HomeRecommand = () => {
-  const [tag, setTag] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const userNearPlace = zustandStore(state => state.userNearPlace)
   const nearPlaceReviews = zustandStore(state => state.nearPlaceReviews)
@@ -88,7 +87,7 @@ const HomeRecommand = () => {
   ]
   useEffect(() => {
     const fetchReviews = (isFromInterval = false) => {
-      setIsLoading(true) // {/* interval 1번 */}
+      setIsLoading(true)
       if (userNearPlace && userNearPlace.length > 0) {
         const categories = userNearPlace.map(unp => {
           return unp.keywords[0]
@@ -109,17 +108,16 @@ const HomeRecommand = () => {
           return acc
         }, [])
 
-        const filteredCategories = reducedCategories?.filter(tag => tag?.length > 0)
+        const filteredCategories = reducedCategories?.filter(
+          tag => tag?.length > 0 && !tag.includes('>'),
+        )
 
         try {
-          // console.log(filteredCategories)
           const results = matchingCategories(defaultCategories, filteredCategories)
           const center = {
             latitude: userNearPlace[0].latitude,
             longitude: userNearPlace[0].longitude,
           }
-          // console.log(center)
-          // console.log(results)
           if (results) {
             API.post('/store/tag/match', {
               results: results,
@@ -142,8 +140,7 @@ const HomeRecommand = () => {
                 )
               })
           }
-          setTag(results)
-          // {/*interval 2번*/}
+
           if (otherPlaces?.length > 0 && lastPlacesRef.current) {
             if (isFromInterval || isSamePlaces(lastPlacesRef.current, otherPlaces)) {
               const places = otherPlaces.map(place => place.stores)
@@ -157,7 +154,6 @@ const HomeRecommand = () => {
     }
 
     fetchReviews(true)
-    // {/* interval 3번 : 개발모드 해제해야함 */}
     if (!import.meta.env.DEV) {
       intervalRef.current = setInterval(() => {
         fetchReviews(true)
@@ -180,11 +176,9 @@ const HomeRecommand = () => {
     const filtered = user?.filter(use => {
       return def?.some(de => use.includes(de))
     })
-    // console.log(filtered)
     return filtered
   }
   const handleNavigate = fps => {
-    // console.log(fps)
     if (fps) {
       API.post('/store/storeInfo', fps).then(res => {
         const data = res.data
@@ -202,8 +196,6 @@ const HomeRecommand = () => {
         .then(res => {
           const data = res.data
           const reviews = data
-          // console.log(data)
-          // console.log(reviews)
           setNearPlaceReviews(reviews?.length > 0 ? reviews : [])
           setIsLoading(false)
           setCountDown(60)
@@ -262,8 +254,7 @@ const HomeRecommand = () => {
       return 0
     }
   }
-  // console.log(tag)
-  // console.log(userNearPlace)
+  const renderedStoreIds = new Set()
   return (
     <div className="max-xl:m-3">
       {isLoading === true ? (
@@ -279,15 +270,24 @@ const HomeRecommand = () => {
         <>
           <div className="flex justify-between">
             <span className="text-xl font-bold">추천 태그</span>
-            {/* <span>
-              {countDown > 0 ? `review 갱신까지 ${countDown}초 남음` : `리뷰 정보 갱신 중...`}
-            </span> */}
           </div>
           {otherPlaces?.length > 0 ? (
             otherPlaces.map((group, i) => {
               const { tag, stores } = group
               const filteredPlaces = stores.filter(store => {
-                return !store.name.includes(tag)
+                const isAlreadyRendered = renderedStoreIds.has(store._id)
+                const tagWords = tag.split(/\s|,|#/).filter(Boolean)
+                const isTagRelevant = tagWords.some(
+                  word => store.name.includes(word) || store.address.includes(word),
+                )
+
+                const isMeaningfulTag = tagWords.some(word => defaultCategories.includes(word))
+
+                if (!isAlreadyRendered && isTagRelevant && isMeaningfulTag) {
+                  renderedStoreIds.add(store._id)
+                  return true
+                }
+                return false
               })
               if (!filteredPlaces || filteredPlaces?.length === 0) return null
               return (
@@ -309,7 +309,7 @@ const HomeRecommand = () => {
                       return (
                         <SwiperSlide key={idx} className="max-w-full mr-3">
                           <img
-                            src={fps?.photos?.[0] || Icon}
+                            src={`${fps?.photos?.[0] ? import.meta.env.VITE_API_BASE_URL + fps?.photos?.[0] : Icon}`}
                             alt="picsum"
                             className="max-[376px]:h-[110px] max-[426px]:h-[150px] max-[769px]:h-[150px] min-[769px]:h-[200px] hover:cursor-pointer rounded-xl"
                             onClick={() => handleNavigate(fps)}
