@@ -18,7 +18,7 @@ import { toast } from 'react-toastify'
 import defaultProfileImg from '../../../assets/images/defaultProfileImg.jpg'
 import { shallow } from 'zustand/shallow'
 import zustandStore from '../../../app/zustandStore.js'
-import {API} from '../../../app/api.js'
+import { API } from '../../../app/api.js'
 import ConfirmModal from '../components/ConfirmModal.jsx' // ConfirmModal 임포트
 
 const MyPageForm = () => {
@@ -181,7 +181,6 @@ const MyPageForm = () => {
   }
 
   useEffect(() => {
-
     if (active !== '음식점 추천(AI)') {
       return
     }
@@ -294,7 +293,7 @@ const MyPageForm = () => {
         setUserName(callUserName)
 
         const callUserImage = response.data.profileImage
-        setUserProfileImage(callUserImage ? `${import.meta.env.VITE_API_BASE_URL}${callUserImage}` : defaultProfileImg)
+        setUserProfileImage(callUserImage ? `${API}${callUserImage}` : defaultProfileImg)
       } catch (error) {
         console.error('사용자 프로필 정보를 불러오는데 실패했습니다:', error)
         setUserProfileImage(defaultProfileImg)
@@ -322,7 +321,6 @@ const MyPageForm = () => {
     const allKeywords = {}
     const excludeKeywords = ['#음식점']
 
-
     recentStores.forEach(item => {
       const keywordsArray = Array.isArray(item.keyword)
         ? item.keyword
@@ -334,14 +332,12 @@ const MyPageForm = () => {
 
       keywordsArray.forEach(keyword => {
         if (keyword && !excludeKeywords.includes(keyword)) {
-
           allKeywords[keyword] = (allKeywords[keyword] || 0) + 1
         }
       })
     })
 
     userBookmark.forEach(bookmarkItem => {
-
       if (
         bookmarkItem.store &&
         bookmarkItem.store.keywords &&
@@ -369,7 +365,6 @@ const MyPageForm = () => {
 
   useEffect(() => {
     const fetchAIRecommendations = async () => {
-
       if (active !== '음식점 추천(AI)') {
         return
       }
@@ -509,7 +504,7 @@ ${aiKeywordsStringForPrompt}
       const res = await API.post(`/api/azure/dalle`, {
         prompt: `${keyword}에 대한 실제 음식 사진처럼 보이고, 시선을 사로잡는 아름다운 구도와 부드러운 자연광이 돋보이는 초고화질 음식 사진을 생성해주세요. 식욕을 돋우는 선명한 색감과 생생한 질감을 가진, 배경은 단순하게 처리하고 음식에 집중해주세요.`,
       })
-     // 이미지 URL이 완전한 URL (http/https)인지 확인하고 반환
+      // 이미지 URL이 완전한 URL (http/https)인지 확인하고 반환
       // 백엔드에서 Base64 인코딩된 데이터를 직접 받는 경우, 'data:image/png;base64,...' 형식으로 반환해야 합니다.
       // 현재 이미지 경로가 파일 시스템 경로로 되어 있어 이 부분에 문제가 있을 수 있습니다.
       // 백엔드에서 유효한 URL을 반환한다고 가정하고, 그대로 사용합니다.
@@ -635,28 +630,29 @@ ${aiKeywordsStringForPrompt}
 
     try {
       if (isCurrentlyBookmarked) {
-        await API.delete(`/bookmark/delete/${storeId}`, {
-          withCredentials: true,
-          data: { headers: { user: userId } },
-        })
-        setUserBookmark(prev => (prev || []).filter(bookmark => bookmark.store?._id !== storeId))
-        toast.success(`'${storeName}' 찜 목록에서 삭제되었습니다.`, { position: 'top-center' })
+        if (confirm('찜목록에서 삭제하시겠습니까?')) {
+          await API.delete(`/bookmark/delete/${storeId}`, {
+            headers: { user: userId },
+          })
+          setUserBookmark(prev => (prev || []).filter(bookmark => bookmark.store?._id !== storeId))
+          toast.success(`'${storeName}' 찜 목록에서 삭제되었습니다.`, { position: 'top-center' })
+        }
       } else {
-        const response = await API.post(
-          `/bookmark/regist/${storeId}`,
-          { headers: { user: userId } },
-          {
-            withCredentials: true,
-          },
-        )
-        setUserBookmark(prev => {
-          const currentBookmarks = prev || []
-          if (!currentBookmarks.some(b => b.store?._id === response.data.store?._id)) {
-            return [...currentBookmarks, response.data]
-          }
-          return currentBookmarks
-        })
-        toast.success(`'${storeName}' 찜 목록에 추가되었습니다!`, { position: 'top-center' })
+        if (confirm('찜목록에 추가하시겠습니까?')) {
+          const response = await API.post(`/bookmark/regist/${storeId}`, {
+            headers: {
+              user: userId,
+            },
+          })
+          setUserBookmark(prev => {
+            const currentBookmarks = prev || []
+            if (!currentBookmarks.some(b => b.store?._id === response.data.store?._id)) {
+              return [...currentBookmarks, response.data]
+            }
+            return currentBookmarks
+          })
+          toast.success(`'${storeName}' 찜 목록에 추가되었습니다!`, { position: 'top-center' })
+        }
       }
     } catch (error) {
       console.error('북마크 토글 실패:', error.response?.data || error.message)
@@ -684,7 +680,7 @@ ${aiKeywordsStringForPrompt}
       case '찜':
         return (
           <MyPageFormBookmark
-          API={API}
+            API={API}
             active={active}
             userId={userId}
             handleBookmarkToggle={handleBookmarkToggle}
@@ -819,7 +815,6 @@ ${aiKeywordsStringForPrompt}
                   )}
                 </div>
                 <hr className="py-3" />
-
               </div>
               <div className="flex gap-5 justify-center">
                 <button
