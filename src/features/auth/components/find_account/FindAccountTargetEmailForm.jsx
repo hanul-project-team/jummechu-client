@@ -5,6 +5,7 @@ import { targetEmailSchema } from '../../schema/targetEmailSchema'
 import { toast } from 'react-toastify'
 import { CSSTransition } from 'react-transition-group'
 import { API } from '../../../../app/api'
+import { useMediaQuery } from 'react-responsive'
 
 const FindAccountTargetEmailForm = ({ nextStep }) => {
   const [showError, setShowError] = useState(false)
@@ -18,10 +19,11 @@ const FindAccountTargetEmailForm = ({ nextStep }) => {
   } = useForm({
     resolver: zodResolver(targetEmailSchema),
   })
+  const isMobile = useMediaQuery({ maxWidth: '640px' })
   const errorRef = useRef(null)
   useEffect(() => {
-    setFocus('email')
-  }, [setFocus])
+    if (!isMobile) setFocus('email')
+  }, [isMobile, setFocus])
   useEffect(() => {
     setShowError(!!errors.email)
   }, [errors.email])

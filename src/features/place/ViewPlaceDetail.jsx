@@ -96,13 +96,13 @@ const ViewPlaceDetail = () => {
   }, [isBookmarked, placeDetail, userBookmark])
 
   useEffect(() => {
-    if (placeDetail?.length < 1) {
-      const placeLink = location.pathname
-      const placeId = placeLink.split('/')[2]
-      if (!placeId || placeId === 'undefined') {
-        console.warn('잘못된 URL입니다. placeId:', placeId)
-        return
-      }
+    const placeLink = location.pathname
+    const placeId = placeLink.split('/')[2]
+    if (!placeId || placeId === 'undefined') {
+      console.warn('잘못된 URL입니다. placeId:', placeId)
+      return
+    }
+    if (!placeDetail || Object.keys(placeDetail).length === 0) {
       API.get(`/store/read/${placeId}`)
         .then(res => {
           const data = res.data
@@ -117,7 +117,7 @@ const ViewPlaceDetail = () => {
           )
         })
     }
-  }, [location.pathname, placeDetail, setPlaceDetail])
+  }, [location.pathname, placeDetail])
   useEffect(() => {
     const script = document.createElement('script')
     script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_KEY}&autoload=false`
@@ -204,7 +204,8 @@ const ViewPlaceDetail = () => {
             })
               .then(res => {
                 const data = res.data
-                setUserBookmark(prev => prev.filter(ubm => ubm?.store._id !== placeDetail._id))
+                // console.log(data)
+                setUserBookmark(prev => prev.filter(ubm => ubm?.store._id !== placeDetail?._id))
               })
               .catch(err => {
                 toast.error(

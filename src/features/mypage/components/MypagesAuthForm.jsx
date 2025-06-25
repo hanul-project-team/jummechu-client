@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 import '../../../assets/styles/tailwind.css'
+import {API} from '../../../app/api.js'
 // import { useNavigate } from 'react-router-dom';
 
 const MypagesAuthForm = ({ onAuthenticated, onCancel }) => {
@@ -10,18 +11,12 @@ const MypagesAuthForm = ({ onAuthenticated, onCancel }) => {
   const [message, setMessage] = useState('')
   // const navigate = useNavigate();
 
-  // ★★★ 디버깅 로그 추가 시작 ★★★
-  // console.log('MypagesAuthForm 컴포넌트 렌더링됨')
-  // ★★★ 디버깅 로그 추가 끝 ★★★
 
   const handleSubmit = async e => {
     e.preventDefault()
     setError('')
     setMessage('')
 
-    // ★★★ 디버깅 로그 추가 시작 ★★★
-    console.log('handleSubmit 함수 호출됨')
-    // ★★★ 디버깅 로그 추가 끝 ★★★
 
     if (!password) {
       setError('비밀번호를 입력해주세요.')
@@ -29,29 +24,21 @@ const MypagesAuthForm = ({ onAuthenticated, onCancel }) => {
     }
 
     try {
-      // ★★★ 디버깅 로그 추가 시작 ★★★
-      console.log('비밀번호 인증 API 호출 시도 중...')
-      // ★★★ 디버깅 로그 추가 끝 ★★★
-      const response = await axios.post(
-        'http://localhost:3000/auth/verify-password',
+      const response = await API.post(
+        '/auth/verify-password',
         { password: password },
         { withCredentials: true },
       )
 
-      // ★★★ 디버깅 로그 추가 시작 ★★★
-      console.log('API 응답 수신:', response)
-      // ★★★ 디버깅 로그 추가 끝 ★★★
 
       if (response.status === 200 && response.data.success) {
         setMessage('비밀번호 인증에 성공했습니다.')
-        console.log('비밀번호 인증 성공! 부모 컴포넌트에 알림...')
         // ★★★ navigate 대신 onAuthenticated 콜백 호출 ★★★
         if (onAuthenticated) {
           onAuthenticated()
         }
       } else {
         setError(response.data.message || '비밀번호가 일치하지 않습니다.')
-        console.log('비밀번호 인증 실패:', response.data.message)
       }
     } catch (err) {
       console.error('비밀번호 인증 실패 (catch 블록):', err.response?.data || err.message)

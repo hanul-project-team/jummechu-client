@@ -4,6 +4,7 @@ import { API } from '../../../../app/api.js'
 import { useSelector } from 'react-redux'
 import { useNavigate, useLocation } from 'react-router-dom'
 import Icon from '../../../../assets/images/default2.png'
+import DefaultProfile from '../../../../assets/images/defaultProfileImg.jpg'
 import StarYellow from '../../../../assets/images/star-yellow.png'
 import StarGray from '../../../../assets/images/star-gray.png'
 import Rating from 'react-rating'
@@ -248,7 +249,6 @@ const PlaceReview = () => {
             <p>
               총 <strong>{reviewInfo?.length}</strong>분의 고객님이 리뷰를 남기셨습니다.
             </p>
-            {/* 리뷰 작성 모달 버튼 */}
             <div className="flex gap-3 my-2">
               <div className="flex hover:cursor-pointer" onClick={handleReviewWrite}>
                 <svg
@@ -297,7 +297,17 @@ const PlaceReview = () => {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex min-sm:gap-3 max-sm:gap-1 items-center">
-                    <img src={Icon} alt="icon" className="sm:max-h-[80px] max-h-[40px]" />
+                    <div className='sm:w-20 sm:h-20 w-10 h-10 overflow-hidden'>
+                      <img
+                        src={
+                          rv?.user?.profileImage
+                            ? import.meta.env.VITE_API_BASE_URL + rv?.user?.profileImage
+                            : DefaultProfile
+                        }
+                        alt="icon"
+                        className="object-fill w-full h-full"
+                      />
+                    </div>
                     <div>
                       <p>{rv?.user?.name}</p>
                       <Rating

@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { resetPasswordSchema } from '../../schema/resetPasswordSchema'
 import { toast } from 'react-toastify'
 import { CSSTransition } from 'react-transition-group'
+import { useMediaQuery } from 'react-responsive'
 import VisibleBtn from '../../../../shared/VisibleBtn'
 import { API } from '../../../../app/api'
 
@@ -32,6 +33,7 @@ const ResetPasswordForm = ({ resetToken }) => {
     resolver: zodResolver(resetPasswordSchema),
   })
   const navigate = useNavigate()
+  const isMobile = useMediaQuery({ maxWidth: '640px' })
   const passwordValue = watch('password')
   const passwordCheckValue = watch('passwordCheck')
   const errorRefs = useRef({
@@ -39,8 +41,8 @@ const ResetPasswordForm = ({ resetToken }) => {
     passwordCheck: createRef(null),
   })
   useEffect(() => {
-    setFocus('password')
-  }, [setFocus])
+    if (!isMobile) setFocus('password')
+  }, [isMobile, setFocus])
   useEffect(() => {
     setPasswordState(prev => ({
       ...prev,

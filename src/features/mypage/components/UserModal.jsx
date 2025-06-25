@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
+import defaultProfileImg from '../../../assets/images/defaultProfileImg.jpg'
+import {API} from '../../../app/api.js'
 
 // axios.defaults.withCredentials는 앱의 가장 상위 컴포넌트나
 // 별도의 설정 파일에서 한 번만 해주는 것이 좋습니다.
@@ -10,7 +12,7 @@ const Modal = ({ isOpen, onClose }) => {
   const [userPhone, setUserPhone] = useState('')
   // ★★★ userProfileImage 상태 추가
   const [userProfileImage, setUserProfileImage] = useState(
-    'http://localhost:3000/static/images/defaultProfileImg.jpg'
+    defaultProfileImg
   ) // 기본 이미지 또는 로딩 중 이미지
   const fileInputRef = useRef(null)
 
@@ -18,7 +20,7 @@ const Modal = ({ isOpen, onClose }) => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/auth/myprofile', {
+        const response = await API.get('/auth/myprofile', {
           withCredentials: true,
         })
 
@@ -28,13 +30,10 @@ const Modal = ({ isOpen, onClose }) => {
         const callUserPhone = response.data.phone
         setUserPhone(callUserPhone)
 
-        const backendBaseUrl = 'http://localhost:3000' // 백엔드 서버 주소
         const profileImagePath = response.data.profileImage // 백엔드에서 받은 상대 경로
-        setUserProfileImage(
-          profileImagePath
-            ? `${backendBaseUrl}${profileImagePath}`
-            : 'http://localhost:3000/static/images/defaultProfileImg.jpg',
-        )
+        if(profileImagePath){
+          setUserProfileImage(import.meta.env.VITE_API_BASE_URL + profileImagePath)
+        }
       } catch (error) {
         console.error('사용자 프로필 정보를 불러오는데 실패했습니다:', error)
       }
@@ -59,7 +58,7 @@ const Modal = ({ isOpen, onClose }) => {
 
       try {
         // 백엔드의 이미지 업로드 API로 요청
-        const response = await axios.post('http://localhost:3000/auth/upload/profile', formData, {
+        const response = await API.post('/auth/upload/profile', formData, {
           headers: {
             'Content-Type': 'multipart/form-data', // 파일 업로드 시 필수 헤더
           },
@@ -67,35 +66,31 @@ const Modal = ({ isOpen, onClose }) => {
         })
 
         console.log('프로필 이미지 업로드 성공:', response.data)
-        const backendBaseUrl = 'http://localhost:3000' // 백엔드 서버 주소
         const newProfileImagePath = response.data.profileImage // 백엔드에서 받은 상대 경로
-        setUserProfileImage(
-          newProfileImagePath
-          ?`${backendBaseUrl}${newProfileImagePath}`
-        :'../image/mainprofile.jpg'
-        ) // 완전한 URL로 상태 업데이트
+        if(newProfileImagePath){
+          setUserProfileImage(import.meta.env.VITE_API_BASE_URL + newProfileImagePath)
+        } // 완전한 URL로 상태 업데이트
 
         alert('프로필 이미지가 성공적으로 변경되었습니다!') // 사용자에게 알림
       } catch (error) {
         console.error('프로필 이미지 업로드 실패:', error)
-        setUserProfileImage('https://picsum.photos/250/250?random=mypage_error');
       }
     }
   }
 
-  
+
   const handleResetImage = async () => {
     if (!window.confirm('프로필 이미지를 기본 이미지로 되돌리시겠습니까?')) {
       return;
     }
     try {
-      const response = await axios.put('http://localhost:3000/auth/profile-image/reset', {}, { // PUT 요청, 본문은 비워둠
+      const response = await API.put('/auth/profile-image/reset', {}, { // PUT 요청, 본문은 비워둠
         withCredentials: true,
       }
     );
       console.log('프로필 이미지 기본 상태로 변경 성공:', response.data);
       // 상태를 기본 이미지 URL로 업데이트
-    setUserProfileImage('http://localhost:3000/static/images/defaultProfileImg.jpg');
+    setUserProfileImage(defaultProfileImg);
     alert('프로필 이미지가 기본 상태로 변경되었습니다!');
 
   } catch (error) {

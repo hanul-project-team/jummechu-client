@@ -7,6 +7,7 @@ import { toast } from 'react-toastify'
 import { CSSTransition } from 'react-transition-group'
 import { find } from '../../slice/findAccountSlice'
 import { verifySchema } from '../../schema/verifySchema'
+import { useMediaQuery } from 'react-responsive'
 import Timer from '../../../../shared/Timer'
 import { API } from '../../../../app/api'
 
@@ -31,6 +32,7 @@ const FindAccountVerifyForm = ({ type }) => {
   } = useForm({
     resolver: zodResolver(verifySchema),
   })
+  const isMobile = useMediaQuery({ maxWidth: '640px' })
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const phoneValue = watch('phone')
@@ -40,8 +42,8 @@ const FindAccountVerifyForm = ({ type }) => {
     phone: createRef(null),
   })
   useEffect(() => {
-    setFocus('name')
-  }, [setFocus])
+    if (!isMobile) setFocus('name')
+  }, [isMobile,setFocus])
   useEffect(() => {
     const isValid = /^01[016789][0-9]{8}$/.test(phoneValue)
     setIsPhone(!!isValid)
@@ -152,7 +154,7 @@ const FindAccountVerifyForm = ({ type }) => {
           </label>
           <div className="flex gap-3">
             <input
-              className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
+              className="w-0 grow border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg  py-4 px-3 outline-hidden"
               type="text"
               id="phone"
               placeholder="'-'제외 숫자만 입력해주세요"
@@ -205,7 +207,7 @@ const FindAccountVerifyForm = ({ type }) => {
           )}
           <div className="flex gap-3">
             <input
-              className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
+              className="w-0 grow border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg  py-4 px-3 outline-hidden"
               type="text"
               id="code"
               placeholder="인증번호 6자리"

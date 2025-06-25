@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { API } from '../../../../app/api'
 import { toast } from 'react-toastify'
 import { CSSTransition } from 'react-transition-group'
+import { useMediaQuery } from 'react-responsive'
 import TermsBox from './TermsBox'
 import VisibleBtn from '../../../../shared/VisibleBtn'
 import Timer from '../../../../shared/Timer'
@@ -54,6 +55,7 @@ const RegistDetailsForm = () => {
     },
   })
   const navigate = useNavigate()
+  const isMobile = useMediaQuery({ maxWidth: '640px' })
   const phoneValue = watch('phone')
   const codeValue = watch('code')
   const passwordValue = watch('password')
@@ -66,8 +68,8 @@ const RegistDetailsForm = () => {
     phone: createRef(null),
   })
   useEffect(() => {
-    setFocus('email')
-  }, [setFocus])
+    if (!isMobile) setFocus('email')
+  }, [isMobile, setFocus])
   useEffect(() => {
     const isValid = /^01[016789][0-9]{8}$/.test(phoneValue)
     setIsPhone(!!isValid)
@@ -335,7 +337,7 @@ const RegistDetailsForm = () => {
             </label>
             <div className="flex gap-3">
               <input
-                className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
+                className="w-0 border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
                 type="text"
                 id="phone"
                 placeholder="'-'제외 숫자만 입력해주세요"
@@ -387,7 +389,7 @@ const RegistDetailsForm = () => {
               </label>
               <div className="flex gap-3">
                 <input
-                  className="border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
+                  className="w-0 border-color-gray-300 hover:border-color-gray-700 focus:ring-1 focus:border-color-gray-900 border rounded-lg grow py-4 px-3 outline-hidden"
                   type="text"
                   id="code"
                   placeholder="인증번호 6자리"
