@@ -54,18 +54,13 @@ const SearchResultPageList = ({ searchData, searchResults, navi, avg, reviews, c
                 </span>
                 <span>&#40;{count(reviews, sd)}&#41;</span>
               </div>
-              <div className="flex gap-1 py-1">
-                {tag?.length > 0 && (
-                  <p className="border-1 rounded-2xl px-2 py-1 text-white bg-color-teal-400">
-                    {tag.filter(tg => tg === extract(sd))}
-                  </p>
-                )}
+              <div className="flex gap-1 py-1 items-center">
                 {filter(sd).map((key, i) => (
                   <p
                     key={i}
-                    className={`${key ? 'border-1 rounded-2xl px-2 py-1 border-gray-700 bg-color-gray-50' : null}`}
+                    className={`${key ? 'text-color-gray-700' : null}`}
                   >
-                    {key}
+                    &#35;{key}
                   </p>
                 ))}
               </div>
