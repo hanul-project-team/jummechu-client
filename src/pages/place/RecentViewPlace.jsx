@@ -42,23 +42,11 @@ const RecentViewPlace = () => {
       if (lastAddedStoreId.current !== urlPlaceId) {
         const addRecentView = async () => {
           try {
-            console.log(
-              `RecentViewPlace: 사용자 ${userId}의 최근 기록에 가게 ${urlPlaceId} 추가 시도.`,
-            )
 
             // placeDetailFromStore에서 필요한 정보 추출
             const { name, photos, rating, address, keyword } = placeDetailFromStore
 
             // ★★★ 여기에서 전송할 데이터를 다시 한 번 로깅합니다. ★★★
-            console.log('RecentViewPlace: API로 전송될 데이터:', {
-              userId: userId, // 백엔드에서는 req.user.id로 받지만, 프론트에서 확인용으로 로깅
-              storeId: urlPlaceId,
-              name: name,
-              photos: photos || [],
-              rating: rating || 0.0,
-              address: address || '',
-              keywords: keyword || [],
-            })
 
             API.post('/auth/recent-history/add', {
               storeId: urlPlaceId,
@@ -74,37 +62,14 @@ const RecentViewPlace = () => {
                 },
               )
             })
-            console.log(`RecentViewPlace: 가게 ${urlPlaceId} 최근 기록에 성공적으로 추가됨.`)
             lastAddedStoreId.current = urlPlaceId // 성공 시 마지막 기록된 ID 업데이트
           } catch (error) {
-            console.error(
-              'RecentViewPlace: 최근 기록 추가 실패:',
-              error.response?.data?.message || error.message,
-            )
             // toast.error('최근 기록 추가 중 오류가 발생했습니다.'); // 사용자에게 보여줄 필요는 없을 수 있음
           }
         }
 
         addRecentView()
-      } else {
-        console.log(
-          `RecentViewPlace: 가게 ${urlPlaceId}는 이미 최근 기록에 추가되어 있거나, 중복 호출 방지됨.`,
-        )
       }
-    } else {
-      console.log(
-        'RecentViewPlace: 필수 정보 (사용자 ID, 가게 ID, 가게 이름) 부족 또는 중복 호출 조건 미충족. 최근 기록을 추가할 수 없습니다.',
-        {
-          userId: userId,
-          urlPlaceId: urlPlaceId,
-          placeDetailFromStoreExists: !!placeDetailFromStore,
-          placeDetailIdMatchesUrl: placeDetailFromStore?._id === urlPlaceId,
-          placeDetailNameExists: !!placeDetailFromStore?.name,
-          placeDetailNameTrimmed: placeDetailFromStore?.name
-            ? String(placeDetailFromStore.name).trim()
-            : '',
-        },
-      )
     }
   }, [userId, urlPlaceId, placeDetailFromStore])
 

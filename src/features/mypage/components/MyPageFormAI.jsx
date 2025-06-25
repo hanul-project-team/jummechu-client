@@ -60,7 +60,7 @@ const MyPageFormAI = ({
             </div>
           )}
 
-          <h2 className="text-lg text-center font-semibold text-gray-700 mb-4">
+          <h2 className="text-lg text-center font-semibold text-gray-700 mb-4 py-3">
             이런 음식점을 추천해요!
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
