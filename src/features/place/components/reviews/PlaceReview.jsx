@@ -358,7 +358,7 @@ const PlaceReview = () => {
                       </button>
                       {rv?.user?._id === user.id && (
                         <button
-                          className="hover:cursor-pointer transition ease-in-out sm:px-3 sm:text-sm text-xs px-2 py-1 border-1 rounded-2xl sm:bg-red-600 sm:active:bg-red-700 text-white"
+                          className="hover:cursor-pointer transition ease-in-out min-sm:px-3 min-sm:text-sm max-sm:text-xs px-2 py-1 border-1 rounded-2xl bg-red-600 active:bg-red-700 text-white"
                           onClick={e => {
                             e.stopPropagation()
                             handleDeleteMyReview(rv)
