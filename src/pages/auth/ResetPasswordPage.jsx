@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSearchParams } from 'react-router-dom'
-import axios from 'axios'
+import { API } from '../../app/api'
 import { toast } from 'react-toastify'
 import ResetPasswordForm from '../../features/auth/components/find_account/ResetPasswordForm'
 
@@ -13,7 +13,7 @@ const ResetPasswordPage = () => {
     if (resetToken) {
       const verifyResetToken = async () => {
         try {
-          await axios.post('http://localhost:3000/auth/verify_reset_token', {
+          await API.post('/auth/verify_reset_token', {
             resetToken,
           })
         } catch (e) {

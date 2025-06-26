@@ -64,7 +64,7 @@ const FindAccountVerifyForm = ({ type }) => {
     if (isValid) {
       try {
         const phone = getValues('phone')
-        // await API.post('/auth/send_code', { phone })
+        await API.post('/auth/send_code', { phone })
         setIsRequested(true)
         resetField('code')
         setFocus('code')
@@ -81,7 +81,7 @@ const FindAccountVerifyForm = ({ type }) => {
   }
   const onSubmit = async data => {
     try {
-      // await API.post('/auth/verify_code', { code: data.code })
+      await API.post('/auth/verify_code', { code: data.code })
       const submitData = { name: data.name, phone: data.phone }
       const response = await API.post('/auth/find_account', submitData)
       dispatch(find(response.data))

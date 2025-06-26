@@ -12,7 +12,7 @@ const ResponsiveBig = ({
 }) => {
   const location = useLocation()
   const isRoot = location.pathname === '/'
-
+  const isMyPage = location.pathname === '/mypage'
   return (
     <div className="grid grid-cols-3 items-center pt-4 pb-8">
       <div className="justify-self-start order-1">
@@ -20,19 +20,23 @@ const ResponsiveBig = ({
           <img src={Logo} alt="logo" />
         </Link>
       </div>
-      {isRoot ? <div className="justify-self-center order-2">
-        <ul className="flex items-center sm:gap-3 lg:gap-13 xl:gap-14 text-md font-semibold">
-          <Link to="#">
-            <li>공지사항</li>
-          </Link>
-          <Link to="#">
-            <li>자주묻는질문</li>
-          </Link>
-          <Link to="#">
-            <li>점메추 소개</li>
-          </Link>
-        </ul>
-      </div> : <div className='order-2'></div>}
+      {isRoot || isMyPage ? (
+        <div className="justify-self-center order-2">
+          <ul className="flex items-center sm:gap-3 lg:gap-13 xl:gap-14 text-md font-semibold">
+            <Link to="#">
+              <li>공지사항</li>
+            </Link>
+            <Link to="#">
+              <li>자주묻는질문</li>
+            </Link>
+            <Link to="#">
+              <li>점메추 소개</li>
+            </Link>
+          </ul>
+        </div>
+      ) : (
+        <div className="order-2"></div>
+      )}
       <div className="justify-self-end order-3">
         {isAuthenticated ? (
           <div className="flex gap-2 items-center relative hover:cursor-pointer">

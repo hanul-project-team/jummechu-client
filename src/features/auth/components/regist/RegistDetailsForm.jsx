@@ -105,7 +105,7 @@ const RegistDetailsForm = () => {
     if (isValid) {
       try {
         const phone = getValues('phone')
-        // await API.post('/auth/send_code', { phone })
+        await API.post('/auth/send_code', { phone })
         setIsRequested(true)
         resetField('code')
         setFocus('code')
@@ -125,7 +125,7 @@ const RegistDetailsForm = () => {
     if (isValid) {
       const code = getValues('code')
       try {
-        // await API.post('/auth/verify_code', { code })
+        await API.post('/auth/verify_code', { code })
         toast.success(
           <div className="Toastify__toast-body cursor-default">인증에 성공하였습니다</div>,
           {
