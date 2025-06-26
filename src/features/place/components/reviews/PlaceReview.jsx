@@ -334,7 +334,7 @@ const PlaceReview = () => {
                     className="text-end flex items-center gap-3 top-0"
                     ref={el => (tabRefs.current[i] = el)}
                   >
-                    <p className="max-sm:text-sm">{rv?.createdAt.split('T')[0]}</p>
+                    <p className="max-sm:text-sm">{rv?.createdAt?.split('T')?.[0]}</p>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
