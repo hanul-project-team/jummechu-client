@@ -33,7 +33,7 @@ const SearchResult = () => {
       }))
       const categories = searchData.map(sd => sd.category_name)
       const visualCategories = categories.reduce((acc, cts) => {
-        const item = cts.split('>')[1].trim()
+        const item = cts.split('>')[1]?.trim()
         if (!acc.includes(item)) {
           acc.push(item)
         }
@@ -106,14 +106,14 @@ const SearchResult = () => {
     }
   }
   const extractCategory = categories => {
-    const cutCate = categories?.category_name?.split('>')[1].trim()
+    const cutCate = categories?.category_name?.split('>')[1]?.trim()
     return cutCate
   }
   const filterKeyword = sd => {
     const storeName = sd?.place_name
     const filtered = sd?.summary?.keyword
       .split(',')
-      .map(key => key.trim())
+      .map(key => key?.trim())
       .filter(key => !key.includes('>'))
       .filter(key => !storeName.includes(key))
     return filtered
