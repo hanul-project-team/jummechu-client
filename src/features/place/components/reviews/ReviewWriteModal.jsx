@@ -139,7 +139,7 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
       <div className="mx-auto h-full overflow-auto custom-scrollbar">
         <div className="flex flex-col p-2">
           <div className="w-full flex items-center justify-center">
-            <img src={placeDetail?.photos[0] ? import.meta.env.VITE_API_BASE_URL+placeDetail.photos[0] : Icon} alt="가게 아이콘" className="sm:w-25 w-20 mr-1" />
+            <img src={placeDetail?.photos?.[0] ? import.meta.env.VITE_API_BASE_URL+placeDetail.photos?.[0] : Icon} alt="가게 아이콘" className="sm:w-25 w-20 mr-1" />
             <div>
               <div className="text-center min-sm:text-xl max-sm:text-sm">
                 <p>{placeDetail?.name}</p>
