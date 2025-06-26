@@ -139,12 +139,12 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
       <div className="mx-auto h-full overflow-auto custom-scrollbar">
         <div className="flex flex-col p-2">
           <div className="w-full flex items-center justify-center">
-            <img src={Icon} alt="가게 아이콘" className="sm:w-25 w-20 mr-1" />
+            <img src={placeDetail?.photos[0] ? import.meta.env.VITE_API_BASE_URL+placeDetail.photos[0] : Icon} alt="가게 아이콘" className="sm:w-25 w-20 mr-1" />
             <div>
-              <div className="text-center sm:text-xl text-sm">
+              <div className="text-center min-sm:text-xl max-sm:text-sm">
                 <p>{placeDetail?.name}</p>
               </div>
-              <div className="flex items-center justify-center sm:text-md text-xs">
+              <div className="flex items-center justify-center min-sm:text-md max-sm:text-xs">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -166,7 +166,7 @@ const ReviewWriteModal = ({ user, placeDetail, setShowReviewModal, setCurrentSor
                 </svg>
                 <p>{placeDetail?.address}</p>
               </div>
-              <div className="flex items-center justify-center sm:text-md text-xs">
+              <div className="flex items-center justify-center min-sm:text-md max-sm:text-xs">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
